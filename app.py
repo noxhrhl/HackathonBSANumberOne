@@ -96,6 +96,11 @@ def report_for(pid):
     return _reports[pid]
 
 
+# Positions touchées par l'effet boule de neige (marché Morpho PT-sUSDe) : seules celles-ci ont
+# l'onglet « graphe avancé ». Les autres n'affichent que le graphe simple.
+ADVANCED_POSITIONS = {"pt-susde-26nov2026", "morpho-ptsusde-usdc", "morpho-ptsusde-borrow"}
+
+
 def sim_ctx_for(pid):
     """État de simulation relevé en ligne pour cette position."""
     return _sims[pid]
@@ -600,7 +605,7 @@ def _render_page(query: str) -> str:
         "controls": controls(q, g, pm),
         "answer": answer_box(q, g, pm, st, dec, cost, stab, size),
         "graph": graph_section(q, g, pm),
-        "simulation": simulation_section(q, g),
+        "simulation": simulation_section(q, g) if q["pos"] in ADVANCED_POSITIONS else "",
         "decision": decision_section(q, rep, st, dec, cost, size),
     }
     return TEMPLATE.substitute(subs)

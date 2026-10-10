@@ -3,23 +3,75 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Belem — Risque de dépendances DeFi</title>
+  <title>Belem — Risque de dépendances</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header class="site-header"><div class="shell"><span class="brand-mark">▲</span><span>BELEM <small>CAPITAL · PROTOTYPE DE RISQUE</small></span><span class="data-badge">$badge · <a href="$refresh_url">Actualiser</a></span></div></header>
-  <main class="shell">
-    <section class="hero">
-      <div><p class="eyebrow">DeFi Risk Dependency Challenge</p><h1>Un maillon cède. <em>On reste, on vend une partie, ou on sort&nbsp;?</em></h1>
-      <p class="intro">Le moteur découvre automatiquement ce dont dépend la position (données réelles : API Pendle, Morpho, Aave, DeFiLlama, Ethena et lectures on-chain), simule la propagation d'un incident, puis compare le coût de sortie au coût de rester.</p></div>
-      <div class="hero-badge"><span>POSITION SUIVIE</span><strong>$position_name</strong><small>$position_size · horizon $horizon jours</small></div>
-    </section>
-    $controls
-    $answer
-    $graph
-    $simulation
-    $decision
-    <footer>Prototype local · Aucun conseil d'investissement · Méthode et sources : NOTES.md et docs/METHODE.md · Les tailles de poches sont illustratives ; les dépendances et les marchés sont réels.</footer>
-  </main>
+  <header class="topbar">
+    <span class="product"><b>Belem Capital</b> Risque de dépendances DeFi</span>
+    <span class="pos"><b>$position_name</b> $position_size, horizon $horizon j</span>
+    <span class="stamp">$badge <a href="$refresh_url">Actualiser</a></span>
+  </header>
+  <div class="app">
+    <aside class="side">
+      <p class="side-title">Scénario</p>
+      $controls
+      <p class="side-note">Le graphe est découvert à partir de l'adresse de la position : contrats lus sur Ethereum, API Pendle, Morpho, Aave, Ethena, DeFiLlama.</p>
+    </aside>
+    <main class="main">
+      $answer
+      <div class="tabs-wrap">
+        <div class="tabbar" role="tablist">
+          <button type="button" class="tab" role="tab" data-tab="t-graph">Graphe simple</button>
+          <button type="button" class="tab" role="tab" data-tab="t-sim">Graphe avancé : effet boule de neige</button>
+        </div>
+        <div id="t-graph" class="tabpane" role="tabpanel">$graph</div>
+        <div id="t-sim" class="tabpane" role="tabpanel">$simulation</div>
+      </div>
+      $decision
+      <footer>Prototype local. Aucun conseil d'investissement. Méthode et sources : NOTES.md, docs/METHODE.md. Tailles de poches illustratives ; dépendances et marchés réels.</footer>
+    </main>
+  </div>
+  <script>
+    // Onglets du graphe : « Simuler » s'ouvre si l'adresse vise la simulation (#sim ou un nœud choisi).
+    (function () {
+      var tabs = document.querySelectorAll('.tabbar .tab');
+      var simPane = document.getElementById('t-sim');
+      if (!simPane || simPane.textContent.trim() === '') {
+        // position sans effet boule de neige : graphe simple seulement, pas d'onglets
+        document.querySelector('.tabbar').hidden = true;
+        if (simPane) { simPane.hidden = true; }
+        return;
+      }
+      function show(id) {
+        tabs.forEach(function (t) {
+          var on = t.dataset.tab === id;
+          t.classList.toggle('active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          document.getElementById(t.dataset.tab).hidden = !on;
+        });
+        var w = document.getElementById('sim-graph');
+        if (id === 't-sim' && w) { w.scrollLeft = w.scrollWidth; }
+      }
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () {
+          show(t.dataset.tab);
+          history.replaceState(null, '', t.dataset.tab === 't-sim' ? '#sim' : '#graphe');
+        });
+      });
+      var wantSim = location.hash === '#sim' || /[?&]snode=/.test(location.search);
+      show(wantSim ? 't-sim' : 't-graph');
+      // L'onglet était caché quand le navigateur a voulu descendre jusqu'à #sim : on y descend maintenant.
+      if (wantSim) {
+        var target = (/[?&]run=1/.test(location.search) && document.querySelector('.kpis')) || document.querySelector('.sim-form') || document.querySelector('.sim-hint') || document.getElementById('sim');
+        if (target) { target.scrollIntoView({block: 'start'}); window.scrollBy(0, -60); }
+      }
+    })();
+    // La case survolée du graphe passe au premier plan pour que son nom complet ne soit pas caché.
+    document.querySelectorAll('.dep-graph .node').forEach(function (n) {
+      var el = n.closest('a') || n;
+      el.addEventListener('mouseenter', function () { if (el.parentNode.lastElementChild !== el) { el.parentNode.appendChild(el); } });
+    });
+  </script>
 </body>
 </html>

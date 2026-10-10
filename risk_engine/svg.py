@@ -35,6 +35,12 @@ def _clip(text, n):
     return text if len(text) <= n else text[: n - 1] + "…"
 
 
+def short_name(name, n=24):
+    """Nom court pour la case : sans la précision entre parenthèses, coupé à n caractères."""
+    base = name.split(" (")[0].split(" « ")[0].strip() or name
+    return _clip(base, n)
+
+
 def fmt_pct(x, d=1):
     if x is None:
         return "—"
@@ -166,14 +172,16 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
             else:
                 opacity = ' opacity="0.45"'
         info = node_info.get(nid, {})
-        sub = kind_label
+        stats = ""
         if sm and sm.get("label"):
-            sub = sm["label"]
+            stats = sm["label"]
         elif n["kind"] != "position" and info:
-            sub += f" · p {fmt_pct(info.get('p'), 2)} · I {info.get('impact', 0):.2f}".replace(".", ",", 1)
+            stats = f"p {fmt_pct(info.get('p'), 2)} · I {info.get('impact', 0):.2f}".replace(".", ",", 1)
         flags = n.get("flags", [])
+        full_sub = " · ".join(x for x in (kind_label, stats) if x)
         if "single_source" in flags and n["kind"] == "oracle":
-            sub += " · source unique"
+            full_sub += " · source unique"
+        short_sub = stats or kind_label
         ev = n.get("evidence") or []
         href = next((x.get("url") for x in ev if (x.get("url") or "").startswith("http")), None)
         tip = (f"{n['name']}\n{kind_label}" + (f" · {n.get('address')}" if n.get("address") else "")
@@ -186,8 +194,13 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
         dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
         g = (f'<g class="node kind-{n["kind"]}"{opacity}><title>{escape(tip)}</title>'
              f'<rect x="{x:.1f}" y="{y:.1f}" width="{NODE_W}" height="{NODE_H}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{dash_attr}/>'
-             f'<text x="{x + 10:.1f}" y="{y + 19:.1f}" font-size="12.5" font-weight="700" fill="{ink}">{escape(_clip(n["name"], 30))}</text>'
-             f'<text x="{x + 10:.1f}" y="{y + 35:.1f}" font-size="10.5" fill="{ink}" opacity="0.8">{escape(_clip(sub, 40))}</text></g>')
+             f'<text x="{x + 10:.1f}" y="{y + 19:.1f}" font-size="12.5" font-weight="700" fill="{ink}">{escape(short_name(n["name"]))}</text>'
+             f'<text x="{x + 10:.1f}" y="{y + 35:.1f}" font-size="10.5" fill="{ink}" opacity="0.8">{escape(_clip(short_sub, 30))}</text>'
+             # au survol : la case s'élargit vers la droite et montre le nom complet
+             f'<g class="full"><rect x="{x:.1f}" y="{y:.1f}" width="{max(NODE_W, 24 + 7.6 * len(n["name"]), 24 + 6.2 * len(full_sub)):.0f}" '
+             f'height="{NODE_H}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{dash_attr}/>'
+             f'<text x="{x + 10:.1f}" y="{y + 19:.1f}" font-size="12.5" font-weight="700" fill="{ink}">{escape(n["name"])}</text>'
+             f'<text x="{x + 10:.1f}" y="{y + 35:.1f}" font-size="10.5" fill="{ink}" opacity="0.8">{escape(full_sub)}</text></g></g>')
         if node_href:
             g = f'<a href="{escape(node_href(nid), quote=True)}">{g}</a>'
         elif href:
@@ -203,12 +216,12 @@ def legend(graph):
     for n in graph["nodes"]:
         if n["kind"] not in kinds:
             kinds.append(n["kind"])
-    items = "".join(f'<span class="lg"><i style="background:{KIND_STYLE[k][0]};border-color:{KIND_STYLE[k][1]}"></i>{KIND_STYLE[k][2]}</span>'
+    items = "".join(f'<span class="lg"><i class="kind-{k}" style="background:{KIND_STYLE[k][0]};border-color:{KIND_STYLE[k][1]}"></i>{KIND_STYLE[k][2]}</span>'
                     for k in KIND_STYLE if k in kinds)
     items += ('<span class="lg"><i class="line"></i>arête vérifiée / API / documentée</span>'
               '<span class="lg"><i class="line dashed"></i>supposée — À VÉRIFIER</span>'
               '<span class="lg"><i class="line hot"></i>chemin de propagation</span>'
-              '<span class="lg"><i style="background:#d1495b;border-color:#9e1b32"></i>composant en incident</span>')
+              '<span class="lg"><i class="incident" style="background:#d1495b;border-color:#9e1b32"></i>composant en incident</span>')
     return f'<div class="legend">{items}</div>'
 
 
