@@ -146,18 +146,63 @@ def parse(query):
     spec = SIM.SCENARIOS.get(stype, {"default": 0.05, "max": 0.9})
     sim = {"snode": snode, "stype": stype, "sev": fnum("sev", 100 * spec["default"], 1, 100 * spec["max"]) / 100,
            "hours": 1 if f.get("hours") == "1" else 24, "run": "1" if f.get("run") == "1" and stype else "0"}
+    ref = g["position"]["size_usd"]
     return {**sim, "pos": pid, "incident": incident, "p": fnum("p", 100 * rep["default_incident_p"], 0, 100) / 100,
+            "amount": fnum("amount", ref, 10_000, 10_000_000_000),
             "c1": fnum("c1", 100 * rep["exit"]["stress"]["c1"], 0, 100) / 100,
             "regime": f.get("regime", "crise") if f.get("regime") in ("crise", "normal") else "crise",
             "view": f.get("view", "neutre") if f.get("view") in ("neutre", "prudent") else "neutre",
             "prop": f.get("prop", "max") if f.get("prop") in ("max", "sum") else "max"}
 
 
-def exit_model(rep, q):
-    if q["regime"] == "normal":
+def _quote_rate(ok, v):
+    """Coût (part du montant vendu) pour vendre v dollars, interpolé entre les cotations relevées.
+    En dessous de la plus petite cotation : son taux ; au-delà de la plus grande : son taux (HYPOTHÈSE)."""
+    if v <= ok[0][0]:
+        return ok[0][1]
+    for (v0, r0), (v1, r1) in zip(ok, ok[1:]):
+        if v <= v1:
+            return r0 + (r1 - r0) * (v - v0) / (v1 - v0)
+    return ok[-1][1]
+
+
+def normal_exit(rep, amount):
+    """Hors crise : cotations réelles relevées (en dollars), ramenées au montant choisi.
+    Si le marché a refusé une taille, on ne vend pas plus que la plus grande vente acceptée."""
+    qs = rep["exit"].get("quotes", {})
+    ok = sorted((x["size_usd"], x["cost"]) for x in qs.get("quotes", []) if x.get("cost") is not None)
+    refused = [x["size_usd"] for x in qs.get("quotes", []) if x.get("cost") is None]
+    if not ok:
         n = rep["exit"]["normal"]
         return D.ExitCost(n["c1"], n["capacity"], n["label"], n["shape"], [tuple(x) for x in n["points"]])
-    return D.ExitCost(q["c1"], 1.0, f"Crise : {pct(q['c1'], 0)} pour tout vendre (défaut = chiffre de Belem)", "quadratic")
+    cap_usd = max(v for v, _ in ok) if refused else None
+    if qs.get("available_liquidity_usd") is not None:
+        cap_usd = qs["available_liquidity_usd"]
+    cap = min(1.0, cap_usd / amount) if cap_usd else 1.0
+    xs = sorted({min(cap, v / amount) for v, _ in ok} | {cap})
+    points = [(x, _quote_rate(ok, x * amount) * x) for x in xs if x > 0]
+    src = qs.get("source") or "cotation réelle"
+    if cap < 1.0:
+        label = (f"Hors crise ({src}) : au plus {usd(cap_usd)} vendables d'un coup, soit {pct(cap, 0)} de la position ; "
+                 f"au-delà, le marché refuse")
+    else:
+        label = f"Hors crise ({src}) : {pct(_quote_rate(ok, amount), 2)} pour tout vendre {usd(amount)}"
+    return D.ExitCost(points[-1][1] if points else 0.0, cap, label, "points", points)
+
+
+def exit_model(rep, q, ref):
+    """Coût de sortie pour le montant choisi. Crise : le chiffre de Belem vaut pour la taille de référence
+    et grandit avec le montant (HYPOTHÈSE : impact de prix proportionnel au montant vendu)."""
+    if q["regime"] == "normal":
+        return normal_exit(rep, q["amount"])
+    k = q["amount"] / ref if ref else 1.0
+    c1 = min(1.0, q["c1"] * k)
+    if abs(k - 1) < 1e-9:
+        label = f"Crise : {pct(c1, 1)} pour tout vendre (chiffre de Belem)"
+    else:
+        label = (f"Crise : {pct(c1, 1)} pour tout vendre {usd(q['amount'])}, soit {pct(q['c1'], 1)} pour {usd(ref)} "
+                 f"(chiffre de Belem) × {num(k, 2)} ; HYPOTHÈSE : l'impact de prix grandit avec le montant")
+    return D.ExitCost(c1, 1.0, label, "quadratic")
 
 
 def link(q, **changes):
@@ -198,8 +243,10 @@ def controls(q, g, pm):
       <label class="wide">Composant en alerte<select name="incident">{inc_opts}</select></label>
       <label>Probabilité que l'alerte devienne un dommage <span>%</span>
         <input type="number" name="p" min="0" max="100" step="1" value="{round(q['p'] * 100)}"><small>{escape(hint)}</small></label>
-      <label>Coût pour tout vendre en crise, C(1) <span>%</span>
-        <input type="number" name="c1" min="0" max="100" step="0.5" value="{round(q['c1'] * 100, 2)}"><small>Défaut : 11 % (énoncé de Belem).</small></label>
+      <label>Montant de la position <span>$</span>
+        <input type="number" name="amount" min="10000" step="100000" value="{round(q['amount'])}"><small>Exemple : {usd(g["position"]["size_usd"])}. Change les montants en dollars et le coût pour vendre.</small></label>
+      <label>Coût en crise pour vendre {usd(g["position"]["size_usd"])} <span>%</span>
+        <input type="number" name="c1" min="0" max="100" step="0.5" value="{round(q['c1'] * 100, 2)}"><small>Défaut : 11 % (énoncé de Belem). Pour un autre montant, il est ajusté en proportion.</small></label>
       <label>Régime de sortie<select name="regime"><option value="crise"{sel('regime', 'crise')}>Crise (C(x) = c·x²)</option>
         <option value="normal"{sel('regime', 'normal')}>Hors crise (cotation réelle)</option></select></label>
       <label>Vue du risque<select name="view"><option value="neutre"{sel('view', 'neutre')}>Neutre (perte attendue)</option>
@@ -220,10 +267,15 @@ def answer_box(q, g, pm, st, dec, cost, sweep_info, size):
         head = "Tout vendre maintenant."
     else:
         head = f"Vendre {pct(x, 0)} maintenant, garder {pct(1 - x, 0)}."
+    capped = cost.capacity < 0.999
+    if capped and x >= cost.capacity - 1e-6:
+        head = (f"Vendre {pct(x, 0)} maintenant, le maximum que le marché accepte d'un coup ; "
+                f"garder {pct(1 - x, 0)}.")
+    all_label = f"vendre le maximum, {pct(cost.capacity, 0)}" if capped else "tout vendre"
     key = "expected" if q["view"] == "neutre" else "worst5"
     lab = "Coût attendu" if q["view"] == "neutre" else "Coût dans les 5 % pires cas"
     body = (f"{lab} {pct(s['partiel'][key])} ({usd(size * s['partiel'][key])}) contre "
-            f"{pct(s['tout_vendre'][key])} (tout vendre) et {pct(s['rester'][key])} (tout garder).")
+            f"{pct(s['tout_vendre'][key])} ({all_label}) et {pct(s['rester'][key])} (tout garder).")
     tail = f"Pire 5 % si on applique la recommandation : {pct(s['partiel']['worst5'])}."
     a, b = sweep_info["from_p"], sweep_info["to_p"]
     stab = f"Recommandation « {sweep_info['category']} » stable pour p entre {pct(a, 0)} et {pct(b, 0)}"
@@ -293,7 +345,8 @@ def graph_section(q, g, pm):
 def decision_section(q, rep, st, dec, cost, size):
     s = dec["strategies"]
     rows = ""
-    for key, label in (("rester", "Tout garder"), ("partiel", f"Vendre {pct(dec['x_star'], 0)}"), ("tout_vendre", "Tout vendre")):
+    all_label = f"Vendre le maximum ({pct(cost.capacity, 0)})" if cost.capacity < 0.999 else "Tout vendre"
+    for key, label in (("rester", "Tout garder"), ("partiel", f"Vendre {pct(dec['x_star'], 0)}"), ("tout_vendre", all_label)):
         v = s[key]
         rows += (f"<tr{' class=best' if key == 'partiel' else ''}><td>{label}</td><td>{pct(v['exit_cost'], 2)}</td>"
                  f"<td>{pct(v['expected'], 2)}</td><td>{pct(v['worst5'], 2)}</td><td>{usd(size * v['expected'])}</td></tr>")
@@ -403,7 +456,7 @@ def sim_overlay(res):
 def sim_form(q, g):
     n = next((x for x in g["nodes"] if x["id"] == q["snode"]), None)
     hidden = "".join(f'<input type="hidden" name="{k}" value="{escape(str(v), quote=True)}">' for k, v in
-                     (("pos", q["pos"]), ("incident", q["incident"]), ("p", round(q["p"] * 100)), ("c1", round(q["c1"] * 100, 2)),
+                     (("pos", q["pos"]), ("amount", round(q["amount"])), ("incident", q["incident"]), ("p", round(q["p"] * 100)), ("c1", round(q["c1"] * 100, 2)),
                       ("regime", q["regime"]), ("view", q["view"]), ("prop", q["prop"]), ("snode", q["snode"])))
     if not n:
         return ('<p class="sim-hint">① Cliquez un nœud du graphe ci-dessous : un <strong>actif</strong> (chute de prix / dépeg), '
@@ -532,6 +585,17 @@ def graph_for_id(res):
     return graph_for(res["position"]["id"].split(":", 1)[1])
 
 
+def scaled_ctx(ctx, k):
+    """Même simulation pour un autre montant : la position (taille, unités, garantie, dette) est mise à l'échelle k."""
+    if ctx is None or abs(k - 1) < 1e-12:
+        return ctx
+    pc = dict(ctx["position"])
+    for key in ("size_usd", "units", "collateral_units", "debt_units"):
+        if isinstance(pc.get(key), (int, float)):
+            pc[key] = pc[key] * k
+    return {**ctx, "position": pc}
+
+
 def simulation_section(q, g):
     head = """<section class="panel" id="sim" aria-labelledby="s-title">
       <p class="eyebrow">SIMULER — SI CE MAILLON CÈDE, COMBIEN PERD LA POSITION ?</p>
@@ -539,7 +603,7 @@ def simulation_section(q, g):
       <p class="section-intro">Aucune probabilité ici : on suppose que la défaillance se produit et on calcule ses conséquences, nœud par nœud,
         avec les formules des protocoles (oracle Morpho, règle de liquidation Morpho Blue, courbe de l'AMM Pendle V2).
         Une transmission impossible à modéliser est marquée <strong>INCONNU</strong> et n'entre pas dans les chiffres.</p>"""
-    ctx = sim_ctx_for(q["pos"])
+    ctx = scaled_ctx(sim_ctx_for(q["pos"]), q["amount"] / g["position"]["size_usd"])
     if ctx is None:
         return head + "<p class='error'>Données de simulation indisponibles depuis les sources en ligne.</p></section>"
     res, err = None, ""
@@ -588,12 +652,12 @@ def _render_page(query: str) -> str:
     g = graph_for(q["pos"])
     rep = report_for(q["pos"])
     pm = pm_for(q["pos"], "base", q["prop"])
-    cost = exit_model(rep, q)
+    cost = exit_model(rep, q, g["position"]["size_usd"])
     st = M.stats(pm.losses(q["incident"], q["p"]))
     dec = D.decide(st, cost, q["view"])
     sweep = sweep_rows(q, pm, cost)
     stab = D.stability_sentence(sweep, q["p"])
-    size = g["position"]["size_usd"]
+    size = q["amount"]
     ts = rep["data_fetched_at"]
     badge = f"Données relevées en ligne le {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC"
     subs = {
