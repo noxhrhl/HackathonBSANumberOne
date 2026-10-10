@@ -66,17 +66,20 @@ def _limit(node, edges, sources, prm):
     return "Probabilité de catégorie, pas fréquence mesurée pour ce composant précis."
 
 
-def analyze(graph, report, context=None, horizon=None):
+def analyze(graph, report, context=None, horizon=None, amount=None):
     """Produit un profil déterministe de chaque nœud, sans incident choisi.
 
     `graph`, `report` et `context` viennent exclusivement du relevé en mémoire
-    fourni par app.ensure_live_data. `horizon` fixe une date de comparaison en test.
+    fourni par app.ensure_live_data. `amount` est la taille choisie, validée par
+    app.parse ; elle change les dollars, jamais les pourcentages. `horizon` fixe
+    une date de comparaison en test.
     Aucun appel à PositionModel.losses(None) ni au simulateur de cascades.
     """
     horizon = report.get("horizon_days") if horizon is None else horizon
     if horizon is None:
         horizon = model.horizon_days(graph)
-    size = graph["position"].get("size_usd")
+    reference_size = graph["position"].get("size_usd")
+    size = reference_size if amount is None else amount
     scenarios = {s: model.PositionModel(graph, s, "max", horizon=horizon, n=1)
                  for s in ("low", "base", "high")}
     base = scenarios["base"]
@@ -153,6 +156,7 @@ def analyze(graph, report, context=None, horizon=None):
     return {
         "position_id": graph.get("position_id") or graph["position"].get("config_id"),
         "position_name": graph["position"]["label"], "position_size_usd": size,
+        "reference_size_usd": reference_size,
         "size_illustrative": True, "horizon_days": horizon, "fetched_at": fetched,
         "confidence": confidence, "rows": rows, "covered_node_ids": [r["id"] for r in rows],
         "coverage": checks.get("coverage") or schema.coverage(graph),

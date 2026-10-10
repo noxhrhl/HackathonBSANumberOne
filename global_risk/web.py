@@ -55,22 +55,25 @@ def _anchor(nid):
     return "risk-" + hashlib.sha1(nid.encode("utf-8")).hexdigest()[:12]
 
 
-def tabs(pid, active="global"):
-    """Deux onglets de premier niveau, indépendants des onglets du graphe actuel."""
-    current = "/?" + urlencode({"pos": pid})
-    global_url = "/global?" + urlencode({"pos": pid})
+def tabs(pid, active="global", amount=None):
+    """Deux pages de premier niveau qui gardent la position et le montant choisis."""
+    params = {"pos": pid}
+    if amount is not None:
+        params["amount"] = round(amount)
+    current = "/?" + urlencode(params)
+    global_url = "/global?" + urlencode(params)
     return (f'<nav class="global-tabs" aria-label="Vues de la position">'
             f'<a href="{_s(current)}" {"aria-current=page" if active == "current" else ""}>Analyse actuelle</a>'
             f'<a href="{_s(global_url)}" {"aria-current=page" if active == "global" else ""}>Analyse globale des risques</a>'
             '</nav>')
 
 
-def add_tabs_to_current(page, pid):
+def add_tabs_to_current(page, pid, amount=None):
     """Ajoute une navigation au HTML rendu par app.py, sans toucher à son contenu."""
     marker = '<div class="tabs-wrap">'
     if marker not in page:
         raise ValueError("Repère d'onglet absent dans le site existant")
-    return page.replace("</head>", CSS + "</head>", 1).replace(marker, tabs(pid, "current") + marker, 1)
+    return page.replace("</head>", CSS + "</head>", 1).replace(marker, tabs(pid, "current", amount) + marker, 1)
 
 
 def _sources_html(items):
@@ -121,6 +124,7 @@ def _risk_html(row):
 def render_global(analysis, graph, report, context, positions):
     """Construit la page globale avec les mêmes couleurs et le graphe du site actuel."""
     pid = analysis["position_id"]
+    amount = analysis["position_size_usd"]
     options = "".join(f'<option value="{_s(p["id"])}" {"selected" if p["id"] == pid else ""}>{_s(p["label"])}</option>'
                       for p in positions)
     groups = []
@@ -149,11 +153,15 @@ def render_global(analysis, graph, report, context, positions):
     sources = _sources_html(analysis["sources"])
     quote = (report.get("exit") or {}).get("quotes") or {}
     quote_line = _s(quote.get("source") or "Données indisponibles")
-    full_quote = next((q for q in quote.get("quotes", []) if q.get("fraction") == 1.0 and q.get("cost") is not None), None)
-    if full_quote:
-        quote_line += " ; coût observé / calculé pour la taille entière : " + _pct(full_quote["cost"])
+    exact_quote = next((q for q in quote.get("quotes", []) if q.get("cost") is not None
+                        and abs(q.get("size_usd", 0) - amount) <= max(1.0, amount * 0.001)), None)
+    if exact_quote:
+        quote_kind = "hypothétique" if quote.get("source") == "HYPOTHÈSE" else "relevé"
+        quote_line += f" ; coût {quote_kind} pour le montant choisi : " + _pct(exact_quote["cost"])
+    elif any(q.get("cost") is not None for q in quote.get("quotes", [])):
+        quote_line += " ; les cotations ont été relevées pour d'autres tailles. Le coût du montant choisi est calculé par l'analyse actuelle."
     else:
-        quote_line += " ; cotation à la taille entière indisponible"
+        quote_line += " ; cotation indisponible"
     oracle_count = len((context or {}).get("oracles") or {})
     oracle_line = (f"{oracle_count} relevé(s) price() on-chain disponible(s) dans le contexte de simulation"
                    if oracle_count else "Données indisponibles ou aucun oracle de prêt dans cette position")
@@ -167,16 +175,18 @@ def render_global(analysis, graph, report, context, positions):
 <span class="pos"><b>{_s(analysis["position_name"])}</b> {_money(analysis["position_size_usd"])}</span>
 <span class="stamp">Relevé en ligne : {_s(fetched[:16].replace("T", " "))} UTC <a href="/global?{_s(urlencode({"pos": pid, "refresh": 1}))}">Actualiser</a></span></header>
 <div class="app"><aside class="side"><p class="side-title">Position analysée</p>
-<form class="controls" action="/global" method="get"><label>Choisir une position<select name="pos">{options}</select></label><button type="submit">Analyser</button></form>
+<form class="controls" action="/global" method="get"><label>Choisir une position<select name="pos">{options}</select></label>
+<label>Montant à analyser <span>$</span><input type="number" name="amount" min="10000" max="10000000000" step="100000" value="{round(amount)}"></label>
+<button type="submit">Analyser</button></form>
 <p class="side-note">Aucune défaillance à sélectionner. Cette page parcourt toutes les dépendances découvertes pour cette position.</p></aside>
-<main class="main">{tabs(pid)}
+<main class="main">{tabs(pid, amount=amount)}
 <section class="panel global-hero" id="summary"><h1>Analyse globale des risques</h1>
 <p>Profil des risques modélisés dans le graphe de cette position. Cette vue ne change pas la recommandation « rester ou vendre ».</p>
 <div class="global-kpis"><div class="global-kpi"><span>Dépendances couvertes</span><strong>{len(analysis["rows"])} nœuds</strong></div>
 <div class="global-kpi"><span>Horizon</span><strong>{analysis["horizon_days"]:.0f} jours</strong></div>
-<div class="global-kpi"><span>Taille illustrative</span><strong>{_money(analysis["position_size_usd"])}</strong></div>
+<div class="global-kpi"><span>Montant choisi, illustratif</span><strong>{_money(amount)}</strong></div>
 <div class="global-kpi"><span>Confiance</span><strong>{_s(analysis["confidence"])}</strong></div></div>
-<p class="global-muted" style="margin-top:12px">Relevé : {_s(fetched)} · Groupes présents : {_s(", ".join(groups) or "aucun")}</p>
+<p class="global-muted" style="margin-top:12px">Relevé : {_s(fetched)} · Taille de référence des cotations : {_money(analysis["reference_size_usd"])} · Groupes présents : {_s(", ".join(groups) or "aucun")}</p>
 <div class="global-note"><strong>Pas de score total fiable.</strong> {_s(analysis["summary"]["reason"])}<br>
 Repère de stress : plus forte perte conditionnelle d’un seul composant = {summary_text}. Ce n’est ni une prévision, ni une somme, ni la perte maximale de toutes les causes réunies.</div></section>
 <section class="panel global-panel"><h2>Chemins de dépendance</h2><p class="global-muted">Cliquez sur un nœud du graphe ou sur un nom pour voir son risque. Une flèche A → B signifie qu'une défaillance de A peut toucher B.</p>

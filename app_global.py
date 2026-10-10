@@ -25,14 +25,15 @@ def selected_position(query):
     return requested if requested in {p["id"] for p in positions} else main
 
 
-def live_analysis(pid, force=False):
+def live_analysis(pid, force=False, query=""):
     """Construit un profil uniquement depuis les relevés en mémoire de app.py."""
     with app._refresh_lock:
         app.ensure_live_data(pid, force=force)
         graph = app.graph_for(pid)
         report = app.report_for(pid)
         context = app.sim_ctx_for(pid)
-        return analyze(graph, report, context), graph, report, context
+        amount = app.parse(query)["amount"]
+        return analyze(graph, report, context, amount=amount), graph, report, context
 
 
 class Handler(app.Handler):
@@ -59,7 +60,7 @@ class Handler(app.Handler):
                 body = current.render_current(request.query, pid)
                 return self._send(body)
             result, graph, report, context = live_analysis(
-                pid, force=parse_qs(request.query).get("refresh") == ["1"])
+                pid, force=parse_qs(request.query).get("refresh") == ["1"], query=request.query)
             if request.path == "/api/global":
                 return self._send(json.dumps(result, ensure_ascii=False),
                                   "application/json; charset=utf-8")

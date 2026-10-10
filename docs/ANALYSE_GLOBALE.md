@@ -13,8 +13,8 @@ Ouvrir `http://127.0.0.1:8000`. Si l'ancien serveur occupe le port, l'arrêter o
 
 ### Deux pages et un seul graphe sur l'analyse actuelle
 
-- **Analyse actuelle** (`/`) : l'utilisateur choisit une position puis un composant en défaillance. Le formulaire soumet ce choix immédiatement. Si la position et le composant sont compatibles avec le simulateur approfondi existant, la page montre son graphe de propagation et ses paramètres supplémentaires : type de choc, sévérité et durée. Sinon, elle montre le graphe de dépendances habituel. Il n'y a jamais deux graphes de dépendances ni deux sous-onglets dans cette page. La recommandation et les calculs de `app.py` restent ceux du site original.
-- **Analyse globale des risques** (`/global`) : la position suffit ; aucun composant en défaillance n'est choisi.
+- **Analyse actuelle** (`/`) : l'utilisateur choisit une position, un montant, puis un composant en défaillance. Le formulaire soumet le choix du composant immédiatement. Si la position et le composant sont compatibles avec le simulateur approfondi existant, la page montre son graphe de propagation et ses paramètres supplémentaires : type de choc, sévérité et durée. Sinon, elle montre le graphe de dépendances habituel. Il n'y a jamais deux graphes de dépendances ni deux sous-onglets dans cette page. La recommandation et les calculs de `app.py`, y compris l'ajustement du coût de sortie au montant choisi, restent ceux du site original.
+- **Analyse globale des risques** (`/global`) : la position et le montant suffisent ; aucun composant en défaillance n'est choisi. Le montant saisi est conservé dans les liens entre les deux pages.
 
 Dans le graphe approfondi, cliquer un autre nœud sélectionne aussi ce nœud comme défaillance de la page. Changer de composant remet à zéro une simulation précédente ; il faut relancer le stress test avec les nouveaux paramètres.
 
@@ -49,6 +49,8 @@ Montant illustratif = perte conditionnelle isolée(n) × taille illustrative de 
 ```
 
 `I(n)` et `sev(n)` ne sont **pas** des pertes observées : ils sont produits par les règles du modèle. La valeur la plus élevée parmi les pertes conditionnelles isolées sert de **repère de stress d'un seul composant**. Elle n'est pas une borne de perte totale en cas de plusieurs causes, ni une prévision. Les scénarios bas / central / haut remplacent les valeurs de sévérité et de poids par les bornes définies dans `risk_engine/rules.py`; ils montrent la sensibilité des résultats à ces hypothèses.
+
+Le commit `montant` permet de changer la taille illustrative de la position. Sur la page globale, le montant choisi remplace la taille de référence uniquement pour convertir les pertes en dollars ; les pourcentages conditionnels ne changent pas. Sur la page actuelle, `app.py` ajuste également le coût de sortie et met à l'échelle les unités de la simulation. Les cotations relevées restent associées à leurs tailles réellement demandées : la page globale n'affiche une cotation comme valable pour le montant choisi que si sa taille correspond. Sinon, elle renvoie au calcul de sortie de l'analyse actuelle, qui interpole ou extrapole les cotations et signale ses hypothèses.
 
 Lorsqu'une règle et une preuve permettent de montrer une probabilité indicative, le moteur utilise `p = 1 − exp(−λ × H / 365)`, où `λ` est un taux annuel de **catégorie** et `H` l'horizon en jours. Certaines catégories viennent des incidents historiques, d'autres d'un jugement documenté. Cette probabilité n'est ni la fréquence observée du contrat exact ni la probabilité d'une alerte en cours. Pour une règle explicitement supposée, ou sans preuve de découverte, la page affiche **non estimable avec fiabilité**.
 

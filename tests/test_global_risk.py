@@ -74,6 +74,20 @@ class GlobalRiskTests(unittest.TestCase):
         graph = fixture_graph()
         self.assertEqual(analyze(graph, REPORT, horizon=45), analyze(graph, REPORT, horizon=45))
 
+    def test_chosen_amount_scales_dollars_without_changing_risk_percentages(self):
+        graph = fixture_graph()
+        small = analyze(graph, REPORT, amount=1000)
+        large = analyze(graph, REPORT, amount=3000)
+        small_rows = {r["id"]: r for r in small["rows"]}
+        large_rows = {r["id"]: r for r in large["rows"]}
+        self.assertEqual(large["position_size_usd"], 3000)
+        self.assertEqual(large["reference_size_usd"], 1000)
+        for nid in small_rows:
+            self.assertEqual(small_rows[nid]["conditional_loss_fraction"],
+                             large_rows[nid]["conditional_loss_fraction"])
+            self.assertAlmostEqual(large_rows[nid]["conditional_loss_usd"],
+                                   3 * small_rows[nid]["conditional_loss_usd"])
+
     def test_oracle_and_sale_channels_remain_distinct(self):
         graph = fixture_graph()
         result = analyze(graph, REPORT)
@@ -182,6 +196,23 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         self.assertTrue(advanced)
         self.assertEqual(parse_qs(query)["incident"], [assets[1]])
         self.assertNotIn("run", parse_qs(query))
+
+    def test_amount_survives_both_pages_and_advanced_controls(self):
+        import app
+        import app_global
+        from global_risk.current import render_current
+        asset = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "asset")
+        page = render_current("pos=" + self.pid + "&incident=" + asset + "&amount=10000000", self.pid)
+        self.assertIn('name="amount"', page)
+        self.assertIn('name="amount" value="10000000"', page)
+        self.assertIn("/global?pos=" + self.pid + "&amp;amount=10000000", page)
+        result, graph, report, context = app_global.live_analysis(
+            self.pid, query="pos=" + self.pid + "&amount=10000000")
+        self.assertEqual(result["position_size_usd"], 10000000)
+        global_page = web.render_global(result, graph, report, context, app.available_positions())
+        self.assertIn('name="amount"', global_page)
+        self.assertIn('value="10000000"', global_page)
+        self.assertIn("/?pos=" + self.pid + "&amp;amount=10000000", global_page)
 
 
 if __name__ == "__main__":

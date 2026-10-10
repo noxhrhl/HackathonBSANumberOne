@@ -106,6 +106,7 @@ def render_current(query, pid):
     with app._refresh_lock:
         app.ensure_live_data(pid, force=parse_qs(query).get("refresh") == ["1"])
         normalized, advanced = _normalized_query(query, pid, app.graph_for(pid), app.report_for(pid))
+        amount = app.parse(normalized)["amount"]
         page = app.render_page(normalized)
-        page = web.add_tabs_to_current(page, pid)
+        page = web.add_tabs_to_current(page, pid, amount)
         return _one_graph(page, advanced)
