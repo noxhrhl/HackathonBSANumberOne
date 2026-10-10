@@ -357,7 +357,11 @@ def _rpc(method: str, params: list):
 def eth_call(to: str, data: str):
     """Appel en lecture seule. Renvoie la chaîne hexadécimale, ou None si le contrat refuse."""
     to, data = to.lower(), data.lower()
-    out = cached("rpc", f"call_{to}_{data}", RPC_URL,
+    key = f"call_{to}_{data}"
+    if len(data) > 74:  # plusieurs arguments : la clé tronquée à 150 caractères ne les distinguerait plus
+        import hashlib
+        key = f"call_{to}_{data[:10]}_{hashlib.sha1(data.encode()).hexdigest()[:16]}"
+    out = cached("rpc", key, RPC_URL,
                  lambda: _rpc("eth_call", [{"to": to, "data": data}, "latest"]),
                  request={"method": "eth_call", "to": to, "data": data})
     return out.get("result")
@@ -372,6 +376,77 @@ def eth_get_code(address: str):
     out = cached("rpc", f"code_{a}", RPC_URL, lambda: _rpc("eth_getCode", [a, "latest"]),
                  request={"method": "eth_getCode", "address": a}, transform=transform)
     return out.get("result")
+
+
+def cache_first(fn, *args):
+    """Instantané pour la simulation : relit le cache s'il existe, sinon interroge la source
+    (sauf en mode hors ligne, où l'absence lève MissingCache). Évite de rafraîchir, en
+    passant, des réponses déjà utilisées comme preuves par les graphes."""
+    prev = _state["offline"]
+    _state["offline"] = True
+    try:
+        return fn(*args)
+    except MissingCache:
+        if prev:
+            raise
+        _state["offline"] = False
+        return fn(*args)
+    finally:
+        _state["offline"] = prev
+
+
+PENDLE_ROUTER = "0x888888888889758f76e7103c6cbf23abbf58f946"
+
+
+def _arg_address(addr: str) -> str:
+    return addr.lower().replace("0x", "").rjust(64, "0")
+
+
+def _int256(word_hex: str) -> int:
+    v = int(word_hex, 16)
+    return v - (1 << 256) if v >= 1 << 255 else v
+
+
+def pendle_market_state(market: str) -> dict:
+    """État complet de l'AMM Pendle V2 : readState(router) (lecture seule, on-chain)."""
+    from .keccak import selector
+    out = eth_call(market, selector("readState(address)") + _arg_address(PENDLE_ROUTER))
+    if not out or len(out) < 2 + 64 * 9:
+        return None
+    w = [out[2 + 64 * i: 2 + 64 * (i + 1)] for i in range(9)]
+    return {"total_pt": _int256(w[0]) / 1e18, "total_sy": _int256(w[1]) / 1e18, "total_lp": _int256(w[2]) / 1e18,
+            "scalar_root": _int256(w[4]) / 1e18, "expiry_ts": int(w[5], 16), "ln_fee_rate_root": int(w[6], 16) / 1e18,
+            "reserve_fee_percent": int(w[7], 16), "last_ln_implied_rate": int(w[8], 16) / 1e18}
+
+
+PENDLE_ROUTER_STATIC = "0x263833d47ea3fa4a30f269323aba6a107f9eb14c"
+
+
+def pendle_static_sell_pt(market: str, pt_units: int):
+    """Cotation on-chain AMM seul (RouterStatic.swapExactPtForSyStatic) : SY reçus, ou None si refus."""
+    from .keccak import selector
+    data = (selector("swapExactPtForSyStatic(address,uint256)") + _arg_address(market)
+            + hex(int(pt_units) * 10 ** 18)[2:].rjust(64, "0"))
+    v = dec_uint(eth_call(PENDLE_ROUTER_STATIC, data))
+    return v / 1e18 if v is not None else None
+
+
+def sy_exchange_rate(sy: str):
+    """Taux SY → actif comptable (SY.exchangeRate(), 18 décimales)."""
+    from .keccak import selector
+    v = dec_uint(eth_call(sy, selector("exchangeRate()")))
+    return v / 1e18 if v is not None else None
+
+
+def oracle_price_raw(oracle: str):
+    """IOracle.price() d'un oracle Morpho : prix du collatéral en unités de dette × 1e36 (brut)."""
+    from .keccak import selector
+    return dec_uint(eth_call(oracle, selector("price()")))
+
+
+def erc20_decimals(token: str):
+    from .keccak import selector
+    return dec_uint(eth_call(token, selector("decimals()")))
 
 
 # Décodage ABI minimal

@@ -1,0 +1,137 @@
+{
+ "position_id": "pt-susde-26nov2026",
+ "built_at": "2026-10-10T18:49:13Z",
+ "prices_usd": {
+  "position:pt-susde-26nov2026": 0.992948867435899,
+  "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497": 1.25128534,
+  "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02": 1.25128534
+ },
+ "pendle": {
+  "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e": {
+   "total_pt": 971271.206194636,
+   "total_sy": 2282035.210152903,
+   "total_lp": 1377019.4256633157,
+   "scalar_root": 57.59703727233936,
+   "expiry_ts": 1795651200,
+   "ln_fee_rate_root": 0.000978762451846258,
+   "reserve_fee_percent": 80,
+   "last_ln_implied_rate": 0.04889510566470275,
+   "sy_rate": 1.2523908528598677,
+   "snapshot_ts": 1791657760,
+   "pt_node": "position:pt-susde-26nov2026",
+   "sy_node": "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "underlying_node": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+  }
+ },
+ "oracles": {
+  "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08": {
+   "raw": 992402714992389650000000
+  },
+  "oracle:1:0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d": {
+   "raw": 992402714992389650000000
+  },
+  "oracle:1:0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465": {
+   "raw": 992002598065759018340913
+  },
+  "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e": {
+   "raw": 1251802630916320128916254
+  },
+  "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25": {
+   "raw": 1252391440873722990000000000000000000
+  }
+ },
+ "lending": {
+  "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05": {
+   "protocol": "morpho-blue",
+   "lltv": 0.915,
+   "oracle": "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "lif": 1.026167265264238,
+   "collateral_usd": 7927287.880276859,
+   "borrow_usd": 6992169.685524775,
+   "supply_usd": 7756493.321118058
+  },
+  "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5": {
+   "protocol": "morpho-blue",
+   "lltv": 0.915,
+   "oracle": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "lif": 1.026167265264238,
+   "collateral_usd": 111454738.8946017,
+   "borrow_usd": 96941896.3782516,
+   "supply_usd": 108982651.56534344
+  },
+  "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48": {
+   "protocol": "morpho-blue",
+   "lltv": 0.86,
+   "oracle": "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25",
+   "lif": 1.0438413361169103,
+   "collateral_usd": 1672371.0907094113,
+   "borrow_usd": 1289282.2529209892,
+   "supply_usd": 1390997.6781874362
+  }
+ },
+ "position": {
+  "type": "pendle_pt",
+  "size_usd": 2000000,
+  "units": 2014202.4081910867,
+  "venue": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e"
+ },
+ "evidence": [
+  {
+   "label": "Prix PT et sous-jacent (API Pendle)",
+   "source": "pendle",
+   "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "fetched_at": "2026-10-10T10:53:06Z",
+   "status": "api"
+  },
+  {
+   "label": "readState() de l'AMM AMM Pendle sUSDe (2026-11-26)",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:42:40Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "SY.exchangeRate()",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:42:40Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Méta-oracle 0xf8b2…1b08 (primaire + seco",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:54Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle primaire 0x8fca…706d (combinaison",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:54Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle secours 0xe2f4…5465 (combinaison ",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:54Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle du marché 0xe621…9e7e (combinaiso",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle du marché 0x5d91…ae25 (taux du co",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  }
+ ],
+ "missing": []
+}

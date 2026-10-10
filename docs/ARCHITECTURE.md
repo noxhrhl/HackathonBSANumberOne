@@ -15,6 +15,8 @@ HackathonBSANumberOne/
 │   ├── rules.py              Hypothèses et fourchettes de risque
 │   ├── model.py              Propagation et simulations de pertes
 │   ├── decide.py             Compare rester, vendre une partie ou tout vendre
+│   ├── simulate.py           Simulateur de défaillance : propagation d'état, sévérité financière
+│   ├── amm.py                Courbe de l'AMM Pendle V2 (MarketMathCore)
 │   ├── risk.py               Petit calcul de seuil utilisé par la page
 │   └── svg.py                Graphes et courbes SVG
 ├── templates/index.html      Structure HTML du site
@@ -63,6 +65,7 @@ positions.json + documented.json + API/RPC mis en cache
 | Ajouter une source ou une relation | `risk_engine/sources.py`, `risk_engine/discover.py`, éventuellement `data/documented.json`. |
 | Modifier une hypothèse de risque | `risk_engine/rules.py`, sa justification dans `NOTES.md`, puis les tests pertinents. |
 | Modifier le calcul de perte ou de décision | `risk_engine/model.py`, `risk_engine/decide.py`, puis les tests. |
+| Ajouter une défaillance ou un protocole au simulateur | `risk_engine/simulate.py` : une entrée dans `SCENARIOS`, un modèle dans `MODELS` et sa règle dans `classify()`, un évaluateur de nœud ou de position ; puis `tests/test_simulate.py`. |
 | Changer l'apparence | `templates/index.html`, `static/style.css` et la composition de la page dans `app.py`. |
 
 Les commandes pour démarrer et vérifier le projet sont dans le [README](../README.md). L'analyse du site porte sur des positions d'exemple ; les tailles sont illustratives, même si les adresses et marchés étudiés sont réels.

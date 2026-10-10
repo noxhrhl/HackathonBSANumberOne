@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-10T11:59:57Z",
+ "generated_at": "2026-10-10T18:48:15Z",
  "pockets": [
   {
    "id": "pt-susde-26nov2026",
@@ -715,16 +715,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.05,
-     "expected": 0.0016396075882620501,
-     "cvar95": 0.027758545144067805
+     "expected": 0.001637012642901074,
+     "cvar95": 0.027714752124071824
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": true,
      "impact": 0.05,
-     "expected": 0.017586706927845062,
-     "cvar95": 0.2978867493914484
+     "expected": 0.017583806014508672,
+     "cvar95": 0.29788055867896196
     },
     {
      "position_id": "aave-v3-usdc",
@@ -739,8 +739,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": true,
      "impact": 0.05,
-     "expected": 0.002202753587613582,
-     "cvar95": 0.03893273724461271
+     "expected": 0.002182409006871136,
+     "cvar95": 0.03852833504581397
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -793,10 +793,10 @@
    ],
    "touched_share": 1.0,
    "book": {
-    "expected": 0.0029975702188240806,
-    "var95": 0.019645833786294347,
-    "cvar95": 0.0414136478523494,
-    "p_any_loss": 0.50895
+    "expected": 0.0029949861748800994,
+    "var95": 0.019621025528323538,
+    "cvar95": 0.04139264187541564,
+    "p_any_loss": 0.50865
    }
   },
   "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2": {
@@ -808,16 +808,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.18045374917937934,
-     "expected": 0.009457501463599124,
-     "cvar95": 0.06749285276131482
+     "expected": 0.009454801729333847,
+     "cvar95": 0.06747252468041161
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": true,
      "impact": 0.1,
-     "expected": 0.0218828604928788,
-     "cvar95": 0.3022392591732919
+     "expected": 0.021880766345144187,
+     "cvar95": 0.3022330684608055
     },
     {
      "position_id": "aave-v3-usdc",
@@ -832,8 +832,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0019395044141591947,
-     "cvar95": 0.03848189561798125
+     "expected": 0.0019190550445124497,
+     "cvar95": 0.038075645058934515
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -886,10 +886,10 @@
    ],
    "touched_share": 0.8,
    "book": {
-    "expected": 0.019141552794274028,
+    "expected": 0.019139028469109365,
     "var95": 0.08301955123097243,
-    "cvar95": 0.10335777437162831,
-    "p_any_loss": 0.6343
+    "cvar95": 0.103355741563538,
+    "p_any_loss": 0.6341
    }
   },
   "perp:binance": {
@@ -901,16 +901,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.04068461915026472,
-     "expected": 0.0044514668043084665,
-     "cvar95": 0.03969889023847354
+     "expected": 0.00444928256693528,
+     "cvar95": 0.03968357572019858
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -925,8 +925,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0019395044141591947,
-     "cvar95": 0.03848189561798125
+     "expected": 0.0019190550445124497,
+     "cvar95": 0.038075645058934515
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -979,10 +979,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.0034629225092564823,
-    "var95": 0.02029026043073229,
-    "cvar95": 0.041908958828065945,
-    "p_any_loss": 0.6362
+    "expected": 0.0034603622320948098,
+    "var95": 0.020257713685974663,
+    "cvar95": 0.04188858953928983,
+    "p_any_loss": 0.6359
    }
   },
   "perp:bybit": {
@@ -994,16 +994,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.006804540971747796,
-     "expected": 0.0018842519970260379,
-     "cvar95": 0.028427305659750598
+     "expected": 0.0018815522627607627,
+     "cvar95": 0.028383044440679933
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -1018,8 +1018,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0019395044141591947,
-     "cvar95": 0.03848189561798125
+     "expected": 0.0019190550445124497,
+     "cvar95": 0.038075645058934515
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -1072,10 +1072,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.002867078144865219,
+    "expected": 0.002864466318014337,
     "var95": 0.019468928683917284,
-    "cvar95": 0.04128047236956936,
-    "p_any_loss": 0.6384
+    "cvar95": 0.04125931429579119,
+    "p_any_loss": 0.6381
    }
   },
   "perp:cde": {
@@ -1087,16 +1087,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.000502700232101498,
-     "expected": 0.0014136247553920456,
-     "cvar95": 0.027301502145022367
+     "expected": 0.0014109250211267704,
+     "cvar95": 0.02725335188616729
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -1111,8 +1111,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0019395044141591947,
-     "cvar95": 0.03848189561798125
+     "expected": 0.0019190550445124497,
+     "cvar95": 0.038075645058934515
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -1165,10 +1165,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.002757825319096908,
-    "var95": 0.01942164856267126,
-    "cvar95": 0.0411786217379803,
-    "p_any_loss": 0.63425
+    "expected": 0.0027552134922460263,
+    "var95": 0.01933878036126411,
+    "cvar95": 0.04115729273199379,
+    "p_any_loss": 0.634
    }
   },
   "custodian:ceffu": {
@@ -1180,7 +1180,7 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": true,
      "impact": 0.25,
-     "expected": 0.023972284425389307,
+     "expected": 0.02396958469112403,
      "cvar95": 0.13934539963229692
     },
     {
@@ -1188,8 +1188,8 @@
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -1204,8 +1204,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0019395044141591947,
-     "cvar95": 0.03848189561798125
+     "expected": 0.0019190550445124497,
+     "cvar95": 0.038075645058934515
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -1258,10 +1258,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.007980554864510903,
-    "var95": 0.03130521749732084,
-    "cvar95": 0.0494610898295483,
-    "p_any_loss": 0.63535
+    "expected": 0.007977943037660022,
+    "var95": 0.031253772594890344,
+    "cvar95": 0.04942812351217294,
+    "p_any_loss": 0.6351
    }
   },
   "issuer:circle": {
@@ -1273,16 +1273,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0013763584148076629,
-     "cvar95": 0.027263253886776702
+     "expected": 0.0013736586805423877,
+     "cvar95": 0.027214706492307377
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -1297,8 +1297,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": true,
      "impact": 1.0,
-     "expected": 0.06173100790480839,
-     "cvar95": 0.3517097168491166
+     "expected": 0.06171055853516165,
+     "cvar95": 0.3515955654167555
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -1351,10 +1351,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.027145549096693793,
+    "expected": 0.02714293726984291,
     "var95": 0.12098581045556757,
-    "cvar95": 0.14511419356024013,
-    "p_any_loss": 0.6369
+    "cvar95": 0.1451140631965665,
+    "p_any_loss": 0.63665
    }
   },
   "custodian:circle-reserve-fund": {
@@ -1366,16 +1366,16 @@
      "label": "PT-sUSDe-26NOV2026",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.0013763584148076629,
-     "cvar95": 0.027263253886776702
+     "expected": 0.0013736586805423877,
+     "cvar95": 0.027214706492307377
     },
     {
      "position_id": "pt-wsteth-30dec2027",
      "label": "PT-wstETH-30DEC2027",
      "touched": false,
      "impact": 0.0,
-     "expected": 0.01754990645651264,
-     "cvar95": 0.2978581092007645
+     "expected": 0.017546937291915844,
+     "cvar95": 0.297851918488278
     },
     {
      "position_id": "aave-v3-usdc",
@@ -1390,8 +1390,8 @@
      "label": "PT-sUSDS-26NOV2026",
      "touched": true,
      "impact": 0.25,
-     "expected": 0.02438271842601175,
-     "cvar95": 0.14572870349978756
+     "expected": 0.02436226905636501,
+     "cvar95": 0.1454323187730253
     },
     {
      "position_id": "morpho-ptsusde-usdc",
@@ -1444,10 +1444,10 @@
    ],
    "touched_share": 0.6000000000000001,
    "book": {
-    "expected": 0.011889149722099193,
+    "expected": 0.011886537895248312,
     "var95": 0.049029374921411094,
     "cvar95": 0.06361555461069668,
-    "p_any_loss": 0.63565
+    "p_any_loss": 0.6354
    }
   }
  }

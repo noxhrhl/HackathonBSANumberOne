@@ -1,5 +1,5 @@
 {
-  "_doc": "Positions suivies. Les adresses sont réelles (Ethereum, chainId 1). Les tailles (2 M$ par poche, livre de 10 poches) sont ILLUSTRATIVES : 10 poches de 10 % comme dans l'énoncé de Belem.",
+  "_doc": "Positions suivies. Les adresses sont réelles (Ethereum, chainId 1). Les tailles (2 M$ par poche, livre de 10 poches) sont ILLUSTRATIVES : 10 poches de 10 % comme dans l'énoncé de Belem. La position « morpho-ptsusde-borrow » (collatéral 2 M$, dette 1,7 M$ USDC, ILLUSTRATIVE) sert au simulateur de défaillance (LTV, facteur de santé) et n'entre pas dans le livre.",
   "book": {"name": "Livre de démonstration (10 poches de 10 %)", "pocket_usd": 2000000},
   "positions": [
     {"id": "pt-susde-26nov2026", "type": "pendle_pt", "label": "PT-sUSDe-26NOV2026", "chain_id": 1,
@@ -27,6 +27,9 @@
      "asset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "size_usd": 2000000},
     {"id": "aave-v3-wsteth", "type": "aave_supply", "label": "wstETH prêté sur Aave V3 (Ethereum Core)", "chain_id": 1,
      "pool": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2", "asset": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
-     "size_usd": 2000000}
+     "size_usd": 2000000},
+    {"id": "morpho-ptsusde-borrow", "type": "morpho_borrow", "label": "PT-sUSDe en garantie sur Morpho, USDC emprunté", "chain_id": 1,
+     "market_id": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05", "size_usd": 2000000, "debt_usd": 1700000,
+     "book": false}
   ]
 }

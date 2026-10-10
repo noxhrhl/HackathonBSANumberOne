@@ -1,0 +1,55 @@
+{
+ "position_id": "susde-hold",
+ "built_at": "2026-10-10T18:49:14Z",
+ "prices_usd": {},
+ "pendle": {},
+ "oracles": {
+  "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e": {
+   "raw": 1251802630916320128916254
+  },
+  "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25": {
+   "raw": 1252391440873722990000000000000000000
+  }
+ },
+ "lending": {
+  "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5": {
+   "protocol": "morpho-blue",
+   "lltv": 0.915,
+   "oracle": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "lif": 1.026167265264238,
+   "collateral_usd": 111454738.8946017,
+   "borrow_usd": 96941896.3782516,
+   "supply_usd": 108982651.56534344
+  },
+  "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48": {
+   "protocol": "morpho-blue",
+   "lltv": 0.86,
+   "oracle": "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25",
+   "lif": 1.0438413361169103,
+   "collateral_usd": 1672371.0907094113,
+   "borrow_usd": 1289282.2529209892,
+   "supply_usd": 1390997.6781874362
+  }
+ },
+ "position": {
+  "type": "hold",
+  "size_usd": 2000000
+ },
+ "evidence": [
+  {
+   "label": "price() de Oracle du marché 0xe621…9e7e (combinaiso",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle du marché 0x5d91…ae25 (taux du co",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  }
+ ],
+ "missing": []
+}

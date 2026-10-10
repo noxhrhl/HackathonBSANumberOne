@@ -2,11 +2,11 @@
  "position_id": "aave-v3-wsteth",
  "label": "wstETH prêté sur Aave V3 (Ethereum Core)",
  "size_usd": 2000000,
- "generated_at": "2026-10-10T11:59:57Z",
+ "generated_at": "2026-10-10T18:49:15Z",
  "offline": true,
  "data_fetched_at": {
   "oldest": "2026-10-10T10:20:00Z",
-  "newest": "2026-10-10T11:34:51Z"
+  "newest": "2026-10-10T18:47:55Z"
  },
  "horizon_days": 30.0,
  "coverage": {

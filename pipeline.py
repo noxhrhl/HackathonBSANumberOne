@@ -4,7 +4,8 @@
   python pipeline.py --all --offline             # toutes les positions, depuis le cache
   python pipeline.py --all --offline --book      # + vue « livre » (10 poches)
 
-Écrit data/graphs/<id>.json (le graphe découvert) et data/reports/<id>.json (le rapport).
+Écrit data/graphs/<id>.json (le graphe découvert), data/reports/<id>.json (le rapport) et
+data/sim/<id>.json (données de base du simulateur de défaillance : prix, état des AMM, oracles).
 La page web lit ces fichiers et recalcule à la volée quand on change l'incident ou p.
 """
 
@@ -13,11 +14,12 @@ import sys
 from pathlib import Path
 
 from risk_engine import decide as D
-from risk_engine import discover, model as M, rules, sources as S
+from risk_engine import discover, model as M, rules, simulate, sources as S
 
 ROOT = Path(__file__).resolve().parent
 GRAPHS = ROOT / "data" / "graphs"
 REPORTS = ROOT / "data" / "reports"
+SIM = ROOT / "data" / "sim"
 BELEM_EXIT = 0.11          # énoncé : « unwinding it costs 11 % in slippage »
 DEFAULT_INCIDENT_P = 0.30  # probabilité par défaut qu'une alerte devienne un dommage (entrée du gérant)
 QUOTE_FRACTIONS = (0.25, 0.5, 1.0, 1.5, 2.5)
@@ -223,6 +225,8 @@ def run(pid, offline):
     (GRAPHS / f"{pid}.json").write_text(json.dumps(g, indent=1, ensure_ascii=False), encoding="utf-8")
     rep = build_report(g)
     (REPORTS / f"{pid}.json").write_text(json.dumps(rep, indent=1, ensure_ascii=False), encoding="utf-8")
+    SIM.mkdir(parents=True, exist_ok=True)  # données de base du simulateur de défaillance (prix, AMM, oracles)
+    (SIM / f"{pid}.json").write_text(json.dumps(simulate.build_context(g), indent=1, ensure_ascii=False), encoding="utf-8")
     return g, rep
 
 
@@ -242,7 +246,7 @@ def main(argv):
               + (f" ERREURS {rep['errors']}" if rep["errors"] else ""))
     if "--book" in argv:
         S.set_offline(offline)
-        book = build_book([p["id"] for p in discover.POSITIONS["positions"]])
+        book = build_book([p["id"] for p in discover.POSITIONS["positions"] if p.get("book", True)])
         (REPORTS / "book.json").write_text(json.dumps(book, indent=1, ensure_ascii=False), encoding="utf-8")
         print(f"livre : {len(book['shared_nodes'])} nœuds partagés ; concentration :",
               ", ".join(f"{c['name']} {c['share_of_chain']:.0%}" for c in book["concentration"]["protocols"][:4]))

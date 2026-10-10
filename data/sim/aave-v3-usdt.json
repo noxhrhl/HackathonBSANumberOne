@@ -1,0 +1,23 @@
+{
+ "position_id": "aave-v3-usdt",
+ "built_at": "2026-10-10T18:49:15Z",
+ "prices_usd": {
+  "asset:1:0xdac17f958d2ee523a2206206994597c13d831ec7": 1.0,
+  "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 1.0
+ },
+ "pendle": {},
+ "oracles": {},
+ "lending": {},
+ "position": {
+  "type": "aave_supply",
+  "size_usd": 2000000,
+  "available_liquidity_usd": 258866496.12140527,
+  "lending": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2"
+ },
+ "evidence": [],
+ "missing": [],
+ "assumed_prices": [
+  "USDT",
+  "USDC"
+ ]
+}

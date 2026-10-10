@@ -231,6 +231,8 @@ def resolve_position(b, pos):
         info = resolve_aave_supply(b, pid, pos)
     elif pos["type"] == "morpho_supply":
         info = resolve_morpho_supply(b, pid, pos)
+    elif pos["type"] == "morpho_borrow":
+        info = resolve_morpho_borrow(b, pid, pos)
     elif pos["type"] == "hold":
         a_id = asset_node(b, pos["asset"], chain_id)
         b.add_edge(edge(a_id, pid, "backing", "documented", doc_ev("data/positions.json"),
@@ -345,6 +347,38 @@ def resolve_morpho_supply(b, pid, pos):
                         {"market_id": mid, "why": "Prix utilisé pour décider des liquidations"}))
     b.add_edge(edge("chain:ethereum", l_id, "settlement", "documented", doc_ev(DOCUMENTED["chains"]["ethereum"]["url"])))
     return {"market_id": mid, "available_liquidity_usd": liquidity}
+
+
+def resolve_morpho_borrow(b, pid, pos):
+    """Emprunteur : collatéral déposé sur un marché Morpho isolé, dette libellée dans l'actif prêté."""
+    chain_id, mid = pos["chain_id"], pos["market_id"].lower()
+    mk = S.morpho_market(chain_id, mid)
+    key = f"market_{chain_id}_{mid}"
+    ev = api_ev("morpho", key)
+    l_id = morpho_market_node(b, chain_id, mk, key)
+    lltv = int(mk["lltv"]) / 1e18
+    b.nodes[pid]["metrics"].update({"collateral_usd": pos["size_usd"], "debt_usd": pos["debt_usd"]})
+    b.add_edge(edge(l_id, pid, "collateral_liquidation", "api", ev,
+                    {"market_id": mid, "lltv": lltv,
+                     "why": "Le marché liquide la position si dette > LLTV × collatéral évalué par son oracle"}))
+    coll = mk["collateralAsset"]["address"].lower()
+    loan = mk["loanAsset"]["address"].lower()
+    c_id = asset_node(b, coll, chain_id)
+    b.add_edge(edge(c_id, pid, "backing", "api", ev, {"role": "collateral", "why": "Collatéral déposé sur Morpho"}))
+    d_id = asset_node(b, loan, chain_id)
+    b.add_edge(edge(d_id, pid, "backing", "api", ev, {"role": "debt", "why": "Dette libellée dans cet actif"}))
+    b.enqueue("asset", d_id, 1, address=loan, chain_id=chain_id)
+    if coll in {p.lower() for p in all_pts()}:
+        expand_pendle_pt(b, c_id, coll, chain_id, 1)
+    else:
+        b.enqueue("asset", c_id, 1, address=coll, chain_id=chain_id)
+    o_id = resolve_oracle(b, mk["oracle"]["address"].lower(), 2, api_type=mk["oracle"].get("type"),
+                          api_data=mk["oracle"].get("data"), label="Oracle du marché")
+    if o_id:
+        b.add_edge(edge(o_id, l_id, "pricing", "api", ev,
+                        {"market_id": mid, "why": "Prix utilisé pour décider des liquidations"}))
+    b.add_edge(edge("chain:ethereum", l_id, "settlement", "documented", doc_ev(DOCUMENTED["chains"]["ethereum"]["url"])))
+    return {"market_id": mid, "collateral_usd": pos["size_usd"], "debt_usd": pos["debt_usd"], "lltv": lltv}
 
 
 def morpho_market_node(b, chain_id, mk, key):

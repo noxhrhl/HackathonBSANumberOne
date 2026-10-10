@@ -655,7 +655,7 @@
  ],
  "loops": [],
  "meta": {
-  "generated_at": "2026-10-10T11:59:55Z",
+  "generated_at": "2026-10-10T18:49:14Z",
   "offline": true,
   "max_depth_limit": 5,
   "sources": [
@@ -1030,6 +1030,41 @@
     "fetched_at": "2026-10-10T11:34:51Z"
    },
    {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:42:40Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:42:40Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:54Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:54Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:54Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
     "source": "pendle",
     "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x34280882267ffa6383b363e278b027be083bbe3b/data",
     "fetched_at": "2026-10-10T10:53:06Z"
@@ -1303,6 +1338,26 @@
     "source": "pendle",
     "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=2056000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
     "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
    },
    {
     "source": "rpc",
@@ -2408,6 +2463,41 @@
     "source": "pendle",
     "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=5031153000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
     "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T18:47:55Z"
    },
    {
     "source": "morpho",

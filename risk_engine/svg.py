@@ -78,9 +78,18 @@ def layout(graph):
     return coords, width, total_h
 
 
-def render(graph, node_info=None, weights=None, incident=None, path=None, coverage_line=""):
-    """SVG complet. node_info[id] = {'p','impact'} ; weights[(a,b)] = w ; path = liste d'ids."""
+SIM_STROKE = {"origin": ("#9e1b32", 2.5, ""), "changed": ("#d1495b", 2.2, ""), "unknown": ("#e08a2c", 2.2, "5 3"),
+              "estimate": ("#e08a2c", 2.2, "5 3"), "no_effect": ("#8a96a3", 1.4, "4 3")}
+
+
+def render(graph, node_info=None, weights=None, incident=None, path=None, coverage_line="",
+           sim=None, node_href=None, sim_edges=None):
+    """SVG complet. node_info[id] = {'p','impact'} ; weights[(a,b)] = w ; path = liste d'ids.
+
+    Mode simulation : sim[id] = {'status', 'label', 'tip'} colore les nœuds touchés et estompe
+    les autres ; node_href(id) rend chaque nœud cliquable ; sim_edges = arêtes traversées."""
     node_info = node_info or {}
+    sim_edges = sim_edges or set()
     weights = weights or {}
     path = path or []
     path_edges = set(zip(path, path[1:]))
@@ -107,6 +116,7 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
         mid = (sx + tx) / 2
         d = f"M{sx:.1f},{sy:.1f} C{mid:.1f},{sy:.1f} {mid:.1f},{ty:.1f} {tx:.1f},{ty:.1f}"
         hot = (e["from"], e["to"]) in path_edges
+        crossed = (e["from"], e["to"]) in sim_edges
         assumed = e["status"] == "assumed"
         w = weights.get((e["from"], e["to"]))
         cls = "edge"
@@ -115,9 +125,13 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
             style = 'stroke="#d5dbe1" stroke-width="0.8" opacity="0.6"'
         if assumed:
             style = 'stroke="#d1495b" stroke-width="1.4" stroke-dasharray="5 4"'
+        if crossed and not hot:
+            style = 'stroke="#e08a2c" stroke-width="1.8"'
         if hot:
             style = 'stroke="#d1495b" stroke-width="3"'
             cls += " hot"
+        if sim is not None and not (hot or crossed) and "opacity" not in style:
+            style += ' opacity="0.35"'
         tip = (f"{nodes[e['from']]['name']} → {nodes[e['to']]['name']}\n"
                f"mécanisme : {e['mechanism']} · statut : {STATUS_LABEL.get(e['status'], e['status'])}"
                + (f" · w = {w:.3f}" if w is not None else "")
@@ -142,9 +156,20 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
             stroke, sw = "#d1495b", 2
         if nid == incident:
             fill, ink, stroke, sw = "#d1495b", "#ffffff", "#9e1b32", 2.5
+        dash, opacity = "", ""
+        sm = (sim or {}).get(nid)
+        if sim is not None:
+            if sm:
+                stroke, sw, dash = SIM_STROKE.get(sm["status"], (stroke, sw, ""))
+                if sm["status"] == "origin":
+                    fill, ink = "#d1495b", "#ffffff"
+            else:
+                opacity = ' opacity="0.45"'
         info = node_info.get(nid, {})
         sub = kind_label
-        if n["kind"] != "position" and info:
+        if sm and sm.get("label"):
+            sub = sm["label"]
+        elif n["kind"] != "position" and info:
             sub += f" · p {fmt_pct(info.get('p'), 2)} · I {info.get('impact', 0):.2f}".replace(".", ",", 1)
         flags = n.get("flags", [])
         if "single_source" in flags and n["kind"] == "oracle":
@@ -156,11 +181,16 @@ def render(graph, node_info=None, weights=None, incident=None, path=None, covera
                          for k, v in (n.get("metrics") or {}).items() if v is not None)
                + "".join(f"\npreuve : {x.get('source')} ({x.get('fetched_at')}) {x.get('url')}" for x in ev[:3])
                + (f"\nsignaux : {', '.join(flags)}" if flags else ""))
-        g = (f'<g class="node kind-{n["kind"]}"><title>{escape(tip)}</title>'
-             f'<rect x="{x:.1f}" y="{y:.1f}" width="{NODE_W}" height="{NODE_H}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>'
+        if sm and sm.get("tip"):
+            tip = f"{n['name']}\n{sm['tip']}"
+        dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+        g = (f'<g class="node kind-{n["kind"]}"{opacity}><title>{escape(tip)}</title>'
+             f'<rect x="{x:.1f}" y="{y:.1f}" width="{NODE_W}" height="{NODE_H}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{dash_attr}/>'
              f'<text x="{x + 10:.1f}" y="{y + 19:.1f}" font-size="12.5" font-weight="700" fill="{ink}">{escape(_clip(n["name"], 30))}</text>'
              f'<text x="{x + 10:.1f}" y="{y + 35:.1f}" font-size="10.5" fill="{ink}" opacity="0.8">{escape(_clip(sub, 40))}</text></g>')
-        if href:
+        if node_href:
+            g = f'<a href="{escape(node_href(nid), quote=True)}">{g}</a>'
+        elif href:
             g = f'<a href="{escape(href, quote=True)}" target="_blank" rel="noopener">{g}</a>'
         parts.append(g)
     parts.extend(labels)

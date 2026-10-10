@@ -1,0 +1,152 @@
+{
+ "position_id": "pt-susds-26nov2026",
+ "built_at": "2026-10-10T18:49:14Z",
+ "prices_usd": {
+  "position:pt-susds-26nov2026": 0.9938079918434342,
+  "asset:1:0xa3931d71877c0e7a3148cb7eb4463524fec27fbd": 1.1123423668985368,
+  "protocol:pendle-sy:1:0xbe3d4ec488a0a042bb86f9176c24f8cd54018ba7": 1.1123423668985368,
+  "asset:1:0xdc035d45d973e3ec169d2276ddab16f1e407384f": 1.0,
+  "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 1.0
+ },
+ "pendle": {
+  "venue:pendle:1:0x9c560ebaf78e596cbcc27411d633a74d628dd7dc": {
+   "total_pt": 1041762.9048571691,
+   "total_sy": 3357490.6810856713,
+   "total_lp": 1523618.6561596612,
+   "scalar_root": 50.49279455297613,
+   "expiry_ts": 1795651200,
+   "ln_fee_rate_root": 0.000998078321070529,
+   "reserve_fee_percent": 80,
+   "last_ln_implied_rate": 0.04769600772958425,
+   "sy_rate": 1.112356102285876,
+   "snapshot_ts": 1791658075,
+   "pt_node": "position:pt-susds-26nov2026",
+   "sy_node": "protocol:pendle-sy:1:0xbe3d4ec488a0a042bb86f9176c24f8cd54018ba7",
+   "underlying_node": "asset:1:0xa3931d71877c0e7a3148cb7eb4463524fec27fbd"
+  }
+ },
+ "oracles": {
+  "oracle:1:0x3464a61a68c486241fe07201c913f055bdce35bf": {
+   "raw": 983539215816844242000000
+  },
+  "oracle:1:0x89dae86eb86cbc4dd2f52031c997a21ab9a950c5": {
+   "raw": 983539215816844242000000
+  },
+  "oracle:1:0x77ae9b629096d0ae0206878b163cca232276c88e": {
+   "raw": 983419332221828326855342
+  },
+  "oracle:1:0x1c7dbd66df93594ba08af8e72c75ba2004d92f9c": {
+   "raw": 1113305801094649332600201
+  },
+  "oracle:1:0x0c426d174fc88b7a25d59945ab2f7274bf7b4c79": {
+   "raw": 1112966257103588448875107
+  }
+ },
+ "lending": {
+  "lending:morpho:1:0x22fe4c688161863c73571a2b8db65cc11a4a6bceee4f0dea4aa83e4b784f1bd9": {
+   "protocol": "morpho-blue",
+   "lltv": 0.915,
+   "oracle": "oracle:1:0x3464a61a68c486241fe07201c913f055bdce35bf",
+   "lif": 1.026167265264238,
+   "collateral_usd": 14915329.030870313,
+   "borrow_usd": 12680715.242843911,
+   "supply_usd": 14255865.562042922
+  },
+  "lending:morpho:1:0x0367161b7cb23dfd03747dd3815d1c445b0437b648a6d50346249c6e7b92ff1b": {
+   "protocol": "morpho-blue",
+   "lltv": 0.915,
+   "oracle": "oracle:1:0x3464a61a68c486241fe07201c913f055bdce35bf",
+   "lif": 1.026167265264238,
+   "collateral_usd": 5089442.108577585,
+   "borrow_usd": 4300665.93307399,
+   "supply_usd": 5155199.521793598
+  },
+  "lending:morpho:1:0x26b178d49895f80ca3c39b2745efc4cd9adcddfcc73dae93e531e86977ec4d96": {
+   "protocol": "morpho-blue",
+   "lltv": 0.965,
+   "oracle": "oracle:1:0x1c7dbd66df93594ba08af8e72c75ba2004d92f9c",
+   "lif": 1.010611419909045,
+   "collateral_usd": 51015381.435793586,
+   "borrow_usd": 46357565.944365405,
+   "supply_usd": 61181564.432409905
+  },
+  "lending:morpho:1:0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b": {
+   "protocol": "morpho-blue",
+   "lltv": 0.965,
+   "oracle": "oracle:1:0x0c426d174fc88b7a25d59945ab2f7274bf7b4c79",
+   "lif": 1.010611419909045,
+   "collateral_usd": 12158709.197114794,
+   "borrow_usd": 11007709.862986283,
+   "supply_usd": 13625402.846528007
+  }
+ },
+ "position": {
+  "type": "pendle_pt",
+  "size_usd": 2000000,
+  "units": 2012461.1760166674,
+  "venue": "venue:pendle:1:0x9c560ebaf78e596cbcc27411d633a74d628dd7dc"
+ },
+ "evidence": [
+  {
+   "label": "Prix PT et sous-jacent (API Pendle)",
+   "source": "pendle",
+   "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xdc169abe56461a2e0c034da431ac2a3ebf596094,0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+   "fetched_at": "2026-10-10T10:53:06Z",
+   "status": "api"
+  },
+  {
+   "label": "readState() de l'AMM AMM Pendle sUSDS (2026-11-26)",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "SY.exchangeRate()",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Méta-oracle 0x3464…35bf (primaire + seco",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle primaire 0x89da…50c5 (combinaison",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle secours 0x77ae…c88e (combinaison ",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle du marché 0x1c7d…2f9c (combinaiso",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  },
+  {
+   "label": "price() de Oracle du marché 0x0c42…4c79 (combinaiso",
+   "source": "rpc",
+   "url": "https://ethereum-rpc.publicnode.com",
+   "fetched_at": "2026-10-10T18:47:55Z",
+   "status": "verified_onchain"
+  }
+ ],
+ "missing": [],
+ "assumed_prices": [
+  "USDS",
+  "USDC"
+ ]
+}

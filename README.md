@@ -22,6 +22,7 @@ Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans
 4. **Robustesse** : plage de probabilité où la recommandation tient, scénarios BAS / BASE / HAUT, entrée la plus sensible.
 5. **Le livre** (10 poches de 10 %) : qui d'autre est touché, perte corrélée du livre, concentrations de TVL.
 6. **Preuves** : paramètres de chaque composant, 14 incidents réels, toutes les données relevées.
+7. **Simulateur de défaillance** (sans probabilité) : cliquer un nœud du graphe, choisir un scénario (chute de prix / dépeg, défaillance d'oracle, crise de liquidité), régler la sévérité, lancer. La page montre les nœuds touchés, chaque étape de propagation (état initial, état simulé, mécanisme, formule), la LTV et le facteur de santé, l'éligibilité à la liquidation, le coût de sortie sur l'AMM et la perte en USD. API : `/api/simulate?pos=…&node=…&type=…&severity=0.05&hours=24`.
 
 ## Où sont les fichiers ?
 
@@ -36,6 +37,7 @@ Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans
 | `data/documented.json`, `data/evidence.json` | Relations et incidents documentés, avec leurs sources. |
 | `data/cache/` | Réponses API et Ethereum datées, nécessaires pour la démo hors ligne. |
 | `data/graphs/`, `data/reports/` | Graphes et analyses produits par le pipeline ; le site les lit directement. |
+| `data/sim/` | Données de base du simulateur (état des AMM Pendle, `price()` des oracles Morpho, prix), relevées on-chain en lecture seule. |
 | `tests/` | Vérifications des calculs, de la découverte et du rendu du site. |
 | `tools/` | Utilitaire de collecte du cache quand le réseau est limité. |
 | `NOTES.md`, `docs/` | Justification des nombres, méthode, architecture et documents de démonstration. |

@@ -2,11 +2,11 @@
  "position_id": "aave-v3-usdc",
  "label": "USDC prêté sur Aave V3 (Ethereum Core)",
  "size_usd": 2000000,
- "generated_at": "2026-10-10T11:59:54Z",
+ "generated_at": "2026-10-10T18:49:14Z",
  "offline": true,
  "data_fetched_at": {
   "oldest": "2026-10-10T10:20:00Z",
-  "newest": "2026-10-10T11:34:51Z"
+  "newest": "2026-10-10T18:47:55Z"
  },
  "horizon_days": 30.0,
  "coverage": {
@@ -246,9 +246,9 @@
   },
   {
    "p": 0.7,
-   "x_star": 0.6409465268029646,
+   "x_star": 0.6409465268029645,
    "category": "vente partielle",
-   "expected": 0.1410082358966522,
+   "expected": 0.14100823589665218,
    "cvar95": 0.3936874402161924
   },
   {
