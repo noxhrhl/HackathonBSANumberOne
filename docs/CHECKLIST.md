@@ -20,7 +20,7 @@
 | | Robustesse : plage de p où la recommandation tient, scénarios, entrée la plus sensible | section 03 | ✅ |
 | | Coût de sortie réel (cotations Pendle) vs coût de crise (11 %) | section 02, « hors crise » | ✅ |
 | | Livre 10 × 10 % : part exposée, perte corrélée du livre, concentrations TVL | section 04 | ✅ |
-| **Démo sur données réelles (15 %)** | Données réelles en cache, démo hors ligne, badge de date | `data/cache/`, en-tête | ✅ |
+| **Démo sur données réelles (15 %)** | Collecte en ligne obligatoire, badge de date du relevé | API et Ethereum, en-tête | ✅ |
 | | Une commande par position, test de fumée de toutes les pages | `pipeline.py`, `tests/test_app.py` | ✅ |
 
 ## Limites (à dire avant qu'on les demande)

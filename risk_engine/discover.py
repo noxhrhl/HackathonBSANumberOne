@@ -14,7 +14,7 @@ Principe : parcours en largeur depuis la position. Chaque nœud découvert est c
 Direction : « A → B » = si A défaille, B est touché. La position est le seul puits.
 Une arête qui fermerait une boucle n'est pas ajoutée : la boucle est signalée à part.
 
-Usage : python -m risk_engine.discover [position_id] [--offline]
+Usage : python -m risk_engine.discover [position_id]
 """
 
 import json
@@ -666,17 +666,18 @@ def discover(position_id):
     # on retire les nœuds qui n'atteignent pas la position (ne devrait pas arriver)
     graph = {"position_id": pos["id"], "position": {**pos, "id": pid, "config_id": pos["id"], "info": info},
              "nodes": list(b.nodes.values()), "edges": b.edges, "loops": b.loops,
-             "meta": {"generated_at": S.now_iso(), "offline": S.is_offline(), "max_depth_limit": MAX_DEPTH,
+             "meta": {"generated_at": S.now_iso(), "max_depth_limit": MAX_DEPTH,
                       "sources": list(S.used_sources().values())}}
     graph["checks"] = {"errors": validate(graph), "coverage": coverage(graph)}
     return graph
 
 
 def main(argv):
-    offline = "--offline" in argv
-    args = [a for a in argv if not a.startswith("--")]
-    S.set_offline(offline)
-    ids = args or [p["id"] for p in POSITIONS["positions"] if p.get("main")]
+    unknown = [a for a in argv if a.startswith("--")]
+    if unknown:
+        raise ValueError(f"Option inconnue : {', '.join(unknown)}")
+    S.reset_sources()
+    ids = argv or [p["id"] for p in POSITIONS["positions"] if p.get("main")]
     for pid in ids:
         g = discover(pid)
         out = ROOT / "data" / "graphs" / f"{pid}.json"

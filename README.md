@@ -7,12 +7,11 @@ Le prototype **découvre automatiquement** ce dont dépend une position (donnée
 ## Démarrer (aucune installation : Python 3.10+ suffit)
 
 ```bash
-python pipeline.py --all --offline --book    # graphes + rapports depuis le cache (~15 s)
-python app.py                                 # puis ouvrir http://127.0.0.1:8000
+python app.py                                 # collecte en ligne, puis http://127.0.0.1:8000
 python -m unittest discover -s tests          # vérifications du moteur et du site
 ```
 
-Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans `--offline`). Les réponses brutes sont enregistrées dans `data/cache/` avec leur heure de relevé ; recalcul des taux d'exploits : `python calibrate.py`.
+Une connexion Internet est requise. Le site relève la position principale au démarrage, puis chaque autre position lorsqu'on la sélectionne. Il relève à nouveau une position après cinq minutes ou via « Actualiser ». Une source indisponible produit une erreur visible ; aucune ancienne réponse n'est utilisée. Pour recalculer tout le livre sans ouvrir le site : `python pipeline.py --all --book`. Recalcul des taux d'exploits historiques : `python calibrate.py`.
 
 ## Ce que montre la page
 
@@ -35,11 +34,9 @@ Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans
 | `templates/`, `static/` | HTML et CSS du site. |
 | `data/positions.json` | Les 10 positions : adresses réelles et tailles illustratives. |
 | `data/documented.json`, `data/evidence.json` | Relations et incidents documentés, avec leurs sources. |
-| `data/cache/` | Réponses API et Ethereum datées, nécessaires pour la démo hors ligne. |
-| `data/graphs/`, `data/reports/` | Graphes et analyses produits par le pipeline ; le site les lit directement. |
-| `data/sim/` | Données de base du simulateur (état des AMM Pendle, `price()` des oracles Morpho, prix), relevées on-chain en lecture seule. |
+| `data/graphs/`, `data/reports/`, `data/sim/` | Exports produits par la commande `pipeline.py` et exemples de test ; le site ne les lit pas. |
 | `tests/` | Vérifications des calculs, de la découverte et du rendu du site. |
-| `tools/` | Utilitaire de collecte du cache quand le réseau est limité. |
+| `tools/` | Outils de collecte spécialisés. |
 | `NOTES.md`, `docs/` | Justification des nombres, méthode, architecture et documents de démonstration. |
 
 Le rôle précis de chaque module et le chemin des données sont dans [l'architecture](docs/ARCHITECTURE.md). Le brief original est conservé dans `BelemCapital_EPFL-Hackathon_DeFi-Risk-Dependency-Challenge_EN_v1.pdf`. Aucun conseil d'investissement.

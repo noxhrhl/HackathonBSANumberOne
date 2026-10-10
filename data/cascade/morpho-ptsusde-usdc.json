@@ -1,0 +1,402 @@
+{
+  "schema_version": 1,
+  "collected_at": "2026-10-10T18:37:36Z",
+  "position_id": "morpho-ptsusde-usdc",
+  "market_id": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+  "market": {
+    "marketId": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+    "lltv": "915000000000000000",
+    "loanAsset": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "collateralAsset": {
+      "address": "0xB195B618EA52b77CB2a58846F452f59f8dFa9390",
+      "symbol": "PT-sUSDE-26NOV2026",
+      "decimals": 18
+    },
+    "oracle": {
+      "address": "0xF8b29e7E9c00CE531434775f7923CC9fbCa01b08"
+    },
+    "state": {
+      "supplyAssets": 7758685052483,
+      "borrowAssets": 6994168629390,
+      "collateralAssets": "7982359346812969045372133"
+    }
+  },
+  "borrowers": [
+    {
+      "address": "0xdf81987465681d0515058fe0a47a3bd174012730",
+      "debt_raw": 3415082630866,
+      "collateral_raw": "3961491354129141559967243"
+    },
+    {
+      "address": "0x5c430ff6f374da12218b380d2040299ae5b6d40e",
+      "debt_raw": 2942563901194,
+      "collateral_raw": "3272383785063586096668894"
+    },
+    {
+      "address": "0x03babeb24619902253fdb0d5675a816879115d98",
+      "debt_raw": 357224870792,
+      "collateral_raw": "413030323985266824510019"
+    },
+    {
+      "address": "0xe3a5bcb68ea2be70c029687bf02d3357417d8d67",
+      "debt_raw": 101207893554,
+      "collateral_raw": "114321470025064289540293"
+    },
+    {
+      "address": "0xde79a400ec22ff42d875e8c12819183a8e12e141",
+      "debt_raw": 100429460730,
+      "collateral_raw": "121330892759276027961641"
+    },
+    {
+      "address": "0xbfcdb32f9e2c6d2a7c5c8c435b3da59ff6049212",
+      "debt_raw": 16498936812,
+      "collateral_raw": "19625387394236489414609"
+    },
+    {
+      "address": "0x405b07642e7c4e1b9eda4ef21f16b22207d0f2cc",
+      "debt_raw": 16118360291,
+      "collateral_raw": "18798941538810985043458"
+    },
+    {
+      "address": "0x4264ef782fc3385c62e16969618e81e079afd880",
+      "debt_raw": 14085630946,
+      "collateral_raw": "15898138666175496215964"
+    },
+    {
+      "address": "0x9f72e6cd13c4da05bafb173e9ff83eb6e324315f",
+      "debt_raw": 12026006078,
+      "collateral_raw": "15606547027648327035172"
+    },
+    {
+      "address": "0x91ab152b06edc600b4a123c2ea1387ebe5b83795",
+      "debt_raw": 10330209823,
+      "collateral_raw": "12793920359580041448474"
+    },
+    {
+      "address": "0xa4818ef55ac5b27308808c633dc6e00a8361a810",
+      "debt_raw": 8021167004,
+      "collateral_raw": "16199974258248803319147"
+    },
+    {
+      "address": "0x7640aecb5a149ee48e79465f9aed3508b1efa164",
+      "debt_raw": 579289886,
+      "collateral_raw": "877611605934104247219"
+    },
+    {
+      "address": "0xb91745297802ad852b286809d25199c7467584a8",
+      "debt_raw": 271406,
+      "collateral_raw": "1000000000000000000"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000dead",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    },
+    {
+      "address": "0x102407f67415dcc4068370625ca27f24bb2a03d5",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    },
+    {
+      "address": "0x6b9a9bee225fb824876e4964eb3bfe1fc1240bb1",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    },
+    {
+      "address": "0x6d3b90747dbf5883bf88ff7eb5fcc86f408b5409",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    },
+    {
+      "address": "0xa2f362079dbc570a6df5bd04ad91002d17c0db9a",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    },
+    {
+      "address": "0xca9ba74ee20917211ef646ac51accc287f27538b",
+      "debt_raw": 0,
+      "collateral_raw": 0
+    }
+  ],
+  "coverage": {
+    "positions": 19,
+    "sum_debt_raw": "6994168629382",
+    "market_debt_raw": "6994168629390",
+    "sum_collateral_raw": "7982359346812969045372133",
+    "market_collateral_raw": "7982359346812969045372133"
+  },
+  "oracle": {
+    "address": "0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+    "block": 26163871,
+    "raw_price": "992401504946727550000000",
+    "primary_oracle": "0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+    "backup_oracle": "0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+    "current_oracle": "0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+    "current_is_primary": true,
+    "price_usdc_per_pt": 0.9924015049467275,
+    "fetched_at": "2026-10-10T18:37:36Z",
+    "rpc_url": "https://ethereum-rpc.publicnode.com"
+  },
+  "pendle": {
+    "pt": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+    "output_token": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "susde_usd": 1.25126327,
+    "pt_usd_reference": 0.9929326748994471,
+    "prices_url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "prices_fetched_at": "2026-10-10T18:37:36Z",
+    "quotes": [
+      {
+        "size_pt": 250000,
+        "ok": true,
+        "out_susde_raw": "198222594318284451974957",
+        "price_impact": -0.0008238913894236457,
+        "fee_usd": 30.745559680699408,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "250000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:28Z",
+        "proceeds_usdc_assumed": 248028.65155458
+      },
+      {
+        "size_pt": 500000,
+        "ok": true,
+        "out_susde_raw": "396196887290993803057472",
+        "price_impact": -0.0014496948531703552,
+        "fee_usd": 61.45260597497348,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "500000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:29Z",
+        "proceeds_usdc_assumed": 495746.61275555036
+      },
+      {
+        "size_pt": 1000000,
+        "ok": true,
+        "out_susde_raw": "791476853669420908937803",
+        "price_impact": -0.002605170434136446,
+        "fee_usd": 122.76299137774784,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "1000000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:30Z",
+        "proceeds_usdc_assumed": 990345.916051711
+      },
+      {
+        "size_pt": 1500000,
+        "ok": true,
+        "out_susde_raw": "1185820676716780389683606",
+        "price_impact": -0.003776795016163592,
+        "fee_usd": 183.92817468233272,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "1500000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:31Z",
+        "proceeds_usdc_assumed": 1483773.8575822513
+      },
+      {
+        "size_pt": 2000000,
+        "ok": true,
+        "out_susde_raw": "1578882456023314842047952",
+        "price_impact": -0.005170403386397876,
+        "fee_usd": 244.89450441678076,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "2000000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:33Z",
+        "proceeds_usdc_assumed": 1975597.6248693638
+      },
+      {
+        "size_pt": 2500000,
+        "ok": true,
+        "out_susde_raw": "1969195012459632693389568",
+        "price_impact": -0.007392362908208405,
+        "fee_usd": 305.4344112500016,
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "2500000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:34Z",
+        "proceeds_usdc_assumed": 2463981.390557931
+      },
+      {
+        "size_pt": 3000000,
+        "ok": false,
+        "status": 400,
+        "reason": "{\"message\":\"MarketProportionTooHigh. Market liquidity is likely insufficient, please consider placing limit order or try again later.\",\"error\":\"Bad Request\",\"computingUnit\":0}",
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "3000000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:35Z"
+      },
+      {
+        "size_pt": 4000000,
+        "ok": false,
+        "status": 400,
+        "reason": "{\"message\":\"MarketProportionTooHigh. Market liquidity is likely insufficient, please consider placing limit order or try again later.\",\"error\":\"Bad Request\",\"computingUnit\":0}",
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "4000000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:35Z"
+      },
+      {
+        "size_pt": 4500000,
+        "ok": false,
+        "status": 400,
+        "reason": "{\"message\":\"MarketProportionTooHigh. Market liquidity is likely insufficient, please consider placing limit order or try again later.\",\"error\":\"Bad Request\",\"computingUnit\":0}",
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "4500000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:36Z"
+      },
+      {
+        "size_pt": 5000000,
+        "ok": false,
+        "status": 400,
+        "reason": "{\"message\":\"MarketProportionTooHigh. Market liquidity is likely insufficient, please consider placing limit order or try again later.\",\"error\":\"Bad Request\",\"computingUnit\":0}",
+        "url": "https://api-v2.pendle.finance/core/v3/sdk/1/convert",
+        "request": {
+          "receiver": "0x000000000000000000000000000000000000dEaD",
+          "slippage": 0.05,
+          "enableAggregator": false,
+          "useLimitOrder": false,
+          "inputs": [
+            {
+              "token": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+              "amount": "5000000000000000000000000"
+            }
+          ],
+          "outputs": [
+            "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+          ]
+        },
+        "fetched_at": "2026-10-10T18:37:36Z"
+      }
+    ],
+    "quote_endpoint_note": "POST /v3/sdk/1/convert, useLimitOrder=false : devis AMM sans carnet d'ordres limites."
+  },
+  "source_urls": {
+    "morpho": "https://api.morpho.org/graphql",
+    "ethereum_rpc": "https://ethereum-rpc.publicnode.com",
+    "pendle_api": "https://api-v2.pendle.finance/core"
+  }
+}

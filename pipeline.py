@@ -1,8 +1,7 @@
 """Chaîne complète : découvrir → enrichir → simuler → décider → rapport JSON.
 
-  python pipeline.py pt-susde-26nov2026          # une position (en ligne, met le cache à jour)
-  python pipeline.py --all --offline             # toutes les positions, depuis le cache
-  python pipeline.py --all --offline --book      # + vue « livre » (10 poches)
+  python pipeline.py pt-susde-26nov2026          # une position, relevé en ligne
+  python pipeline.py --all --book                # toutes les positions + livre
 
 Écrit data/graphs/<id>.json (le graphe découvert), data/reports/<id>.json (le rapport) et
 data/sim/<id>.json (données de base du simulateur de défaillance : prix, état des AMM, oracles).
@@ -135,7 +134,7 @@ def build_report(graph, incident=None, incident_p=DEFAULT_INCIDENT_P):
               **pm.weight_info[(e["from"], e["to"])]} for e in graph["edges"]]
     return {
         "position_id": pid, "label": graph["position"]["label"], "size_usd": graph["position"]["size_usd"],
-        "generated_at": S.now_iso(), "offline": S.is_offline(), "data_fetched_at": data_timestamp(graph),
+        "generated_at": S.now_iso(), "data_fetched_at": data_timestamp(graph),
         "horizon_days": pm.horizon, "coverage": graph["checks"]["coverage"], "errors": graph["checks"]["errors"],
         "loops": graph.get("loops", []), "default_incident": incident, "default_incident_p": incident_p,
         "stats": st, "decision": decision, "exit": {"quotes": quotes, "stress": models["stress"].to_dict(),
@@ -217,8 +216,7 @@ def build_book(pids):
             "exposures": {nid: book_exposure(graphs, nid, DEFAULT_INCIDENT_P) for nid in top}}
 
 
-def run(pid, offline):
-    S.set_offline(offline)
+def run(pid):
     g = discover.discover(pid)
     GRAPHS.mkdir(parents=True, exist_ok=True)
     REPORTS.mkdir(parents=True, exist_ok=True)
@@ -231,12 +229,15 @@ def run(pid, offline):
 
 
 def main(argv):
-    offline = "--offline" in argv
+    unknown = [a for a in argv if a.startswith("--") and a not in ("--all", "--book")]
+    if unknown:
+        raise ValueError(f"Option inconnue : {', '.join(unknown)}")
     ids = [a for a in argv if not a.startswith("--")]
     if "--all" in argv or not ids:
         ids = [p["id"] for p in discover.POSITIONS["positions"]]
+    S.reset_sources()
     for pid in ids:
-        g, rep = run(pid, offline)
+        g, rep = run(pid)
         cov = rep["coverage"]
         d = rep["decision"]["neutre"]
         print(f"{pid:24s} {cov['dependencies']:3d} dépendances, profondeur {cov['max_depth']}, "
@@ -245,7 +246,6 @@ def main(argv):
               f"CVaR={rep['stats']['cvar95']:.2%} x*={d['x_star']:.0%} ({d['category']})"
               + (f" ERREURS {rep['errors']}" if rep["errors"] else ""))
     if "--book" in argv:
-        S.set_offline(offline)
         book = build_book([p["id"] for p in discover.POSITIONS["positions"] if p.get("book", True)])
         (REPORTS / "book.json").write_text(json.dumps(book, indent=1, ensure_ascii=False), encoding="utf-8")
         print(f"livre : {len(book['shared_nodes'])} nœuds partagés ; concentration :",

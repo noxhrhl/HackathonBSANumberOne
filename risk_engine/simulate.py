@@ -193,7 +193,7 @@ def classify(edge, nodes, graph):
 
 
 # ---------------------------------------------------------------------------
-# Contexte : données de base (prix, AMM, oracles) relevées une fois et mises en cache
+# Contexte : prix, AMM et oracles relevés en ligne pour cette simulation
 # ---------------------------------------------------------------------------
 
 def _ts(iso):
@@ -223,7 +223,7 @@ def pendle_links(graph):
 
 
 def build_context(graph):
-    """Relève (ou relit du cache) tout ce dont la simulation a besoin. Lecture seule."""
+    """Relève en ligne les états nécessaires à la simulation, en lecture seule."""
     nodes = {n["id"]: n for n in graph["nodes"]}
     pos = graph["position"]
     ctx = {"position_id": graph["position_id"], "built_at": S.now_iso(), "prices_usd": {}, "pendle": {}, "oracles": {},
@@ -231,7 +231,7 @@ def build_context(graph):
 
     def safe(label, fn, *args):
         try:
-            return S.cache_first(fn, *args)
+            return fn(*args)
         except Exception as exc:  # donnée absente : le modèle concerné sera INCONNU
             ctx["missing"].append(f"{label} : {type(exc).__name__} {str(exc)[:120]}")
             return None

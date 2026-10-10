@@ -1,22 +1,17 @@
-"""Accès aux données réelles, avec cache disque (bibliothèque standard uniquement).
+"""Accès en ligne aux API et à Ethereum (bibliothèque standard uniquement).
 
-Chaque réponse brute est enregistrée dans data/cache/<source>/<clé>.json avec l'URL,
-la requête et l'heure du relevé (fetched_at). En mode hors ligne (--offline), seules
-les réponses en cache sont relues : la démo fonctionne sans réseau.
+Une réponse est réutilisée seulement pendant le relevé en cours. Le relevé suivant
+interroge à nouveau les sources ; une erreur réseau remonte sans ancienne réponse.
 
 Sources : API Pendle, API GraphQL Morpho, API GraphQL Aave, DeFiLlama, API publique
 d'Ethena, et un nœud RPC Ethereum public (appels eth_call en lecture seule).
 """
 
 import json
-import re
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-CACHE_DIR = ROOT / "data" / "cache"
 RPC_URL = "https://ethereum-rpc.publicnode.com"
 PENDLE = "https://api-v2.pendle.finance/core"
 MORPHO_GQL = "https://api.morpho.org/graphql"
@@ -25,85 +20,34 @@ LLAMA = "https://api.llama.fi"
 ETHENA = "https://app.ethena.fi/api"
 USER_AGENT = "Mozilla/5.0 (BelemRiskPrototype; +https://github.com/noxhrhl/HackathonBSANumberOne)"
 
-_state = {"offline": False, "used": {}, "collect": None}
+_state = {"used": {}, "responses": {}}
 
 
-class MissingCache(RuntimeError):
-    """Réponse absente du cache en mode hors ligne."""
-
-
-def set_offline(flag: bool):
-    _state["offline"] = bool(flag)
-
-
-def start_collect():
-    """Mode outil : en hors ligne, enregistre les requêtes absentes du cache au lieu d'échouer."""
-    _state["collect"] = []
-    return _state["collect"]
-
-
-def write_cache_entry(source, key, url, request, response, fetched_at):
-    """Écrit une entrée de cache relevée par un autre canal (même format que `cached`)."""
-    path = cache_path(source, key)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"source": source, "key": key, "url": url, "request": request,
-               "fetched_at": fetched_at, "response": response}
-    path.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
-
-
-def is_offline() -> bool:
-    return _state["offline"]
+def reset_sources():
+    """Commence un relevé indépendant avec de nouvelles requêtes réseau."""
+    _state["used"].clear()
+    _state["responses"].clear()
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _safe(key: str) -> str:
-    return re.sub(r"[^A-Za-z0-9_.-]", "_", key)[:150]
-
-
-def cache_path(source: str, key: str) -> Path:
-    return CACHE_DIR / source / f"{_safe(key)}.json"
-
-
 def used_sources() -> dict:
-    """Toutes les entrées de cache lues pendant ce calcul (pour la liste des preuves)."""
+    """Sources interrogées pendant ce relevé, avec leur URL et leur heure."""
     return dict(_state["used"])
 
 
 def cached(source: str, key: str, url: str, fetch, request=None, transform=None):
-    """Renvoie la réponse (depuis le cache hors ligne, sinon depuis le réseau puis cache).
-
-    transform : réduit la réponse avant enregistrement (on ne garde que les champs utiles,
-    pour un dépôt léger). La même réduction s'applique en ligne et dans le cache.
-    """
-    path = cache_path(source, key)
-    if _state["offline"]:
-        if not path.exists():
-            if _state["collect"] is not None:  # mode « collecte » : on note la requête manquante
-                _state["collect"].append({"source": source, "key": key, "url": url, "request": request})
-                if source == "rpc":
-                    return {"result": None}
-            raise MissingCache(f"Absent du cache : {path.relative_to(ROOT)}")
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    else:
-        try:
-            response = fetch()
-            if transform:
-                response = transform(response)
-            payload = {"source": source, "key": key, "url": url, "request": request,
-                       "fetched_at": now_iso(), "response": response}
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
-        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
-            if not path.exists():
-                raise
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            payload["stale_reason"] = str(exc)
-    _state["used"][(source, key)] = {"source": source, "url": payload.get("url", url),
-                                     "fetched_at": payload.get("fetched_at", "?")}
-    return payload["response"]
+    """Interroge la source une fois par relevé, sans repli en cas d'échec."""
+    identity = (source, key)
+    if identity not in _state["responses"]:
+        response = fetch()
+        if transform:
+            response = transform(response)
+        _state["responses"][identity] = response
+        _state["used"][identity] = {"source": source, "url": url, "fetched_at": now_iso()}
+    return _state["responses"][identity]
 
 
 def meta(source: str, key: str) -> dict:
@@ -184,7 +128,9 @@ def pendle_quote(chain_id: int, token_in: str, token_out: str, amount_units: int
     def fetch():
         try:
             return _get_json(url)
-        except urllib.error.HTTPError as exc:  # 400 = marché trop petit pour cette taille
+        except urllib.error.HTTPError as exc:  # 400 = route refusée pour cette taille
+            if exc.code != 400:
+                raise
             return {"_error": exc.read().decode("utf-8", "replace")[:300], "_status": exc.code}
 
     def transform(resp):
@@ -376,23 +322,6 @@ def eth_get_code(address: str):
     out = cached("rpc", f"code_{a}", RPC_URL, lambda: _rpc("eth_getCode", [a, "latest"]),
                  request={"method": "eth_getCode", "address": a}, transform=transform)
     return out.get("result")
-
-
-def cache_first(fn, *args):
-    """Instantané pour la simulation : relit le cache s'il existe, sinon interroge la source
-    (sauf en mode hors ligne, où l'absence lève MissingCache). Évite de rafraîchir, en
-    passant, des réponses déjà utilisées comme preuves par les graphes."""
-    prev = _state["offline"]
-    _state["offline"] = True
-    try:
-        return fn(*args)
-    except MissingCache:
-        if prev:
-            raise
-        _state["offline"] = False
-        return fn(*args)
-    finally:
-        _state["offline"] = prev
 
 
 PENDLE_ROUTER = "0x888888888889758f76e7103c6cbf23abbf58f946"

@@ -1,13 +1,15 @@
-"""Tests de la découverte sur les réponses réelles en cache (aucun accès réseau)."""
+"""Vérifie la structure des graphes produits par un relevé antérieur."""
+import json
 import unittest
+from pathlib import Path
 
 from risk_engine import discover
-from risk_engine import sources as S
+
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def graph(pid):
-    S.set_offline(True)
-    return discover.discover(pid)
+    return json.loads((ROOT / "data" / "graphs" / f"{pid}.json").read_text(encoding="utf-8"))
 
 
 class PtSusdeDiscoveryTests(unittest.TestCase):

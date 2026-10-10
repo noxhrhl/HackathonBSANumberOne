@@ -32,7 +32,7 @@ Code: `risk_engine/simulate.py` (engine and scenarios), `risk_engine/amm.py` (Pe
 
 ### 1.1 The dependency graph
 
-Each position has a graph in `data/graphs/<position>.json`, produced by `risk_engine/discover.py`. An edge **A → B** means "if A fails, B is affected". The position is the only sink. Each edge has a **mechanism** (`backing`, `pricing`, `exit_liquidity`, `collateral_liquidation`, `bad_debt`, `settlement`, `hedging`, `custody`), a **verification status** (`verified_onchain`, `api`, `documented`, `assumed`) and **evidence** (source, URL, timestamp).
+Each position has a graph built in memory by `risk_engine/discover.py`; the command-line pipeline can also export it to `data/graphs/<position>.json` for inspection. An edge **A → B** means "if A fails, B is affected". The position is the only sink. Each edge has a **mechanism** (`backing`, `pricing`, `exit_liquidity`, `collateral_liquidation`, `bad_debt`, `settlement`, `hedging`, `custody`), a **verification status** (`verified_onchain`, `api`, `documented`, `assumed`) and **evidence** (source, URL, timestamp).
 
 Example, the borrower position `morpho-ptsusde-borrow`:
 
@@ -61,7 +61,7 @@ USDC ──backing(debt)──► POSITION
 | Morpho market state | Morpho GraphQL API | collateral 7.93 M$, borrow 6.99 M$, supply 7.76 M$, LLTV 91.5 % |
 | Meta-oracle parameters | `deviationThreshold()`, `challengeTimelockDuration()`, `healingTimelockDuration()` (eth_call, read by discovery) | 0.75 %, 16 h, 24 h |
 
-The file uses a **cache-first** rule (`sources.cache_first`): an entry already in `data/cache/` is reused, so evidence used by the graphs is never silently refreshed. A missing entry is fetched online, or reported as missing in offline mode. Missing data never crashes the model. The model that needs it returns **UNKNOWN** (section 9).
+The simulator reads its inputs online during the same collection as the graphs. Repeated calls to one source are reused only in memory for that collection. Missing data never produces a fabricated value: the affected model returns **UNKNOWN** (section 9).
 
 ---
 
@@ -541,7 +541,7 @@ The page shows the three strategies side by side (exit cost, expected cost, wors
 | Position sizes (2 M$ pockets; borrower collateral 2 M$, debt 1.7 M$) | `data/positions.json` | **illustrative** |
 | USDC / USDT = 1 $ when no price is read | simulator default | **assumption** (shown on the page) |
 
-Every response is stored in `data/cache/<source>/` with its URL and `fetched_at` timestamp. The page lists the evidence used by each simulation under "Données utilisées : vérifiées et hypothèses".
+Each online source records its URL and `fetched_at` timestamp for the current collection. The page lists the evidence used by each simulation under "Données utilisées : vérifiées et hypothèses". Previous responses are never used after a network failure.
 
 All blockchain interactions are read-only (`eth_call`, `eth_getCode`). Nothing is signed or sent.
 

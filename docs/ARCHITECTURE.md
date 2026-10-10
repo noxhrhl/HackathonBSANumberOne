@@ -1,6 +1,6 @@
 # Architecture du projet
 
-Le site utilise une seule application : `app.py`. Il lit les graphes et rapports produits par `pipeline.py`. Les fichiers de `risk_engine/` contiennent les calculs ; ils ne définissent pas une seconde interface.
+Le site utilise une seule application : `app.py`. Il reconstruit en mémoire les graphes et rapports depuis les sources en ligne. `pipeline.py` exporte séparément ces résultats en JSON pour analyse ou tests. Les fichiers de `risk_engine/` contiennent les calculs ; ils ne définissent pas une seconde interface.
 
 ```text
 HackathonBSANumberOne/
@@ -9,7 +9,7 @@ HackathonBSANumberOne/
 ├── calibrate.py              Recalcule, si besoin, les taux historiques d'incident
 ├── risk_engine/              Logique réutilisable, indépendante de la page
 │   ├── discover.py           Découvre les dépendances des positions
-│   ├── sources.py            Lit API et Ethereum, avec cache hors ligne
+│   ├── sources.py            Lit API et Ethereum en ligne
 │   ├── keccak.py             Sélecteurs des appels aux contrats
 │   ├── schema.py             Format et validation des graphes
 │   ├── rules.py              Hypothèses et fourchettes de risque
@@ -26,11 +26,9 @@ HackathonBSANumberOne/
 │   ├── documented.json       Relations sourcées qui ne sont pas lues automatiquement
 │   ├── evidence.json         Incidents historiques cités par la page
 │   ├── calibration/          Résultat daté de la calibration des taux
-│   ├── cache/                Réponses API et Ethereum nécessaires hors ligne
-│   ├── graphs/               Graphes produits par le pipeline, un par position
-│   └── reports/              Analyses produites, plus la vue du portefeuille
+│   ├── graphs/               Exports du pipeline, un graphe par position
+│   └── reports/              Exports des analyses et du portefeuille
 ├── tests/                    Vérifications du moteur et du rendu de la page
-├── tools/cache_tool.py       Utilitaire de collecte du cache en cas de réseau limité
 ├── docs/                     Explications, méthode et script de démonstration
 ├── README.md                 Démarrage rapide
 ├── NOTES.md                  Origine des paramètres et limites du modèle
@@ -40,22 +38,22 @@ HackathonBSANumberOne/
 ## Comment les fichiers travaillent ensemble
 
 ```text
-positions.json + documented.json + API/RPC mis en cache
+positions.json + documented.json + API/RPC relevés en ligne
                          ↓
               risk_engine/discover.py
                          ↓
-              data/graphs/<position>.json
+              graphe en mémoire
                          ↓
    rules.py + model.py + decide.py + evidence.json
                          ↓
-              data/reports/<position>.json
+              rapport en mémoire
                          ↓
      app.py + templates/index.html + static/style.css
                          ↓
                    page locale
 ```
 
-`pipeline.py` orchestre la découverte, la simulation et l'écriture des fichiers de `data/graphs/` et `data/reports/`. La page recharge ces résultats et recalcule la décision quand un visiteur change l'incident ou une hypothèse. `data/cache/` conserve les réponses brutes avec leur date : il est nécessaire pour la démonstration hors ligne. Les graphes et rapports conservés permettent d'ouvrir le site immédiatement, même sans relancer le pipeline.
+`pipeline.py` orchestre les mêmes calculs pour produire des fichiers JSON. `app.py` relève en ligne la position principale avant d'ouvrir le site et les autres positions lorsqu'on les choisit ; chaque position est actualisée après cinq minutes ou à la demande. La page recalcule la décision quand un visiteur change l'incident ou une hypothèse. Le site n'ouvre pas les fichiers JSON exportés.
 
 ## Où intervenir
 

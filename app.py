@@ -3,12 +3,14 @@
   python app.py            puis ouvrir http://127.0.0.1:8000
   python app.py --port 8001
 
-La page lit data/graphs/*.json et data/reports/*.json (produits par pipeline.py) et
-recalcule la décision quand on change l'incident, sa probabilité ou le coût de sortie.
+Le site relève la position affichée en ligne au démarrage, puis toutes les cinq minutes.
+Une collecte échouée rend la page indisponible au lieu d'afficher un ancien rapport.
 """
 
 import argparse
 import json
+import threading
+import time
 from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -16,10 +18,12 @@ from string import Template
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from risk_engine import decide as D
+from risk_engine import discover, sources as S
 from risk_engine import model as M
 from risk_engine import rules, svg
 from risk_engine import simulate as SIM
 from risk_engine.risk import assess
+import pipeline
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATE = Template((ROOT / "templates" / "index.html").read_text(encoding="utf-8"))
@@ -29,6 +33,34 @@ EVIDENCE = json.loads((ROOT / "data" / "evidence.json").read_text(encoding="utf-
 KIND_FR = {k: v[2] for k, v in svg.KIND_STYLE.items()}
 
 _models, _graphs, _reports, _sims = {}, {}, {}, {}
+_refresh_lock = threading.RLock()
+_last_refresh = {}
+REFRESH_SECONDS = 300
+
+
+def ensure_live_data(pid, force=False):
+    """Reconstruit une position avec les API ; aucun rapport ancien ne sert de repli."""
+    with _refresh_lock:
+        if pid not in {p["id"] for p in POSITIONS["positions"]}:
+            raise ValueError(f"Position inconnue : {pid}")
+        last = _last_refresh.get(pid, 0.0)
+        if not force and last and time.monotonic() - last < REFRESH_SECONDS:
+            return
+        _last_refresh.pop(pid, None)
+        for key in list(_models):
+            if key[0] == pid:
+                del _models[key]
+        _graphs.pop(pid, None)
+        _reports.pop(pid, None)
+        _sims.pop(pid, None)
+        S.reset_sources()
+        graph = discover.discover(pid)
+        report = pipeline.build_report(graph)
+        context = SIM.build_context(graph)
+        _graphs[pid] = graph
+        _reports[pid] = report
+        _sims[pid] = context
+        _last_refresh[pid] = time.monotonic()
 
 
 def pct(x, d=1):
@@ -57,22 +89,15 @@ def num(x, d=2):
 
 
 def graph_for(pid):
-    if pid not in _graphs:
-        _graphs[pid] = json.loads((ROOT / "data" / "graphs" / f"{pid}.json").read_text(encoding="utf-8"))
     return _graphs[pid]
 
 
 def report_for(pid):
-    if pid not in _reports:
-        _reports[pid] = json.loads((ROOT / "data" / "reports" / f"{pid}.json").read_text(encoding="utf-8"))
     return _reports[pid]
 
 
 def sim_ctx_for(pid):
-    """Données de base du simulateur (data/sim/<id>.json, produit par pipeline.py), ou None."""
-    if pid not in _sims:
-        path = ROOT / "data" / "sim" / f"{pid}.json"
-        _sims[pid] = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    """État de simulation relevé en ligne pour cette position."""
     return _sims[pid]
 
 
@@ -84,18 +109,12 @@ def pm_for(pid, scenario="base", propagation="max", **ov):
 
 
 def available_positions():
-    out = []
-    for p in POSITIONS["positions"]:
-        if (ROOT / "data" / "reports" / f"{p['id']}.json").exists():
-            out.append(p)
-    return out
+    return POSITIONS["positions"]
 
 
 def parse(query):
     f = {k: v[0] for k, v in parse_qs(query, keep_blank_values=True).items()}
     positions = available_positions()
-    if not positions:
-        raise RuntimeError("Aucun rapport : lancez d'abord `python pipeline.py --all --offline --book`.")
     main = next((p["id"] for p in positions if p.get("main")), positions[0]["id"])
     pid = f.get("pos", main)
     if pid not in [p["id"] for p in positions]:
@@ -517,7 +536,7 @@ def simulation_section(q, g):
         Une transmission impossible à modéliser est marquée <strong>INCONNU</strong> et n'entre pas dans les chiffres.</p>"""
     ctx = sim_ctx_for(q["pos"])
     if ctx is None:
-        return head + "<p class='error'>Données du simulateur absentes : lancez <code>python pipeline.py --all --offline</code>.</p></section>"
+        return head + "<p class='error'>Données de simulation indisponibles depuis les sources en ligne.</p></section>"
     res, err = None, ""
     if q["run"] == "1":
         try:
@@ -549,6 +568,17 @@ def simulation_section(q, g):
 
 
 def render_page(query: str) -> str:
+    with _refresh_lock:
+        return _render_page(query)
+
+
+def _render_page(query: str) -> str:
+    args = parse_qs(query)
+    main = next((p["id"] for p in POSITIONS["positions"] if p.get("main")), POSITIONS["positions"][0]["id"])
+    pid = args.get("pos", [main])[0]
+    if pid not in {p["id"] for p in POSITIONS["positions"]}:
+        pid = main
+    ensure_live_data(pid, force=args.get("refresh") == ["1"])
     q = parse(query)
     g = graph_for(q["pos"])
     rep = report_for(q["pos"])
@@ -560,13 +590,13 @@ def render_page(query: str) -> str:
     stab = D.stability_sentence(sweep, q["p"])
     size = g["position"]["size_usd"]
     ts = rep["data_fetched_at"]
-    badge = (f"Données en cache du {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC" if rep.get("offline")
-             else f"Données relevées le {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC")
+    badge = f"Données relevées en ligne le {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC"
     subs = {
         "position_name": escape(g["position"]["label"]),
         "position_size": usd(size),
         "horizon": num(pm.horizon, 0),
         "badge": badge,
+        "refresh_url": "/?" + escape(urlencode({"pos": q["pos"], "refresh": 1}), quote=True),
         "controls": controls(q, g, pm),
         "answer": answer_box(q, g, pm, st, dec, cost, stab, size),
         "graph": graph_section(q, g, pm),
@@ -577,10 +607,18 @@ def render_page(query: str) -> str:
 
 
 def api_simulate(query):
+    with _refresh_lock:
+        return _api_simulate(query)
+
+
+def _api_simulate(query):
     """/api/simulate?pos=…&node=…&type=price_shock|oracle_failure|liquidity_crisis&severity=0.05&hours=24"""
     f = {k: v[0] for k, v in parse_qs(query).items()}
     pid = f.get("pos", "")
-    if pid not in [p["id"] for p in available_positions()] or sim_ctx_for(pid) is None:
+    if pid not in [p["id"] for p in available_positions()]:
+        return {"error": f"position inconnue : {pid}"}
+    ensure_live_data(pid)
+    if sim_ctx_for(pid) is None:
         return {"error": f"position inconnue ou sans données de simulation : {pid}"}
     g = graph_for(pid)
     node = f.get("node", "")
@@ -609,7 +647,9 @@ class Handler(BaseHTTPRequestHandler):
                 content_type, status = "application/json; charset=utf-8", 200
             elif request.path.startswith("/api/report/"):
                 pid = request.path.rsplit("/", 1)[-1]
-                body = json.dumps(report_for(pid), ensure_ascii=False).encode("utf-8")
+                with _refresh_lock:
+                    ensure_live_data(pid)
+                    body = json.dumps(report_for(pid), ensure_ascii=False).encode("utf-8")
                 content_type, status = "application/json; charset=utf-8", 200
             else:
                 body, content_type, status = b"Page introuvable", "text/plain; charset=utf-8", 404
@@ -630,6 +670,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prototype local de risque DeFi")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
+    main = next((p["id"] for p in POSITIONS["positions"] if p.get("main")), POSITIONS["positions"][0]["id"])
+    print("Collecte en ligne de la position principale…", flush=True)
+    ensure_live_data(main)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     print(f"Ouvrez http://127.0.0.1:{args.port} (Ctrl+C pour arrêter)")
     try:

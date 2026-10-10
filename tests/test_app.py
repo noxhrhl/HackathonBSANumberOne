@@ -1,13 +1,36 @@
 """Test de fumée : la page s'affiche pour chaque position, chaque composant et chaque option."""
+import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 @unittest.skipUnless((ROOT / "data" / "reports" / "pt-susde-26nov2026.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline --book")
+                     "lancer d'abord : python pipeline.py --all --book")
 class PageSmokeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import app
+        cls.online_guard = patch("app.ensure_live_data")
+        cls.online_guard.start()  # les fichiers générés servent ici de fixtures de rendu
+        for p in app.available_positions():
+            pid = p["id"]
+            app._graphs[pid] = json.loads((ROOT / "data" / "graphs" / f"{pid}.json").read_text())
+            app._reports[pid] = json.loads((ROOT / "data" / "reports" / f"{pid}.json").read_text())
+            path = ROOT / "data" / "sim" / f"{pid}.json"
+            app._sims[pid] = json.loads(path.read_text()) if path.exists() else None
+
+    @classmethod
+    def tearDownClass(cls):
+        import app
+        cls.online_guard.stop()
+        app._graphs.clear()
+        app._reports.clear()
+        app._sims.clear()
+        app._models.clear()
+
     def test_default_page(self):
         import app
         html = app.render_page("")

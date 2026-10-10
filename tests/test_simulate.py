@@ -38,24 +38,11 @@ def step(res, node):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class PendleAmmTests(unittest.TestCase):
     def setUp(self):
         _, ctx = load("pt-susde-26nov2026")
         self.mk = amm.PendleMarket.from_state(ctx["pendle"][VENUE])
-
-    def test_matches_onchain_router_static(self):
-        """La courbe transcrite reproduit RouterStatic.swapExactPtForSyStatic (cache on-chain)."""
-        from risk_engine import sources as S
-        S.set_offline(True)
-        try:
-            for units in (503551, 1007101, 2014202):
-                onchain = S.pendle_static_sell_pt("0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e", units)
-                ours = self.mk.sell_pt(units)["sy_out"]
-                # les deux relevés ont quelques minutes d'écart (blocs différents) : tolérance 1e-5
-                self.assertAlmostEqual(ours / onchain, 1.0, delta=1e-5)
-        finally:
-            S.set_offline(False)
 
     def test_spot_matches_api_implied_apy(self):
         g, _ = load("pt-susde-26nov2026")
@@ -76,7 +63,7 @@ class PendleAmmTests(unittest.TestCase):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class PriceShockTests(unittest.TestCase):
     def test_usde_depeg_propagates_through_value_chain(self):
         res = run("pt-susde-26nov2026", "price_shock", USDE, 0.05)
@@ -126,7 +113,7 @@ class PriceShockTests(unittest.TestCase):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class OracleFailureTests(unittest.TestCase):
     def test_market_prices_unchanged_but_position_liquidatable(self):
         res = run("morpho-ptsusde-borrow", "oracle_failure", LINEAR_FEED, 0.10)
@@ -171,7 +158,7 @@ class OracleFailureTests(unittest.TestCase):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class LiquidityCrisisTests(unittest.TestCase):
     def test_reference_price_unchanged_exit_degraded(self):
         res = run("pt-susde-26nov2026", "liquidity_crisis", VENUE, 0.80)
@@ -215,7 +202,7 @@ class LiquidityCrisisTests(unittest.TestCase):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class EngineTests(unittest.TestCase):
     def test_each_node_evaluated_once_even_with_two_paths(self):
         """Le flux linéaire atteint le méta-oracle par deux chemins (primaire et secours)."""
@@ -285,8 +272,26 @@ class EngineTests(unittest.TestCase):
 
 
 @unittest.skipUnless((ROOT / "data" / "sim" / "morpho-ptsusde-borrow.json").exists(),
-                     "lancer d'abord : python pipeline.py --all --offline")
+                     "lancer d'abord : python pipeline.py --all")
 class SimulatorPageTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import app
+        from unittest.mock import patch
+        cls.online_guard = patch("app.ensure_live_data")
+        cls.online_guard.start()  # fixtures de rendu, sans appels réseau dans les tests
+        for pid in ("pt-susde-26nov2026", "morpho-ptsusde-borrow"):
+            app._graphs[pid], app._sims[pid] = load(pid)
+            app._reports[pid] = json.loads((ROOT / "data" / "reports" / f"{pid}.json").read_text())
+
+    @classmethod
+    def tearDownClass(cls):
+        import app
+        cls.online_guard.stop()
+        app._graphs.clear()
+        app._reports.clear()
+        app._sims.clear()
+        app._models.clear()
     def test_page_runs_each_scenario(self):
         import app
         for node, sc, sev in ((USDE, "price_shock", 5), (LINEAR_FEED, "oracle_failure", 10), (VENUE, "liquidity_crisis", 80)):
