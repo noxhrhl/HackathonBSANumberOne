@@ -27,7 +27,7 @@ POSITIONS = json.loads((ROOT / "data" / "positions.json").read_text(encoding="ut
 EVIDENCE = json.loads((ROOT / "data" / "evidence.json").read_text(encoding="utf-8"))["incidents"]
 KIND_FR = {k: v[2] for k, v in svg.KIND_STYLE.items()}
 
-_models, _graphs, _reports, _book = {}, {}, {}, {}
+_models, _graphs, _reports = {}, {}, {}
 
 
 def pct(x, d=1):
@@ -58,13 +58,6 @@ def report_for(pid):
     if pid not in _reports:
         _reports[pid] = json.loads((ROOT / "data" / "reports" / f"{pid}.json").read_text(encoding="utf-8"))
     return _reports[pid]
-
-
-def book_report():
-    p = ROOT / "data" / "reports" / "book.json"
-    if "book" not in _book and p.exists():
-        _book["book"] = json.loads(p.read_text(encoding="utf-8"))
-    return _book.get("book")
 
 
 def pm_for(pid, scenario="base", propagation="max", **ov):
@@ -296,124 +289,6 @@ def sweep_rows(q, pm, cost):
     return rows
 
 
-def robustness_section(q, g, pm, cost, rows):
-    stab = D.stability_sentence(rows, q["p"])
-    make = lambda sc, prop, **ov: pm_for(q["pos"], sc, prop, **ov)  # noqa: E731
-    chart = svg.line_chart([("x* selon p", "#087e82", [(r["p"], r["x_star"]) for r in rows])], x_label="probabilité de l'incident p",
-                           markers=[(q["p"], next(r["x_star"] for r in rows if abs(r["p"] - round(q["p"] * 50) / 50) < 1e-9), "#d1495b", "aujourd'hui")],
-                           y_max=1.0)
-    fp, fa = stab["first_partial_p"], stab["first_all_p"]
-    sentence = f"La recommandation « {stab['category']} » tient pour p entre {pct(stab['from_p'], 0)} et {pct(stab['to_p'], 0)}."
-    if fp is not None:
-        sentence += f" Vendre une partie devient utile dès p ≈ {pct(fp, 0)}"
-        sentence += f", tout vendre au-delà de {pct(fa, 0)}." if fa is not None else " ; tout vendre n'est jamais optimal ici."
-    else:
-        sentence += " Même avec un incident certain, garder reste moins cher que vendre."
-    scen = D.scenario_table(g, q["incident"], q["p"], cost, q["prop"], make)
-    srows = "".join(f"<tr><td>{lab}</td><td>{num(v['impact'], 3)}</td><td>{pct(v['stats']['expected'], 2)}</td><td>{pct(v['stats']['cvar95'], 2)}</td>"
-                    f"<td>{pct(v['neutre']['x_star'], 0)}</td><td>{pct(v['prudent']['x_star'], 0)}</td></tr>"
-                    for lab, v in (("BAS", scen["low"]), ("BASE", scen["base"]), ("HAUT", scen["high"])))
-    sens = D.sensitivity(g, q["incident"], q["p"], cost, q["prop"], make)
-    trs = ""
-    for t in sens["tests"]:
-        lo, hi = t["low"]["x_star"], t["high"]["x_star"]
-        left, right = min(lo, hi), max(lo, hi)
-        trs += (f"<tr><td>{escape(t['input'])}</td><td>{pct(lo, 0)}</td><td>{pct(hi, 0)}</td>"
-                f"<td><div class='tornado'><span style='left:{left * 100:.0f}%;width:{max(1, (right - left) * 100):.0f}%'></span>"
-                f"<i style='left:{sens['base_x'] * 100:.0f}%'></i></div></td></tr>")
-    pm_other = pm_for(q["pos"], "base", "sum" if q["prop"] == "max" else "max")
-    other = pm_other.impact.get(q["incident"], 0)
-    prop_txt = (f"Chemin le plus fort : I = {num(pm.impact.get(q['incident'], 0) if q['prop'] == 'max' else other, 3)} ; "
-                f"somme des chemins plafonnée : I = {num(other if q['prop'] == 'max' else pm.impact.get(q['incident'], 0), 3)}.")
-    return f"""
-    <section class="panel" aria-labelledby="r-title">
-      <p class="eyebrow">03 / ROBUSTESSE</p><h2 id="r-title">La recommandation résiste-t-elle à nos hypothèses ?</h2>
-      <p class="decision">{escape(sentence)} Entrée la plus sensible : <strong>{escape(sens['most_sensitive'])}</strong>.</p>
-      <div class="two-col">
-        <div>{chart}<p class="fine-print">Fraction optimale à vendre x* selon la probabilité de l'incident (mêmes 20 000 tirages pour chaque p).</p></div>
-        <div>
-          <table class="data"><thead><tr><th>Scénario</th><th>I</th><th>Perte attendue</th><th>Pire 5 %</th><th>x* neutre</th><th>x* prudent</th></tr></thead><tbody>{srows}</tbody></table>
-          <p class="fine-print">BAS / BASE / HAUT : toutes les fréquences, sévérités et poids pris à leur borne basse, centrale ou haute (NOTES.md).</p>
-        </div>
-      </div>
-      <table class="data"><thead><tr><th>Une entrée à la fois (bas → haut)</th><th>x* bas</th><th>x* haut</th><th>Écart (le trait = base)</th></tr></thead><tbody>{trs}</tbody></table>
-      <p class="fine-print">Choix de la propagation : {escape(prop_txt)} Le chemin le plus fort ignore qu'un dommage peut arriver par plusieurs routes ; la somme peut le compter deux fois. Voir le formulaire pour basculer.</p>
-    </section>"""
-
-
-def book_section(q, g):
-    book = book_report()
-    if not book:
-        return ""
-    pids = [p["id"] for p in book["pockets"]]
-    graphs = [graph_for(p) for p in pids if (ROOT / "data" / "graphs" / f"{p}.json").exists()]
-    key = (q["incident"], round(q["p"], 2))
-    if key not in _book:
-        n_p = len(graphs)
-        per, total = [], [0.0] * M.N_SIM
-        for gg in graphs:
-            pm = pm_for(gg["position_id"])
-            touched = q["incident"] in pm.params and pm.impact.get(q["incident"], 0) > 0
-            ls = pm.losses(q["incident"] if touched else None, q["p"] if touched else None)
-            for s in range(M.N_SIM):
-                total[s] += ls[s] / n_p
-            st = M.stats(ls)
-            per.append((gg, touched, pm.impact.get(q["incident"], 0) if touched else 0, st))
-        _book[key] = (per, M.stats(total))
-    per, bst = _book[key]
-    rows = "".join(f"<tr class='{'hit' if t else ''}'><td><a href='{link(q, pos=gg['position_id'])}'>{escape(gg['position']['label'])}</a></td>"
-                   f"<td>{'oui' if t else 'non'}</td><td>{num(i, 3)}</td><td>{pct(st['expected'], 2)}</td><td>{pct(st['cvar95'], 2)}</td></tr>"
-                   for gg, t, i, st in per)
-    touched_share = sum(1 for _, t, _, _ in per if t) / max(len(per), 1)
-    shared = "".join(f"<li><a href='{link(q, incident=s['id'])}'>{escape(s['name'])}</a> — {len(s['pockets'])} poches</li>" for s in book["shared_nodes"][:12])
-    conc = "".join(f"<li class='{'flag' if c['share_of_chain'] >= book['concentration']['flag_threshold'] else ''}'>{escape(c['name'])} : "
-                   f"{usd(c['ethereum_tvl_usd'])} sur Ethereum, soit {pct(c['share_of_chain'], 0)} de la TVL de la chaîne</li>"
-                   for c in book["concentration"]["protocols"])
-    name = graph_for(q["pos"])
-    inc_name = next((n["name"] for n in name["nodes"] if n["id"] == q["incident"]), q["incident"])
-    return f"""
-    <section class="panel" aria-labelledby="b-title">
-      <p class="eyebrow">04 / LE LIVRE — 10 POCHES DE 10 %</p><h2 id="b-title">Si « {escape(svg._clip(inc_name, 50))} » cède, qui d'autre est touché ?</h2>
-      <p class="section-intro">Dix positions réelles découvertes par le même moteur ; tailles égales (10 % chacune, illustratif comme dans l'énoncé).
-        Un même nœud défaille dans les mêmes scénarios pour toutes les poches : les pertes sont corrélées.</p>
-      <div class="metrics three">
-        <div class="metric"><span>Part du livre exposée</span><strong>{pct(touched_share, 0)}</strong></div>
-        <div class="metric"><span>Perte attendue du livre</span><strong>{pct(bst['expected'], 3)}</strong></div>
-        <div class="metric accent"><span>Pire 5 % du livre</span><strong>{pct(bst['cvar95'], 3)}</strong></div>
-      </div>
-      <div class="two-col">
-        <table class="data"><thead><tr><th>Poche</th><th>Touchée</th><th>I</th><th>Perte attendue</th><th>Pire 5 %</th></tr></thead><tbody>{rows}</tbody></table>
-        <div><h3>Nœuds partagés par plusieurs poches</h3><ul class="plain">{shared}</ul>
-          <h3>Concentration de la TVL d'Ethereum (DeFiLlama)</h3><ul class="plain">{conc}</ul>
-          <p class="fine-print">Signalé au-delà de 10 % de la TVL de la chaîne.</p></div>
-      </div>
-    </section>"""
-
-
-def evidence_section(q, g, pm, rep):
-    inc_kind = pm.node_by_id[q["incident"]]["kind"]
-    items = "".join(f"<li class='{'rel' if inc_kind in e['kinds'] else ''}'><a href='{e['url']}' target='_blank' rel='noopener'>{escape(e['title'])}</a> "
-                    f"<small>({e['date']})</small> — {escape(e['facts'])} <em>Utilisé pour : {escape(e['used_for'])}</em></li>" for e in EVIDENCE)
-    prows = ""
-    for nid, prm in sorted(pm.params.items(), key=lambda kv: -pm.impact.get(kv[0], 0)):
-        n = pm.node_by_id[nid]
-        prows += (f"<tr{' class=hit' if nid == q['incident'] else ''}><td>{escape(svg._clip(n['name'], 48))}</td><td>{KIND_FR.get(n['kind'], n['kind'])}</td>"
-                  f"<td>{pct(prm['lam'], 2)} <small>[{pct(prm['lam_range'][0], 2)} ; {pct(prm['lam_range'][2], 2)}]</small></td>"
-                  f"<td>{pct(prm['p'], 3)}</td><td>{pct(prm['sev'], 0)} <small>[{pct(prm['sev_range'][0], 0)} ; {pct(prm['sev_range'][2], 0)}]</small></td>"
-                  f"<td>{num(pm.impact.get(nid, 0), 3)}</td><td>{'HYPOTHÈSE' if prm['assumption'] else ''} {escape(prm['why'] or '')}</td></tr>")
-    srcs = "".join(f"<li>{escape(s['source'])} — <a href='{escape(s['url'], quote=True)}' target='_blank' rel='noopener'>{escape(s['url'][:90])}</a> <small>relevé {escape(s['fetched_at'])}</small></li>"
-                   for s in g["meta"]["sources"])
-    return f"""
-    <section class="panel" aria-labelledby="e-title">
-      <p class="eyebrow">05 / PREUVES</p><h2 id="e-title">D'où viennent les nombres</h2>
-      <details open><summary>Paramètres de chaque composant (horizon {num(pm.horizon, 0)} jours)</summary>
-        <table class="data small"><thead><tr><th>Composant</th><th>Type</th><th>λ annuel [bas ; haut]</th><th>p sur l'horizon</th><th>Sévérité [bas ; haut]</th><th>I</th><th>Note</th></tr></thead><tbody>{prows}</tbody></table>
-        <p class="fine-print">p = 1 − exp(−λ·H/365). λ vient de la base d'exploits DeFiLlama (2021-2025) ou d'incidents documentés ; détails dans NOTES.md.</p></details>
-      <details><summary>Incidents réels utilisés ({len(EVIDENCE)})</summary><ul class="evidence">{items}</ul></details>
-      <details><summary>Données relevées ({len(g['meta']['sources'])} réponses en cache)</summary><ul class="evidence">{srcs}</ul></details>
-    </section>"""
-
-
 def render_page(query: str) -> str:
     q = parse(query)
     g = graph_for(q["pos"])
@@ -437,9 +312,6 @@ def render_page(query: str) -> str:
         "answer": answer_box(q, g, pm, st, dec, cost, stab, size),
         "graph": graph_section(q, g, pm),
         "decision": decision_section(q, rep, st, dec, cost, size),
-        "robustness": robustness_section(q, g, pm, cost, sweep),
-        "book": book_section(q, g),
-        "evidence": evidence_section(q, g, pm, rep),
     }
     return TEMPLATE.substitute(subs)
 

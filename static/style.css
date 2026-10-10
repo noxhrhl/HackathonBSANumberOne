@@ -86,9 +86,6 @@ table.data tr.best td { background:#fff6e5; font-weight:700; }
 table.data tr.hit td { background:#fdecee; }
 table.data.small { font-size:12px; }
 .mini-chart { width:100%; height:auto; }
-.tornado { position:relative; height:12px; background:#eef1f4; border-radius:6px; }
-.tornado span { position:absolute; top:0; height:12px; background:#e38a70; border-radius:6px; }
-.tornado i { position:absolute; top:-3px; width:2px; height:18px; background:var(--navy); }
 .metrics.three { grid-template-columns:repeat(3,1fr); }
 ul.plain { padding-left:18px; font-size:13px; }
 ul.plain li.flag { color:#ad352f; font-weight:700; }
