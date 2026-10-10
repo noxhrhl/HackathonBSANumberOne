@@ -1,0 +1,48 @@
+{
+  "position_name": "PT d'exemple",
+  "scenario_name": "Baisse de valeur de l'actif sous-jacent",
+  "scenario_target": "underlying",
+  "demo_note": "Données illustratives : ce PT et ces chiffres ne désignent pas un marché réel.",
+  "defaults": {
+    "position_usd": 10000,
+    "loss_percent": 20,
+    "exit_percent": 3
+  },
+  "dependencies": [
+    {
+      "id": "chain",
+      "layer": 1,
+      "name": "Blockchain",
+      "status": "À identifier",
+      "description": "Elle exécute les contrats et les transactions. Une interruption peut empêcher de sortir à temps."
+    },
+    {
+      "id": "underlying",
+      "layer": 2,
+      "name": "Actif sous-jacent et émetteur",
+      "status": "Touché dans le scénario",
+      "description": "La valeur du PT dépend de ce que son actif sous-jacent permettra réellement de récupérer."
+    },
+    {
+      "id": "oracle",
+      "layer": 3,
+      "name": "Oracle",
+      "status": "À vérifier",
+      "description": "Il peut fournir un prix à d'autres protocoles. Son rôle exact dépend du marché retenu."
+    },
+    {
+      "id": "market",
+      "layer": 4,
+      "name": "Marché PT",
+      "status": "À identifier",
+      "description": "Il permet de vendre avant échéance ; la liquidité détermine le coût réel de sortie."
+    },
+    {
+      "id": "lending",
+      "layer": 5,
+      "name": "Marché de prêt",
+      "status": "Non utilisé",
+      "description": "Il ne concerne la position que si le PT est déposé en garantie d'un emprunt."
+    }
+  ]
+}
