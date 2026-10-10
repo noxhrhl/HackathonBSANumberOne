@@ -1,0 +1,257 @@
+{
+ "method": "Exploits ≥ 5 M$ du 2021-01-01 au 2026-01-01 (5 ans), reliés à la catégorie DeFiLlama du protocole ; taux = exploits / (protocoles × 5 ans) ; borne haute Poisson 95 %. Groupes : TVL ≥ 10 M$ (« all ») et ≥ 500 M$ (« large »). Biais du survivant connu.",
+ "source": "https://api.llama.fi/hacks + https://api.llama.fi/protocols",
+ "fetched_at": "2026-10-10T10:45:00Z",
+ "computed_in": "navigateur (même méthode que calibrate.py)",
+ "window": [
+  "2021-01-01",
+  "2026-01-01"
+ ],
+ "min_amount_usd": 5000000.0,
+ "categories": {
+  "Lending": {
+   "all": {
+    "protocols": 62,
+    "hacks": 3,
+    "rate": 0.00967741935483871,
+    "upper95": 0.02501290322580645,
+    "events": [
+     "2025-06-25 Resupply 9.6 M$ (Token & Share Accounting)",
+     "2021-09-29 Compound V2 147.0 M$ (Token & Share Accounting)",
+     "2023-08-18 Exactly 7.6 M$ (Access Control)"
+    ]
+   },
+   "large": {
+    "protocols": 12,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.049933333333333337,
+    "events": []
+   }
+  },
+  "Dexs": {
+   "all": {
+    "protocols": 83,
+    "hacks": 5,
+    "rate": 0.012048192771084338,
+    "upper95": 0.02533253012048193,
+    "events": [
+     "2025-11-03 Balancer V2 128.0 M$ (Token & Share Accounting)",
+     "2021-07-15 THORChain DEX 5.0 M$ (Bridge & Cross-Chain)",
+     "2023-07-30 Curve DEX 61.7 M$ (Reentrancy)",
+     "2021-07-22 THORChain DEX 8.0 M$ (Protocol Logic)",
+     "2025-05-22 Cetus CLMM 223.0 M$ (Token & Share Accounting)"
+    ]
+   },
+   "large": {
+    "protocols": 7,
+    "hacks": 1,
+    "rate": 0.02857142857142857,
+    "upper95": 0.13554285714285713,
+    "events": [
+     "2023-07-30 Curve DEX 61.7 M$ (Reentrancy)"
+    ]
+   }
+  },
+  "CDP": {
+   "all": {
+    "protocols": 17,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.03524705882352941,
+    "events": []
+   },
+   "large": {
+    "protocols": 2,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.2996,
+    "events": []
+   }
+  },
+  "Liquid Staking": {
+   "all": {
+    "protocols": 71,
+    "hacks": 1,
+    "rate": 0.0028169014084507044,
+    "upper95": 0.013363380281690141,
+    "events": [
+     "2022-12-02 Ankr 5.0 M$ (Access Control)"
+    ]
+   },
+   "large": {
+    "protocols": 14,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.0428,
+    "events": []
+   }
+  },
+  "Yield": {
+   "all": {
+    "protocols": 29,
+    "hacks": 1,
+    "rate": 0.006896551724137931,
+    "upper95": 0.03271724137931034,
+    "events": [
+     "2021-05-29 Belt Finance 6.3 M$ (Token & Share Accounting)"
+    ]
+   },
+   "large": {
+    "protocols": 3,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.19973333333333335,
+    "events": []
+   }
+  },
+  "Basis Trading": {
+   "all": {
+    "protocols": 19,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.031536842105263155,
+    "events": []
+   },
+   "large": {
+    "protocols": 2,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.2996,
+    "events": []
+   }
+  },
+  "Derivatives": {
+   "all": {
+    "protocols": 22,
+    "hacks": 1,
+    "rate": 0.00909090909090909,
+    "upper95": 0.04312727272727272,
+    "events": [
+     "2023-11-18 dYdX V3 9.0 M$ (Market Manipulation)"
+    ]
+   },
+   "large": {
+    "protocols": 1,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.5992,
+    "events": []
+   }
+  },
+  "Bridge": {
+   "all": {
+    "protocols": 52,
+    "hacks": 6,
+    "rate": 0.023076923076923078,
+    "upper95": 0.04554615384615385,
+    "events": [
+     "2023-12-31 Orbit Bridge 81.7 M$ (Input Validation)",
+     "2022-02-02 Portal 326.0 M$ (Input Validation)",
+     "2023-07-07 Multichain 126.0 M$ (Key Compromise)",
+     "2021-07-10 Multichain 7.9 M$ (Key Compromise)",
+     "2023-07-02 Poly Network 5.0 M$ (Bridge & Cross-Chain)",
+     "2021-08-10 Poly Network 611.0 M$ (Access Control)"
+    ]
+   },
+   "large": {
+    "protocols": 15,
+    "hacks": 1,
+    "rate": 0.013333333333333334,
+    "upper95": 0.06325333333333333,
+    "events": [
+     "2022-02-02 Portal 326.0 M$ (Input Validation)"
+    ]
+   }
+  },
+  "CEX": {
+   "all": {
+    "protocols": 55,
+    "hacks": 7,
+    "rate": 0.025454545454545455,
+    "upper95": 0.04781090909090909,
+    "events": [
+     "2025-02-21 Bybit 1400.0 M$ (Social Engineering)",
+     "2025-07-16 BigONE 27.0 M$ (Frontend & Infrastructure)",
+     "2025-09-09 SwissBorg 41.5 M$ (Frontend & Infrastructure)",
+     "2025-01-23 Phemex 85.0 M$ (Key Compromise)",
+     "2024-09-20 BingX 43.3 M$ (Key Compromise)",
+     "2022-11-01 Deribit 28.0 M$ (Key Compromise)"
+    ]
+   },
+   "large": {
+    "protocols": 24,
+    "hacks": 4,
+    "rate": 0.03333333333333333,
+    "upper95": 0.07628333333333333,
+    "events": [
+     "2025-02-21 Bybit 1400.0 M$ (Social Engineering)",
+     "2025-09-09 SwissBorg 41.5 M$ (Frontend & Infrastructure)",
+     "2024-09-20 BingX 43.3 M$ (Key Compromise)",
+     "2022-11-01 Deribit 28.0 M$ (Key Compromise)"
+    ]
+   }
+  },
+  "Yield Aggregator": {
+   "all": {
+    "protocols": 18,
+    "hacks": 3,
+    "rate": 0.03333333333333333,
+    "upper95": 0.08615555555555555,
+    "events": [
+     "2021-12-02 Badger DAO 120.0 M$ (Frontend & Infrastructure)",
+     "2021-02-05 Yearn Finance 11.0 M$ (Oracle Manipulation)",
+     "2023-04-13 Yearn Finance 11.5 M$ (Oracle Manipulation)"
+    ]
+   },
+   "large": {
+    "protocols": 0,
+    "hacks": 0,
+    "rate": null,
+    "upper95": null,
+    "events": []
+   }
+  },
+  "RWA": {
+   "all": {
+    "protocols": 32,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.018725,
+    "events": []
+   },
+   "large": {
+    "protocols": 1,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.5992,
+    "events": []
+   }
+  },
+  "Liquid Restaking": {
+   "all": {
+    "protocols": 8,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.0749,
+    "events": []
+   },
+   "large": {
+    "protocols": 1,
+    "hacks": 0,
+    "rate": 0.0,
+    "upper95": 0.5992,
+    "events": []
+   }
+  },
+  "_oracle_manipulation_all": {
+   "hacks": 27,
+   "examples": [
+    "2022-10-11 Mango Markets V3 115.0 M$",
+    "2024-06-10 UwU Lend 20.0 M$",
+    "2024-11-16 Polter Finance 8.7 M$",
+    "2024-07-19 Rho Markets 7.6 M$"
+   ]
+  }
+ }
+}

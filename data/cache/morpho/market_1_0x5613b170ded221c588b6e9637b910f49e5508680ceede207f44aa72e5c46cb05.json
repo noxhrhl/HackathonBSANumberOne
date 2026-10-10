@@ -1,0 +1,40 @@
+{
+ "source": "morpho",
+ "key": "market_1_0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+ "url": "https://api.morpho.org/graphql",
+ "request": {
+  "query": "{ markets(first: 1, where: {chainId_in: [1], uniqueKey_in: [\"0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05\"]}) { items { marketId lltv listed loanAsset { symbol address } collateralAsset { symbol address } oracle { address type data { ... on MorphoChainlinkOracleV2Data { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } baseOracleVault { address } quoteOracleVault { address } } ... on MorphoChainlinkOracleData { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } } } } state { supplyAssetsUsd borrowAssetsUsd collateralAssetsUsd } } } }"
+ },
+ "fetched_at": "2026-10-10T10:54:24Z",
+ "response": {
+  "data": {
+   "markets": {
+    "items": [
+     {
+      "marketId": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDC",
+       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "collateralAsset": {
+       "symbol": "PT-sUSDE-26NOV2026",
+       "address": "0xB195B618EA52b77CB2a58846F452f59f8dFa9390"
+      },
+      "oracle": {
+       "address": "0xF8b29e7E9c00CE531434775f7923CC9fbCa01b08",
+       "type": "Unknown",
+       "data": null
+      },
+      "state": {
+       "supplyAssetsUsd": 7756493.321118058,
+       "borrowAssetsUsd": 6992169.685524775,
+       "collateralAssetsUsd": 7927287.880276859
+      }
+     }
+    ]
+   }
+  }
+ }
+}

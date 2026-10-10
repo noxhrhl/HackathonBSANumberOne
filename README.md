@@ -1,50 +1,47 @@
-# Belem Capital — prototype de risque DeFi
+# Belem Capital — risque de dépendances DeFi
 
-Cette première version montre **comment** une position peut être reliée à ses dépendances et comment comparer la perte d'un scénario au coût d'une sortie. Les données de `data/demo.json` sont **illustratives** : aucun prix réel ni probabilité d'incident n'est encore récupéré.
+Un maillon cède. On reste, on vend une partie, ou on sort ?
 
-## Démarrer
+Le prototype **découvre automatiquement** ce dont dépend une position (données réelles : API Pendle, Morpho, Aave, DeFiLlama, Ethena, et lectures on-chain sur Ethereum), **simule** la propagation d'un incident, puis **calcule combien vendre** en comparant un coût de sortie certain à une perte incertaine.
 
-Il faut Python 3.10 ou plus récent. Aucune installation de paquet n'est nécessaire.
+## Démarrer (aucune installation : Python 3.10+ suffit)
 
 ```bash
-python3 app.py
+python pipeline.py --all --offline --book    # graphes + rapports depuis le cache (~15 s)
+python app.py                                 # puis ouvrir http://127.0.0.1:8000
+python -m unittest discover -s tests          # 41 tests (~2 min)
 ```
 
-Ouvrir ensuite <http://127.0.0.1:8000>. Pour choisir un autre port : `python3 app.py --port 8001`. Arrêter le serveur avec `Ctrl+C`.
+Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans `--offline`). Les réponses brutes sont enregistrées dans `data/cache/` avec leur heure de relevé ; recalcul des taux d'exploits : `python calibrate.py`.
 
 ## Ce que montre la page
 
-1. La position d'exemple et cinq étages de dépendance. Les étages « à vérifier » ou « non utilisé » sont distingués des dépendances retenues dans le scénario.
-2. Trois champs modifiables : valeur de la position, perte **si l'incident se produit**, et coût de sortie immédiate.
-3. Deux montants et un seuil de probabilité. Par exemple, si sortir coûte 300 USD et qu'un incident causerait 2 000 USD de perte, le seuil est `300 / 2 000 = 15 %`. **Ce seuil n'est pas une estimation de la probabilité réelle de l'incident.**
-
-Ce calcul volontairement simple compare une seule période et un seul scénario. Il n'inclut pas encore la variation du prix du PT, la liquidité pour une taille d'ordre donnée, les frais de transaction, les incidents combinés ou un emprunt garanti par le PT.
+1. **La réponse à 3 h du matin** : la décision, son coût comparé aux deux extrêmes, et pourquoi (chemin du dommage, facteur d'impact, preuves).
+2. **Le graphe découvert** : colonnes par profondeur, couleur par type, chemin de propagation en rouge, preuve et heure au survol.
+3. **Combien vendre** : C(x) = c·x², x\* = L / 2c, trois stratégies côte à côte, cotations réelles Pendle hors crise.
+4. **Robustesse** : plage de probabilité où la recommandation tient, scénarios BAS / BASE / HAUT, entrée la plus sensible.
+5. **Le livre** (10 poches de 10 %) : qui d'autre est touché, perte corrélée du livre, concentrations de TVL.
+6. **Preuves** : paramètres de chaque composant, 14 incidents réels, toutes les données relevées.
 
 ## Fichiers
 
 | Fichier | Rôle |
 | --- | --- |
-| `app.py` | Serveur local, lecture du formulaire et affichage de la page |
-| `risk.py` | Calcul financier isolé de l'interface |
-| `data/demo.json` | Position, scénario et dépendances illustratives |
-| `templates/index.html` | Structure de la page |
-| `static/style.css` | Mise en forme et schéma visuel |
-| `tests/test_risk.py` | Vérification des cas essentiels du calcul |
+| `pipeline.py` | Une commande : découvrir → enrichir → simuler → décider → `data/graphs/` et `data/reports/` |
+| `discover.py` | Découverte en largeur, un résolveur par type de nœud (Pendle, collatéral, oracle, actif, émetteur) |
+| `sources.py` | Accès aux API et au RPC Ethereum, avec cache disque (`--offline`) |
+| `keccak.py` | Keccak-256 en Python pur (sélecteurs des appels on-chain) |
+| `schema.py` | Contrat de données (types, mécanismes, statuts) et contrôles automatiques |
+| `rules.py` | Tous les nombres de risque (λ, sévérité, w) avec fourchettes ; justification dans `NOTES.md` |
+| `calibrate.py` | Taux d'exploits par catégorie depuis la base DeFiLlama |
+| `model.py` | Facteur d'impact et Monte Carlo (nombres aléatoires communs) |
+| `decide.py` | Coût de sortie, vente partielle optimale, robustesse |
+| `svg.py` | Dessin du graphe et des courbes (SVG côté serveur) |
+| `app.py`, `templates/`, `static/` | La page locale |
+| `risk.py` | Calcul de seuil simple de l'équipe (`assess`, utilisé dans la boîte de réponse) et premier modèle de graphe |
+| `data/positions.json` | Les 10 positions (adresses réelles, tailles illustratives) |
+| `data/documented.json`, `data/evidence.json` | Faits documentés et incidents, chacun avec un lien |
+| `NOTES.md` | D'où vient chaque nombre |
+| `docs/` | Méthode, questions du jury, pitch, script de démo, checklist des critères |
 
-Pour lancer les vérifications :
-
-```bash
-python3 -m unittest discover -s tests
-```
-
-## Comment continuer
-
-**Données.** Choisir un marché PT réel et remplacer les valeurs illustratives de `data/demo.json`. Commencer par l'[API officielle Pendle](https://docs.pendle.finance/pendle-v2-dev/Quickstart), puis vérifier les adresses et les liens dans la documentation des protocoles. Ajouter à chaque valeur sa source et l'heure du relevé. Ne pas présenter un lien supposé comme vérifié.
-
-**Dépendances.** Aujourd'hui, la page affiche des fiches, pas un graphe découvert automatiquement. Relier chaque composant par des identifiants de contrats et décrire le mécanisme exact de propagation d'un incident. Un marché de prêt ne doit devenir une dépendance de la position que si le PT y est réellement déposé.
-
-**Risque.** Remplacer les pourcentages saisis par des scénarios justifiés. Estimer le coût de sortie à partir d'une cotation ou de la profondeur du marché pour **la taille de la position**. Ajouter d'autres scénarios seulement après avoir validé le premier avec une personne qui connaît le marché.
-
-**Interface.** Le calcul est dans `risk.py` et les données dans `data/demo.json` : on peut enrichir ou remplacer l'interface sans changer ces deux parties.
-
-Le brief original est conservé dans `BelemCapital_EPFL-Hackathon_DeFi-Risk-Dependency-Challenge_EN_v1.pdf`.
+Le brief original est conservé dans `BelemCapital_EPFL-Hackathon_DeFi-Risk-Dependency-Challenge_EN_v1.pdf`. Aucun conseil d'investissement.

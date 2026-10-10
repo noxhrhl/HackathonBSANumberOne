@@ -1,0 +1,14 @@
+{
+ "source": "rpc",
+ "key": "call_0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d_0xbd8f238e",
+ "url": "https://ethereum-rpc.publicnode.com",
+ "request": {
+  "method": "eth_call",
+  "to": "0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+  "data": "0xbd8f238e"
+ },
+ "fetched_at": "2026-10-10T11:29:11Z",
+ "response": {
+  "error": "execution reverted"
+ }
+}

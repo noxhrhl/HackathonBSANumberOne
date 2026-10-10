@@ -1,0 +1,118 @@
+{
+ "source": "morpho",
+ "key": "markets_collateral_1_0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+ "url": "https://api.morpho.org/graphql",
+ "request": {
+  "query": "{ markets(first: 100, where: {chainId_in: [1], collateralAssetAddress_in: [\"0x9d39a5de30e57443bff2a8307a4256c8797a3497\"]}) { items { marketId lltv listed loanAsset { symbol address } collateralAsset { symbol address } oracle { address type data { ... on MorphoChainlinkOracleV2Data { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } baseOracleVault { address } quoteOracleVault { address } } ... on MorphoChainlinkOracleData { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } } } } state { supplyAssetsUsd borrowAssetsUsd collateralAssetsUsd } } } }"
+ },
+ "fetched_at": "2026-10-10T10:54:24Z",
+ "response": {
+  "data": {
+   "markets": {
+    "items": [
+     {
+      "marketId": "0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "PYUSD",
+       "address": "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8"
+      },
+      "collateralAsset": {
+       "symbol": "sUSDe",
+       "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+      },
+      "oracle": {
+       "address": "0xE6212D05cB5aF3C821Fef1C1A233a678724F9E7E",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": {
+         "address": "0x8f1dF6D7F2db73eECE86a18b4381F4707b918FB1"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": {
+         "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+        },
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 108982651.56534344,
+       "borrowAssetsUsd": 96941896.3782516,
+       "collateralAssetsUsd": 111454738.8946017
+      }
+     },
+     {
+      "marketId": "0x88a18b2f4d94e7ad27a381b15531c06abf05a7c99dd5d3c3679875fed6f7e742",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDtb",
+       "address": "0xC139190F447e929f090Edeb554D95AbB8b18aC1C"
+      },
+      "collateralAsset": {
+       "symbol": "sUSDe",
+       "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+      },
+      "oracle": {
+       "address": "0x67BcC03438D7d71c39343d7AD21cb73Dc19aDB89",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": null,
+        "baseFeedTwo": null,
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": {
+         "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+        },
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 994046.3343360987,
+       "borrowAssetsUsd": 915586.1959771323,
+       "collateralAssetsUsd": 1177251.8330789881
+      }
+     },
+     {
+      "marketId": "0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "DAI",
+       "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+      },
+      "collateralAsset": {
+       "symbol": "sUSDe",
+       "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+      },
+      "oracle": {
+       "address": "0x5D916980D5Ae1737a8330Bf24dF812b2911Aae25",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": null,
+        "baseFeedTwo": null,
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": {
+         "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+        },
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 1390997.6781874362,
+       "borrowAssetsUsd": 1289282.2529209892,
+       "collateralAssetsUsd": 1672371.0907094113
+      }
+     }
+    ]
+   }
+  },
+  "_filtre": "marchés listés avec au moins 1 M$ de collatéral"
+ }
+}

@@ -1,0 +1,38 @@
+{
+ "source": "pendle",
+ "key": "market_data_1_0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+ "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+ "request": null,
+ "fetched_at": "2026-10-10T10:53:06Z",
+ "response": {
+  "timestamp": "2026-10-10T10:00:00.000Z",
+  "liquidity": {
+   "usd": 3819899.8469281546,
+   "acc": 3823112.4412482698
+  },
+  "tradingVolume": {
+   "usd": 85770.1818427809
+  },
+  "totalTvl": {
+   "usd": 25630535.650082957
+  },
+  "underlyingInterestApy": 0.049506664001520706,
+  "underlyingRewardApy": 0,
+  "underlyingApy": 0.049506664001520706,
+  "impliedApy": 0.05011036032441507,
+  "ytFloatingApy": -0.3600586882844654,
+  "swapFeeApy": 0.00019944253728887418,
+  "voterApy": 0,
+  "ptDiscount": 0.006216048443787092,
+  "pendleApy": 0.0017168064027002286,
+  "arbApy": 0,
+  "lpRewardApy": 0,
+  "aggregatedApy": 0.05157533013219185,
+  "maxBoostedApy": 0.05415053973624219,
+  "totalPt": 971271.206194636,
+  "totalSy": 2282035.210152903,
+  "totalLp": 1377019.4256633157,
+  "totalActiveSupply": 1377019.4256633157,
+  "assetPriceUsd": 0.9991596913850992
+ }
+}

@@ -1,0 +1,96 @@
+{
+ "source": "morpho",
+ "key": "markets_collateral_1_0xdc169abe56461a2e0c034da431ac2a3ebf596094",
+ "url": "https://api.morpho.org/graphql",
+ "request": {
+  "query": "{ markets(first: 100, where: {chainId_in: [1], collateralAssetAddress_in: [\"0xdc169abe56461a2e0c034da431ac2a3ebf596094\"]}) { items { marketId lltv listed loanAsset { symbol address } collateralAsset { symbol address } oracle { address type data { ... on MorphoChainlinkOracleV2Data { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } baseOracleVault { address } quoteOracleVault { address } } ... on MorphoChainlinkOracleData { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } } } } state { supplyAssetsUsd borrowAssetsUsd collateralAssetsUsd } } } }"
+ },
+ "fetched_at": "2026-10-10T10:54:24Z",
+ "response": {
+  "data": {
+   "markets": {
+    "items": [
+     {
+      "marketId": "0x9a8dab6de1059e6dc66c34b358764b70effb289e514e237f3161ffb09eaaf24f",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDS",
+       "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+      },
+      "collateralAsset": {
+       "symbol": "PT-sUSDS-26NOV2026",
+       "address": "0xdC169AbE56461A2E0c034Da431Ac2a3ebf596094"
+      },
+      "oracle": {
+       "address": "0xda5901EF31ecAFa6561B2e56B4997FAdd3dB4646",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0xd1264C014A912DA0415A03dF8580bb63AdD0E0a4"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 3661355.902068038,
+       "borrowAssetsUsd": 3140533.4705135208,
+       "collateralAssetsUsd": 3803174.369494037
+      }
+     },
+     {
+      "marketId": "0x22fe4c688161863c73571a2b8db65cc11a4a6bceee4f0dea4aa83e4b784f1bd9",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDC",
+       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "collateralAsset": {
+       "symbol": "PT-sUSDS-26NOV2026",
+       "address": "0xdC169AbE56461A2E0c034Da431Ac2a3ebf596094"
+      },
+      "oracle": {
+       "address": "0x3464a61A68C486241FE07201C913F055Bdce35BF",
+       "type": "Unknown",
+       "data": null
+      },
+      "state": {
+       "supplyAssetsUsd": 14255865.562042922,
+       "borrowAssetsUsd": 12680715.242843911,
+       "collateralAssetsUsd": 14915329.030870313
+      }
+     },
+     {
+      "marketId": "0x0367161b7cb23dfd03747dd3815d1c445b0437b648a6d50346249c6e7b92ff1b",
+      "lltv": "915000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDT",
+       "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      },
+      "collateralAsset": {
+       "symbol": "PT-sUSDS-26NOV2026",
+       "address": "0xdC169AbE56461A2E0c034Da431Ac2a3ebf596094"
+      },
+      "oracle": {
+       "address": "0x3464a61A68C486241FE07201C913F055Bdce35BF",
+       "type": "Unknown",
+       "data": null
+      },
+      "state": {
+       "supplyAssetsUsd": 5155199.521793598,
+       "borrowAssetsUsd": 4300665.93307399,
+       "collateralAssetsUsd": 5089442.108577585
+      }
+     }
+    ]
+   }
+  },
+  "_filtre": "marchés listés avec au moins 1 M$ de collatéral"
+ }
+}

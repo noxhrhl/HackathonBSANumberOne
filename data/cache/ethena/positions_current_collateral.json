@@ -1,0 +1,155 @@
+{
+ "source": "ethena",
+ "key": "positions_current_collateral",
+ "url": "https://app.ethena.fi/api/positions/current/collateral",
+ "request": null,
+ "fetched_at": "2026-10-10T11:27:21Z",
+ "response": {
+  "collateral": [
+   {
+    "asset": "stETH",
+    "exchange": "Unallocated",
+    "timestamp": 1791608344,
+    "usdAmount": 8
+   },
+   {
+    "asset": "mETH",
+    "exchange": "Bybit",
+    "timestamp": 1791608344,
+    "usdAmount": 274
+   },
+   {
+    "asset": "mETH",
+    "exchange": "Unallocated",
+    "timestamp": 1791608344,
+    "usdAmount": 1868
+   },
+   {
+    "asset": "ETH",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 176388728
+   },
+   {
+    "asset": "ETH",
+    "exchange": "Bybit",
+    "timestamp": 1791608344,
+    "usdAmount": 76356475
+   },
+   {
+    "asset": "ETH",
+    "exchange": "Deribit",
+    "timestamp": 1791608344,
+    "usdAmount": 42737
+   },
+   {
+    "asset": "ETH",
+    "exchange": "OKX",
+    "timestamp": 1791608344,
+    "usdAmount": 84711716
+   },
+   {
+    "asset": "ETH",
+    "exchange": "Unallocated",
+    "timestamp": 1791608344,
+    "usdAmount": 7691
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 47640082
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "Bybit",
+    "timestamp": 1791608344,
+    "usdAmount": 17164117
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "Deribit",
+    "timestamp": 1791608344,
+    "usdAmount": 265
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "OKX",
+    "timestamp": 1791608344,
+    "usdAmount": 21225896
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "Unallocated",
+    "timestamp": 1791608344,
+    "usdAmount": 3796680874
+   },
+   {
+    "asset": "Liquid Cash",
+    "exchange": "CDE",
+    "timestamp": 1791608344,
+    "usdAmount": 8025161.76
+   },
+   {
+    "asset": "BTC",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 350226000
+   },
+   {
+    "asset": "BTC",
+    "exchange": "Bybit",
+    "timestamp": 1791608344,
+    "usdAmount": 15107574
+   },
+   {
+    "asset": "BTC",
+    "exchange": "Deribit",
+    "timestamp": 1791608344,
+    "usdAmount": 18905996
+   },
+   {
+    "asset": "BTC",
+    "exchange": "OKX",
+    "timestamp": 1791608344,
+    "usdAmount": 95774670
+   },
+   {
+    "asset": "BTC",
+    "exchange": "Unallocated",
+    "timestamp": 1791608344,
+    "usdAmount": 5733920
+   },
+   {
+    "asset": "SOL",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 37678906
+   },
+   {
+    "asset": "XRP",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 17368244
+   },
+   {
+    "asset": "BNB",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 6063278
+   },
+   {
+    "asset": "Gold",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 5631191
+   },
+   {
+    "asset": "Equity RWA",
+    "exchange": "Binance",
+    "timestamp": 1791608344,
+    "usdAmount": 8497303
+   }
+  ]
+ }
+}

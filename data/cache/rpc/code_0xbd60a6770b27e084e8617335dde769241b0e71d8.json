@@ -1,0 +1,15 @@
+{
+ "source": "rpc",
+ "key": "code_0xbd60a6770b27e084e8617335dde769241b0e71d8",
+ "url": "https://ethereum-rpc.publicnode.com",
+ "request": {
+  "method": "eth_getCode",
+  "address": "0xbd60a6770b27e084e8617335dde769241b0e71d8"
+ },
+ "fetched_at": "2026-10-10T11:29:11Z",
+ "response": {
+  "result": null,
+  "code_size": 2598,
+  "prefix": "0x6080604081815260043610"
+ }
+}

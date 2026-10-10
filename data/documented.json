@@ -1,0 +1,79 @@
+{
+  "_doc": "Faits documentés (statut « documented ») utilisés quand une API ne relie pas deux éléments. Chaque entrée a un lien. Relevé le 2026-10-10.",
+  "checked_at": "2026-10-10T12:00:00Z",
+  "tokens": {
+    "0x9d39a5de30e57443bff2a8307a4256c8797a3497": {"symbol": "sUSDe", "issuer": "ethena", "url": "https://docs.ethena.fi/solution-design/staking-usde"},
+    "0x4c9edd5852cd905f086c759e8383e09bff1e68b3": {"symbol": "USDe", "issuer": "ethena", "url": "https://docs.ethena.fi/overview/how-usde-works"},
+    "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0": {"symbol": "wstETH", "issuer": "lido", "url": "https://docs.lido.fi/contracts/wsteth"},
+    "0xae7ab96520de3a18e5e111b5eaab095312d7fe84": {"symbol": "stETH", "issuer": "lido", "url": "https://docs.lido.fi/contracts/lido"},
+    "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd": {"symbol": "sUSDS", "issuer": "sky", "url": "https://developers.skyeco.com/protocol/tokens/susds/"},
+    "0xdc035d45d973e3ec169d2276ddab16f1e407384f": {"symbol": "USDS", "issuer": "sky", "url": "https://developers.skyeco.com/protocol/tokens/usds/"},
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {"symbol": "USDC", "issuer": "circle", "url": "https://www.circle.com/transparency"},
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": {"symbol": "USDT", "issuer": "tether", "url": "https://tether.to/en/transparency/"},
+    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {"symbol": "WETH", "issuer": null, "url": "https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}
+  },
+  "issuers": {
+    "ethena": {
+      "name": "Ethena (émetteur d'USDe)",
+      "defillama": "ethena-usde",
+      "url": "https://docs.ethena.fi/",
+      "hedging_from_api": true,
+      "deployments_from_api": {"category": "DeFi Lending", "targets": ["lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2", "protocol:morpho-blue"]},
+      "deps": [
+        {"id": "custodian:copper", "name": "Copper (ClearLoop, garde hors-bourse)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody"},
+        {"id": "custodian:ceffu", "name": "Ceffu (MirrorX, garde hors-bourse)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody"}
+      ]
+    },
+    "lido": {
+      "name": "Lido (émetteur de stETH)",
+      "defillama": "lido",
+      "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+      "deps": [
+        {"id": "custodian:lido-node-operators", "name": "Opérateurs de nœuds Lido (choisis par la DAO)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://lido.fi/how-lido-works/lido-node-operators-set-overview"},
+        {"id": "oracle:lido-oracle-committee", "name": "Comité d'oracles Lido (9 membres, rapporte les soldes)", "kind": "oracle", "mechanism": "backing",
+         "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations"},
+        {"id": "admin:lido-dao", "name": "Gouvernance Lido DAO (détenteurs de LDO)", "kind": "admin", "mechanism": "backing",
+         "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations"}
+      ]
+    },
+    "sky": {
+      "name": "Sky (ex-Maker, émetteur d'USDS)",
+      "defillama": "sky-lending",
+      "url": "https://developers.skyeco.com/protocol/liquidity/litepsm/",
+      "deps": [
+        {"token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "name": "USDC via le LitePSM (échange USDS↔USDC sans glissement)", "mechanism": "backing",
+         "url": "https://developers.skyeco.com/protocol/liquidity/litepsm/"},
+        {"id": "oracle:chronicle", "name": "Oracles Chronicle (prix des collatéraux Sky)", "kind": "oracle", "mechanism": "pricing",
+         "url": "https://api.llama.fi/protocols", "status": "api", "note": "DeFiLlama oraclesBreakdown de sky-lending : Chronicle"}
+      ]
+    },
+    "circle": {
+      "name": "Circle (émetteur d'USDC)",
+      "url": "https://www.circle.com/transparency",
+      "deps": [
+        {"id": "custodian:circle-reserve-fund", "name": "Circle Reserve Fund (USDXX, fonds monétaire géré par BlackRock)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://www.circle.com/transparency"},
+        {"id": "custodian:circle-banks", "name": "Liquidités chez « quelques très grandes banques » (cf. SVB 2023)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://www.circle.com/transparency"}
+      ]
+    },
+    "tether": {
+      "name": "Tether (émetteur d'USDT)",
+      "url": "https://tether.to/en/transparency/",
+      "deps": [
+        {"id": "custodian:cantor", "name": "Cantor Fitzgerald (garde des bons du Trésor)", "kind": "custodian", "mechanism": "custody",
+         "url": "https://www.theblock.co/post/272893/cantor-fitzgerald-ceo-tether-reserves"}
+      ]
+    }
+  },
+  "oracle_providers": {
+    "chainlink_usde_usd": {"description": "USDe / USD", "provider": "Chainlink", "operators": 16, "deviation": 0.005,
+      "url": "https://data.chain.link/feeds/ethereum/mainnet/usde-usd"}
+  },
+  "chains": {
+    "ethereum": {"name": "Ethereum", "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/"}
+  }
+}

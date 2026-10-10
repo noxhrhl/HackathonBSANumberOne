@@ -1,0 +1,428 @@
+{
+ "source": "morpho",
+ "key": "markets_collateral_1_0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+ "url": "https://api.morpho.org/graphql",
+ "request": {
+  "query": "{ markets(first: 100, where: {chainId_in: [1], collateralAssetAddress_in: [\"0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0\"]}) { items { marketId lltv listed loanAsset { symbol address } collateralAsset { symbol address } oracle { address type data { ... on MorphoChainlinkOracleV2Data { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } baseOracleVault { address } quoteOracleVault { address } } ... on MorphoChainlinkOracleData { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } } } } state { supplyAssetsUsd borrowAssetsUsd collateralAssetsUsd } } } }"
+ },
+ "fetched_at": "2026-10-10T10:54:24Z",
+ "response": {
+  "data": {
+   "markets": {
+    "items": [
+     {
+      "marketId": "0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDT",
+       "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x95DB30fAb9A3754e42423000DF27732CB2396992",
+       "type": "ChainlinkOracle",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": {
+         "address": "0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46"
+        },
+        "quoteFeedTwo": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 150788017.98731574,
+       "borrowAssetsUsd": 121617946.02412555,
+       "collateralAssetsUsd": 399632391.87499946
+      }
+     },
+     {
+      "marketId": "0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d",
+      "lltv": "945000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "WETH",
+       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xbD60A6770b27E084E8617335ddE769241B0e71D8",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x905b7dAbCD3Ce6B792D874e303D336424Cdb1421"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 22804300.950881932,
+       "borrowAssetsUsd": 19828950.865512803,
+       "collateralAssetsUsd": 21706043.499017656
+      }
+     },
+     {
+      "marketId": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+      "lltv": "965000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "WETH",
+       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xbD60A6770b27E084E8617335ddE769241B0e71D8",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x905b7dAbCD3Ce6B792D874e303D336424Cdb1421"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 84151481.51755306,
+       "borrowAssetsUsd": 71098463.46473841,
+       "collateralAssetsUsd": 78684966.48748472
+      }
+     },
+     {
+      "marketId": "0xb374528d44b6ab6e0cecc87e0481f45d892f38baec90c1d318851969ec14ea5f",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDS",
+       "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xc9A9440d1545047b2Ce3624DB425410cF2EAE292",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x905b7dAbCD3Ce6B792D874e303D336424Cdb1421"
+        },
+        "baseFeedTwo": {
+         "address": "0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8"
+        },
+        "quoteFeedOne": {
+         "address": "0xfF30586cD0F29eD462364C7e81375FC0C71219b1"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 966503.4036421496,
+       "borrowAssetsUsd": 872373.5074006,
+       "collateralAssetsUsd": 1532450.9238800053
+      }
+     },
+     {
+      "marketId": "0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDC",
+       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+       "type": "ChainlinkOracle",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": {
+         "address": "0x986b5E1e1755e3C2440e960477f25201B0a8bbD4"
+        },
+        "quoteFeedTwo": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 32473266.2879285,
+       "borrowAssetsUsd": 29271981.4063245,
+       "collateralAssetsUsd": 74842015.60581474
+      }
+     },
+     {
+      "marketId": "0x88abdf8693e663144c3544b9442e9b04520016d6ebc57aa76424c00ab1683c9d",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "RLUSD",
+       "address": "0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x4e58cea93a5252547c99D04042de646b17531653",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+        },
+        "quoteFeedOne": {
+         "address": "0x26C46B7aD0012cA71F2298ada567dC9Af14E7f2A"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 1385105.588034413,
+       "borrowAssetsUsd": 1268222.5000806046,
+       "collateralAssetsUsd": 3167733.8218856105
+      }
+     },
+     {
+      "marketId": "0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDC",
+       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0xc0053f3FBcCD593758258334Dfce24C2A9A673aD"
+        },
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 12573090.353801291,
+       "borrowAssetsUsd": 11321233.221505718,
+       "collateralAssetsUsd": 22448319.13773057
+      }
+     },
+     {
+      "marketId": "0x7a25fb17b8bd83a934ad87d9d1725188fc129992ca816f3145b4ab7f673c98c3",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "EURCV",
+       "address": "0x5F7827FDeb7c20b443265Fc2F40845B715385Ff2"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xF13B2929b84fA6da4855942B2ea60E82B080C5a1",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0xc0053f3FBcCD593758258334Dfce24C2A9A673aD"
+        },
+        "quoteFeedOne": {
+         "address": "0xb49f677943BC038e9857d61E7d053CaA2C1734C1"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 9708031.007973678,
+       "borrowAssetsUsd": 8737236.700715328,
+       "collateralAssetsUsd": 16510229.875746831
+      }
+     },
+     {
+      "marketId": "0x7421c2741e064e8c53fcb5de9faf7f0025dce75bc1caf26774dd878291c81dac",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "EURC",
+       "address": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x6Eb9F4128CeBc8B885A4d8562Db1Addf097f7348",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+        },
+        "quoteFeedOne": {
+         "address": "0x04F84020Fdf10d9ee64D1dcC2986EDF2F556DA11"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 769050.8830612424,
+       "borrowAssetsUsd": 679724.5704942251,
+       "collateralAssetsUsd": 1549511.2037729537
+      }
+     },
+     {
+      "marketId": "0x6d2fba32b8649d92432d036c16aa80779034b7469b63abc259b17678857f31c2",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDC",
+       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x167D283aCAC1b9ff39466A75aA82902f340f1F4D",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0xeC4031539b851eEc918b41FE3e03d7236fEc7be8"
+        },
+        "baseFeedTwo": null,
+        "quoteFeedOne": {
+         "address": "0x4C7A561D15001C6ee5E05996591419b11962fa1A"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 843427.5355711698,
+       "borrowAssetsUsd": 759508.662174568,
+       "collateralAssetsUsd": 1809434.2969041122
+      }
+     },
+     {
+      "marketId": "0x6a57d77b9a173c5ed10d432e7009dd1ee9a97fac62a7bc970b4bd715e2fff5c8",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "USDT",
+       "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0xc0053f3FBcCD593758258334Dfce24C2A9A673aD"
+        },
+        "quoteFeedOne": null,
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 3561609.4354221197,
+       "borrowAssetsUsd": 2845606.9383658827,
+       "collateralAssetsUsd": 5312240.296437225
+      }
+     },
+     {
+      "marketId": "0x0b352b7550acdb1f39fea4b8f9ef8ac2d7953613b92599610b8fbec8a98a51d1",
+      "lltv": "860000000000000000",
+      "listed": true,
+      "loanAsset": {
+       "symbol": "EURCV",
+       "address": "0x5F7827FDeb7c20b443265Fc2F40845B715385Ff2"
+      },
+      "collateralAsset": {
+       "symbol": "wstETH",
+       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+      },
+      "oracle": {
+       "address": "0x44D6d497fb53294f283983E2931972840eb3DD90",
+       "type": "ChainlinkOracleV2",
+       "data": {
+        "baseFeedOne": {
+         "address": "0x4F67e4d9BD67eFa28236013288737D39AeF48e79"
+        },
+        "baseFeedTwo": {
+         "address": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+        },
+        "quoteFeedOne": {
+         "address": "0xb49f677943BC038e9857d61E7d053CaA2C1734C1"
+        },
+        "quoteFeedTwo": null,
+        "baseOracleVault": null,
+        "quoteOracleVault": null
+       }
+      },
+      "state": {
+       "supplyAssetsUsd": 1961087.4461714542,
+       "borrowAssetsUsd": 1759967.2585311353,
+       "collateralAssetsUsd": 4939665.474580019
+      }
+     }
+    ]
+   }
+  },
+  "_filtre": "marchés listés avec au moins 1 M$ de collatéral"
+ }
+}

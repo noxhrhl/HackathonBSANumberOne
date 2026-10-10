@@ -1,0 +1,1420 @@
+{
+ "position_id": "pt-wsteth-30dec2027",
+ "position": {
+  "id": "position:pt-wsteth-30dec2027",
+  "type": "pendle_pt",
+  "label": "PT-wstETH-30DEC2027",
+  "chain_id": 1,
+  "market": "0x34280882267ffa6383b363e278b027be083bbe3b",
+  "pt": "0xb253eff1104802b97ac7e3ac9fdd73aece295a2c",
+  "size_usd": 2000000,
+  "config_id": "pt-wsteth-30dec2027",
+  "info": {
+   "market": "0x34280882267ffa6383b363e278b027be083bbe3b",
+   "venue": "venue:pendle:1:0x34280882267ffa6383b363e278b027be083bbe3b",
+   "underlying": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "pt_price_usd": 2431.8105140263347,
+   "expiry": "2027-12-30T00:00:00.000Z",
+   "liquidity_usd": 5125312.487789483
+  }
+ },
+ "nodes": [
+  {
+   "id": "position:pt-wsteth-30dec2027",
+   "name": "PT-wstETH-30DEC2027",
+   "kind": "position",
+   "chain": "ethereum",
+   "metrics": {
+    "size_usd": 2000000,
+    "pt_price_usd": 2431.8105140263347,
+    "expiry": "2027-12-30T00:00:00.000Z",
+    "underlying_price_usd": 3108.8964014,
+    "implied_apy": 0.021313089608826497
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "data/positions.json",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    },
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c,0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "details": {
+    "type": "pendle_pt"
+   },
+   "address": "0xb253eff1104802b97ac7e3ac9fdd73aece295a2c"
+  },
+  {
+   "id": "chain:ethereum",
+   "name": "Ethereum (chaîne de règlement)",
+   "kind": "chain",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": 51376949114.26337
+   },
+   "evidence": [
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/v2/chains",
+     "fetched_at": "2026-10-10T10:44:00Z"
+    },
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "protocol:pendle-sy:1:0xcbc72d92b2dc8187414f6734718563898740c0bc",
+   "name": "Contrat SY Pendle (wstETH)",
+   "kind": "protocol",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_call readTokens()",
+     "url": "https://etherscan.io/address/0x34280882267ffa6383b363e278b027be083bbe3b#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0xcbc72d92b2dc8187414f6734718563898740c0bc",
+   "details": {
+    "role": "Le PT se rachète contre le SY à l'échéance"
+   }
+  },
+  {
+   "id": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "name": "wstETH",
+   "kind": "asset",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "etherscan",
+     "url": "https://etherscan.io/token/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0"
+  },
+  {
+   "id": "venue:pendle:1:0x34280882267ffa6383b363e278b027be083bbe3b",
+   "name": "AMM Pendle wstETH (2027-12-30)",
+   "kind": "venue",
+   "chain": "ethereum",
+   "metrics": {
+    "liquidity_usd": 5125312.487789483,
+    "volume_24h_usd": 27.805399046100618,
+    "implied_apy": 0.021313089608826497,
+    "pt_discount": 0.02541451066631395,
+    "total_pt": 99.3696496703288,
+    "total_sy": 1570.9015956303774
+   },
+   "evidence": [
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x34280882267ffa6383b363e278b027be083bbe3b/data",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "address": "0x34280882267ffa6383b363e278b027be083bbe3b"
+  },
+  {
+   "id": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "name": "stETH",
+   "kind": "asset",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "etherscan",
+     "url": "https://etherscan.io/token/0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+  },
+  {
+   "id": "issuer:lido",
+   "name": "Lido (émetteur de stETH)",
+   "kind": "issuer",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": 24227676998.431416,
+    "ethereum_tvl_usd": 24222025315.873707
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    },
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/protocols",
+     "fetched_at": "2026-10-10T11:26:57Z"
+    }
+   ],
+   "details": {
+    "category": "Liquid Staking"
+   }
+  },
+  {
+   "id": "lending:morpho:1:0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+   "name": "Morpho wstETH/USDT (LLTV 86.0 %)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "collateral_usd": 399632391.87499946,
+    "borrow_usd": 121617946.02412555,
+    "supply_usd": 150788017.98731574,
+    "lltv": 0.86
+   },
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+    "protocol": "morpho-blue",
+    "protocol_tvl_usd": 11226921256.631933
+   }
+  },
+  {
+   "id": "oracle:1:0x95db30fab9a3754e42423000df27732cb2396992",
+   "name": "Oracle du marché 0x95db…6992 (combinaison de flux)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0x95db30fab9a3754e42423000df27732cb2396992#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0x95db30fab9a3754e42423000df27732cb2396992#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0x95db30fab9a3754e42423000df27732cb2396992",
+   "details": {
+    "api_type": "ChainlinkOracle",
+    "type": "morpho_chainlink_v2",
+    "base_vault": null
+   }
+  },
+  {
+   "id": "oracle:1:0x4f67e4d9bd67efa28236013288737d39aef48e79",
+   "name": "Custom price feed for wstETH / ETH (fournisseur non identifié)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "answer": 1.24553272,
+    "updated_at": 1791608207
+   },
+   "evidence": [
+    {
+     "source": "eth_call description()",
+     "url": "https://etherscan.io/address/0x4f67e4d9bd67efa28236013288737d39aef48e79#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0x4f67e4d9bd67efa28236013288737d39aef48e79",
+   "details": {
+    "type": "price_feed",
+    "description": "Custom price feed for wstETH / ETH",
+    "aggregator": null,
+    "provider": "fournisseur non identifié"
+   }
+  },
+  {
+   "id": "oracle:1:0xee9f2375b4bdf6387aa8265dd4fb8f16512a1d46",
+   "name": "USDT / ETH (Chainlink)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "answer": 0.000401038185661941,
+    "updated_at": 1791600791
+   },
+   "evidence": [
+    {
+     "source": "eth_call description()",
+     "url": "https://etherscan.io/address/0xee9f2375b4bdf6387aa8265dd4fb8f16512a1d46#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0xee9f2375b4bdf6387aa8265dd4fb8f16512a1d46",
+   "details": {
+    "type": "chainlink_proxy",
+    "description": "USDT / ETH",
+    "aggregator": "0x0b539d864c16398dcc7353521c62186380de6b56",
+    "provider": "Chainlink"
+   }
+  },
+  {
+   "id": "lending:morpho:1:0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+   "name": "Morpho wstETH/WETH (LLTV 96.5 %)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "collateral_usd": 78684966.48748472,
+    "borrow_usd": 71098463.46473841,
+    "supply_usd": 84151481.51755306,
+    "lltv": 0.965
+   },
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+    "protocol": "morpho-blue",
+    "protocol_tvl_usd": 11226921256.631933
+   }
+  },
+  {
+   "id": "oracle:1:0xbd60a6770b27e084e8617335dde769241b0e71d8",
+   "name": "Oracle du marché 0xbd60…71d8 (combinaison de flux)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0xbd60a6770b27e084e8617335dde769241b0e71d8#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xbd60a6770b27e084e8617335dde769241b0e71d8#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0xbd60a6770b27e084e8617335dde769241b0e71d8",
+   "details": {
+    "api_type": "ChainlinkOracleV2",
+    "type": "morpho_chainlink_v2",
+    "base_vault": null
+   },
+   "flags": [
+    "single_source"
+   ]
+  },
+  {
+   "id": "oracle:1:0x905b7dabcd3ce6b792d874e303d336424cdb1421",
+   "name": "wstETH/stETH exchange rate (fournisseur non identifié)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "answer": 1.2459380791267287,
+    "updated_at": 0
+   },
+   "evidence": [
+    {
+     "source": "eth_call description()",
+     "url": "https://etherscan.io/address/0x905b7dabcd3ce6b792d874e303d336424cdb1421#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0x905b7dabcd3ce6b792d874e303d336424cdb1421",
+   "flags": [
+    "non_market_price"
+   ],
+   "details": {
+    "type": "price_feed",
+    "description": "wstETH/stETH exchange rate",
+    "aggregator": null,
+    "kind_of_price": "taux de change on-chain (pas un prix de marché)",
+    "provider": "fournisseur non identifié"
+   }
+  },
+  {
+   "id": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "name": "Aave V3 (pool Ethereum Core)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "total_supply_usd": 23188174782.22587,
+    "tvl_usd": 17354116295.02958,
+    "ethereum_tvl_usd": 14522977973.006773
+   },
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    },
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/protocols",
+     "fetched_at": "2026-10-10T11:26:57Z"
+    }
+   ],
+   "address": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "protocol": "aave-v3",
+    "oracles_defillama": [
+     "Chainlink"
+    ]
+   }
+  },
+  {
+   "id": "custodian:lido-node-operators",
+   "name": "Opérateurs de nœuds Lido (choisis par la DAO)",
+   "kind": "custodian",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/lido-node-operators-set-overview",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "oracle:lido-oracle-committee",
+   "name": "Comité d'oracles Lido (9 membres, rapporte les soldes)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "admin:lido-dao",
+   "name": "Gouvernance Lido DAO (détenteurs de LDO)",
+   "kind": "admin",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "chain:ethereum",
+   "to": "position:pt-wsteth-30dec2027",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Toute sortie ou remboursement passe par une transaction Ethereum"
+   }
+  },
+  {
+   "from": "protocol:pendle-sy:1:0xcbc72d92b2dc8187414f6734718563898740c0bc",
+   "to": "position:pt-wsteth-30dec2027",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call readTokens()",
+     "url": "https://etherscan.io/address/0x34280882267ffa6383b363e278b027be083bbe3b#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "why": "À l'échéance, 1 PT = 1 unité du sous-jacent via le contrat SY"
+   }
+  },
+  {
+   "from": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "to": "protocol:pendle-sy:1:0xcbc72d92b2dc8187414f6734718563898740c0bc",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call yieldToken()",
+     "url": "https://etherscan.io/address/0xcbc72d92b2dc8187414f6734718563898740c0bc#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "why": "Le SY détient le sous-jacent ; sa valeur fait celle du PT"
+   }
+  },
+  {
+   "from": "venue:pendle:1:0x34280882267ffa6383b363e278b027be083bbe3b",
+   "to": "position:pt-wsteth-30dec2027",
+   "mechanism": "exit_liquidity",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x34280882267ffa6383b363e278b027be083bbe3b/data",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "details": {
+    "why": "Seul lieu pour vendre le PT avant l'échéance",
+    "liquidity_usd": 5125312.487789483
+   }
+  },
+  {
+   "from": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "to": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call stETH()",
+     "url": "https://etherscan.io/address/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "why": "wstETH est une enveloppe de stETH (lu on-chain : stETH())"
+   }
+  },
+  {
+   "from": "issuer:lido",
+   "to": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.lido.fi/contracts/lido",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Lido (émetteur de stETH) émet et garantit stETH"
+   }
+  },
+  {
+   "from": "lending:morpho:1:0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+   "to": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+    "collateral_usd": 399632391.87499946,
+    "pressure_ratio": null,
+    "why": "Des liquidations forceraient la vente de cet actif"
+   }
+  },
+  {
+   "from": "oracle:1:0x4f67e4d9bd67efa28236013288737d39aef48e79",
+   "to": "oracle:1:0x95db30fab9a3754e42423000df27732cb2396992",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0x95db30fab9a3754e42423000df27732cb2396992#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xee9f2375b4bdf6387aa8265dd4fb8f16512a1d46",
+   "to": "oracle:1:0x95db30fab9a3754e42423000df27732cb2396992",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call QUOTE_FEED_1()",
+     "url": "https://etherscan.io/address/0x95db30fab9a3754e42423000df27732cb2396992#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "role": "QUOTE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0x95db30fab9a3754e42423000df27732cb2396992",
+   "to": "lending:morpho:1:0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+   "mechanism": "pricing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+    "why": "Prix utilisé pour décider des liquidations"
+   }
+  },
+  {
+   "from": "lending:morpho:1:0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+   "to": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+    "collateral_usd": 78684966.48748472,
+    "pressure_ratio": null,
+    "why": "Des liquidations forceraient la vente de cet actif"
+   }
+  },
+  {
+   "from": "oracle:1:0x905b7dabcd3ce6b792d874e303d336424cdb1421",
+   "to": "oracle:1:0xbd60a6770b27e084e8617335dde769241b0e71d8",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xbd60a6770b27e084e8617335dde769241b0e71d8#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xbd60a6770b27e084e8617335dde769241b0e71d8",
+   "to": "lending:morpho:1:0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+   "mechanism": "pricing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+    "why": "Prix utilisé pour décider des liquidations"
+   }
+  },
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "collateral_usd": 2435794718.246014,
+    "why": "wstETH accepté en garantie sur Aave (2436 M$)"
+   }
+  },
+  {
+   "from": "custodian:lido-node-operators",
+   "to": "issuer:lido",
+   "mechanism": "custody",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/lido-node-operators-set-overview",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Opérateurs de nœuds Lido (choisis par la DAO)"
+   }
+  },
+  {
+   "from": "oracle:lido-oracle-committee",
+   "to": "issuer:lido",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Comité d'oracles Lido (9 membres, rapporte les soldes)"
+   }
+  },
+  {
+   "from": "admin:lido-dao",
+   "to": "issuer:lido",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://lido.fi/how-lido-works/known-risks-and-mitigations",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Gouvernance Lido DAO (détenteurs de LDO)"
+   }
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "protocol:pendle-sy:1:0xcbc72d92b2dc8187414f6734718563898740c0bc",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "venue:pendle:1:0x34280882267ffa6383b363e278b027be083bbe3b",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:morpho:1:0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:morpho:1:0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  }
+ ],
+ "loops": [],
+ "meta": {
+  "generated_at": "2026-10-10T11:59:53Z",
+  "offline": true,
+  "max_depth_limit": 5,
+  "sources": [
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/v2/chains",
+    "fetched_at": "2026-10-10T10:44:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/markets/active",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/protocols",
+    "fetched_at": "2026-10-10T11:26:57Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "aave",
+    "url": "https://api.v3.aave.com/graphql",
+    "fetched_at": "2026-10-10T11:25:20Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/positions/current/collateral",
+    "fetched_at": "2026-10-10T11:27:21Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/collateral-breakdown",
+    "fetched_at": "2026-10-10T10:40:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=503551000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=1007101000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=2014202000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=3021304000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=5035506000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x34280882267ffa6383b363e278b027be083bbe3b/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c,0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   }
+  ]
+ },
+ "checks": {
+  "errors": [],
+  "coverage": {
+   "dependencies": 17,
+   "edges": 22,
+   "max_depth": 5,
+   "by_status": {
+    "verified_onchain": 6,
+    "api": 6,
+    "documented": 10,
+    "assumed": 0
+   },
+   "share_by_status": {
+    "verified_onchain": 0.2727272727272727,
+    "api": 0.2727272727272727,
+    "documented": 0.45454545454545453,
+    "assumed": 0.0
+   },
+   "verified_share": 1.0
+  }
+ }
+}

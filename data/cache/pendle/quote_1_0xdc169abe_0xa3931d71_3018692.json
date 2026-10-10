@@ -1,0 +1,13 @@
+{
+ "source": "pendle",
+ "key": "quote_1_0xdc169abe_0xa3931d71_3018692",
+ "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=3018692000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+ "request": null,
+ "fetched_at": "2026-10-10T11:34:51Z",
+ "response": {
+  "ok": true,
+  "out_amount": "2695879525224163861252326",
+  "priceImpact": -0.0004206567830678334,
+  "fee_usd": 381.5023136072144
+ }
+}

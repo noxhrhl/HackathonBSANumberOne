@@ -1,0 +1,96 @@
+{
+ "source": "defillama",
+ "key": "protocols_subset",
+ "url": "https://api.llama.fi/protocols",
+ "request": null,
+ "fetched_at": "2026-10-10T11:26:57Z",
+ "response": {
+  "protocols": {
+   "lido": {
+    "name": "Lido",
+    "slug": "lido",
+    "category": "Liquid Staking",
+    "parentProtocol": null,
+    "tvl": 24227676998.431416,
+    "ethereum_tvl": 24222025315.873707,
+    "oraclesBreakdown": []
+   },
+   "aave-v3": {
+    "name": "Aave V3",
+    "slug": "aave-v3",
+    "category": "Lending",
+    "parentProtocol": "parent#aave",
+    "tvl": 17354116295.02958,
+    "ethereum_tvl": 14522977973.006773,
+    "oraclesBreakdown": [
+     {
+      "name": "Chainlink",
+      "type": "Primary",
+      "proof": []
+     }
+    ]
+   },
+   "morpho-blue": {
+    "name": "Morpho Blue",
+    "slug": "morpho-blue",
+    "category": "Lending",
+    "parentProtocol": "parent#morpho",
+    "tvl": 11226921256.631933,
+    "ethereum_tvl": 5143685204.765378,
+    "oraclesBreakdown": []
+   },
+   "sky-lending": {
+    "name": "Sky Lending",
+    "slug": "sky-lending",
+    "category": "CDP",
+    "parentProtocol": "parent#maker",
+    "tvl": 5982845596.941147,
+    "ethereum_tvl": 5982845596.941147,
+    "oraclesBreakdown": [
+     {
+      "name": "Chronicle",
+      "type": "Aggregator",
+      "proof": []
+     },
+     {
+      "name": "Internal",
+      "type": "Aggregator",
+      "proof": [
+       "https://developers.skyeco.com/protocol/liquidity/litepsm/"
+      ]
+     }
+    ]
+   },
+   "ethena-usde": {
+    "name": "Ethena USDe",
+    "slug": "ethena-usde",
+    "category": "Basis Trading",
+    "parentProtocol": "parent#ethena",
+    "tvl": 4778391301.322117,
+    "ethereum_tvl": 4778391301.322117,
+    "oraclesBreakdown": []
+   },
+   "pendle-v2": {
+    "name": "Pendle V2",
+    "slug": "pendle-v2",
+    "category": "Yield",
+    "parentProtocol": "parent#pendle",
+    "tvl": 1208355016.8058891,
+    "ethereum_tvl": 764203348.6726011,
+    "oraclesBreakdown": [
+     {
+      "name": "RedStone",
+      "type": "Primary",
+      "proof": [],
+      "chains": [
+       {
+        "chain": "Redstone"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "_filtre": "slugs utilisés par le projet (LLAMA_SLUGS)"
+ }
+}

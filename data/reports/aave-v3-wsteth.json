@@ -1,0 +1,1956 @@
+{
+ "position_id": "aave-v3-wsteth",
+ "label": "wstETH prêté sur Aave V3 (Ethereum Core)",
+ "size_usd": 2000000,
+ "generated_at": "2026-10-10T11:59:57Z",
+ "offline": true,
+ "data_fetched_at": {
+  "oldest": "2026-10-10T10:20:00Z",
+  "newest": "2026-10-10T11:34:51Z"
+ },
+ "horizon_days": 30.0,
+ "coverage": {
+  "dependencies": 37,
+  "edges": 38,
+  "max_depth": 4,
+  "by_status": {
+   "verified_onchain": 1,
+   "api": 23,
+   "documented": 14,
+   "assumed": 0
+  },
+  "share_by_status": {
+   "verified_onchain": 0.02631578947368421,
+   "api": 0.6052631578947368,
+   "documented": 0.3684210526315789,
+   "assumed": 0.0
+  },
+  "verified_share": 1.0
+ },
+ "errors": [],
+ "loops": [
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "issuer:ethena",
+   "mechanism": "backing",
+   "note": "dépendance circulaire : chacun détient une partie de l'autre (risque réflexif) — arête signalée ici, non dessinée (le graphe reste acyclique)",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/collateral-breakdown",
+     "fetched_at": "2026-10-10T10:40:00Z"
+    }
+   ]
+  }
+ ],
+ "default_incident": "issuer:lido",
+ "default_incident_p": 0.3,
+ "stats": {
+  "expected": 0.060814741034160735,
+  "var95": 0.2905083424124984,
+  "cvar95": 0.3504133188272657,
+  "p_any_loss": 0.33135
+ },
+ "decision": {
+  "neutre": {
+   "view": "neutre",
+   "L": 0.060814741034160735,
+   "x_star": 0.276430641064367,
+   "closed_form": 0.276430641064367,
+   "category": "vente partielle",
+   "strategies": {
+    "rester": {
+     "x": 0.0,
+     "expected": 0.060814741034160735,
+     "worst5": 0.3504133188272657,
+     "exit_cost": 0.0
+    },
+    "partiel": {
+     "x": 0.276430641064367,
+     "expected": 0.05240921210904248,
+     "worst5": 0.2619538693914705,
+     "exit_cost": 0.008405528925118259
+    },
+    "tout_vendre": {
+     "x": 1.0,
+     "expected": 0.11,
+     "worst5": 0.11,
+     "exit_cost": 0.11
+    }
+   },
+   "saving_vs_best_extreme": 0.008405528925118255
+  },
+  "prudent": {
+   "view": "prudent",
+   "L": 0.3504133188272657,
+   "x_star": 1.0,
+   "closed_form": 1.0,
+   "category": "tout vendre",
+   "strategies": {
+    "rester": {
+     "x": 0.0,
+     "expected": 0.060814741034160735,
+     "worst5": 0.3504133188272657,
+     "exit_cost": 0.0
+    },
+    "partiel": {
+     "x": 1.0,
+     "expected": 0.11,
+     "worst5": 0.11,
+     "exit_cost": 0.11
+    },
+    "tout_vendre": {
+     "x": 1.0,
+     "expected": 0.11,
+     "worst5": 0.11,
+     "exit_cost": 0.11
+    }
+   },
+   "saving_vs_best_extreme": 0.0
+  }
+ },
+ "exit": {
+  "quotes": {
+   "type": "aave_supply",
+   "quotes": [
+    {
+     "fraction": 1.0,
+     "size_usd": 2000000,
+     "cost": 0.0,
+     "note": "retrait sans glissement tant que la liquidité disponible suffit"
+    }
+   ],
+   "capacity": 1.0,
+   "source": "liquidité disponible (API Aave / Morpho)",
+   "available_liquidity_usd": 2376427249.1866627,
+   "capacity_fraction_normal": 1.0
+  },
+  "stress": {
+   "c1": 0.11,
+   "capacity": 1.0,
+   "label": "Crise — chiffre de Belem : 11 % pour tout vendre",
+   "shape": "quadratic",
+   "points": []
+  },
+  "normal": {
+   "c1": 0.0,
+   "capacity": 1.0,
+   "label": "Hors crise — cotation réelle : 0.00% pour tout vendre",
+   "shape": "quadratic",
+   "points": [
+    [
+     1.0,
+     0.0
+    ]
+   ]
+  }
+ },
+ "p_sweep": [
+  {
+   "p": 0.0,
+   "x_star": 0.005693192561411876,
+   "category": "rester",
+   "expected": 0.0012525023635106126,
+   "cvar95": 0.025050047270212254
+  },
+  {
+   "p": 0.05,
+   "x_star": 0.05261179676960461,
+   "category": "vente partielle",
+   "expected": 0.011574595289313015,
+   "cvar95": 0.21490538354745128
+  },
+  {
+   "p": 0.1,
+   "x_star": 0.09760238652214408,
+   "category": "vente partielle",
+   "expected": 0.0214725250348717,
+   "cvar95": 0.27768759458269876
+  },
+  {
+   "p": 0.15,
+   "x_star": 0.1403673022191708,
+   "category": "vente partielle",
+   "expected": 0.030880806488217574,
+   "cvar95": 0.30534251082242586
+  },
+  {
+   "p": 0.2,
+   "x_star": 0.18631863626057912,
+   "category": "vente partielle",
+   "expected": 0.04099009997732741,
+   "cvar95": 0.3264677403456052
+  },
+  {
+   "p": 0.25,
+   "x_star": 0.23143441805364554,
+   "category": "vente partielle",
+   "expected": 0.05091557197180202,
+   "cvar95": 0.33946470735229817
+  },
+  {
+   "p": 0.3,
+   "x_star": 0.276430641064367,
+   "category": "vente partielle",
+   "expected": 0.060814741034160735,
+   "cvar95": 0.3504133188272657
+  },
+  {
+   "p": 0.35,
+   "x_star": 0.3215020223290298,
+   "category": "vente partielle",
+   "expected": 0.07073044491238656,
+   "cvar95": 0.3581377417012328
+  },
+  {
+   "p": 0.4,
+   "x_star": 0.3690917722474061,
+   "category": "vente partielle",
+   "expected": 0.08120018989442934,
+   "cvar95": 0.3668339065614864
+  },
+  {
+   "p": 0.45,
+   "x_star": 0.4162986156678312,
+   "category": "vente partielle",
+   "expected": 0.09158569544692287,
+   "cvar95": 0.3735927206449117
+  },
+  {
+   "p": 0.5,
+   "x_star": 0.4655411892204789,
+   "category": "vente partielle",
+   "expected": 0.10241906162850535,
+   "cvar95": 0.3810991985140967
+  },
+  {
+   "p": 0.55,
+   "x_star": 0.5145616165511003,
+   "category": "vente partielle",
+   "expected": 0.11320355564124207,
+   "cvar95": 0.3878317611805958
+  },
+  {
+   "p": 0.6,
+   "x_star": 0.5601594158417297,
+   "category": "vente partielle",
+   "expected": 0.12323507148518054,
+   "cvar95": 0.3930515765023112
+  },
+  {
+   "p": 0.65,
+   "x_star": 0.6047332075873312,
+   "category": "vente partielle",
+   "expected": 0.13304130566921285,
+   "cvar95": 0.39688727872342944
+  },
+  {
+   "p": 0.7,
+   "x_star": 0.648919393858157,
+   "category": "vente partielle",
+   "expected": 0.14276226664879454,
+   "cvar95": 0.4001554640121774
+  },
+  {
+   "p": 0.75,
+   "x_star": 0.695583034935231,
+   "category": "vente partielle",
+   "expected": 0.1530282676857508,
+   "cvar95": 0.4044303529112278
+  },
+  {
+   "p": 0.8,
+   "x_star": 0.742913052669701,
+   "category": "vente partielle",
+   "expected": 0.16344087158733422,
+   "cvar95": 0.40782373214871476
+  },
+  {
+   "p": 0.85,
+   "x_star": 0.7864534521943088,
+   "category": "vente partielle",
+   "expected": 0.17301975948274795,
+   "cvar95": 0.4111470838686248
+  },
+  {
+   "p": 0.9,
+   "x_star": 0.8309548794512538,
+   "category": "vente partielle",
+   "expected": 0.18281007347927583,
+   "cvar95": 0.41493420112009116
+  },
+  {
+   "p": 0.95,
+   "x_star": 0.8750803524725739,
+   "category": "vente partielle",
+   "expected": 0.19251767754396626,
+   "cvar95": 0.41772705554397793
+  },
+  {
+   "p": 1.0,
+   "x_star": 0.9200010377464732,
+   "category": "vente partielle",
+   "expected": 0.2024002283042241,
+   "cvar95": 0.4203006984641155
+  }
+ ],
+ "stability": {
+  "category": "vente partielle",
+  "from_p": 0.05,
+  "to_p": 1.0,
+  "first_partial_p": 0.05,
+  "first_all_p": null
+ },
+ "scenarios": {
+  "low": {
+   "stats": {
+    "expected": 0.006508494308493427,
+    "var95": 0.031382433690208475,
+    "cvar95": 0.03994554215174253,
+    "p_any_loss": 0.3015
+   },
+   "neutre": {
+    "view": "neutre",
+    "L": 0.006508494308493427,
+    "x_star": 0.029584065038606486,
+    "closed_form": 0.029584065038606486,
+    "category": "rester",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.006508494308493427,
+      "worst5": 0.03994554215174253,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 0.029584065038606486,
+      "expected": 0.006412220449030492,
+      "worst5": 0.038860064494185914,
+      "exit_cost": 9.627385946293484e-05
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 9.627385946293487e-05
+   },
+   "prudent": {
+    "view": "prudent",
+    "L": 0.03994554215174253,
+    "x_star": 0.18157064614428423,
+    "closed_form": 0.18157064614428423,
+    "category": "vente partielle",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.006508494308493427,
+      "worst5": 0.03994554215174253,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 0.18157064614428423,
+      "expected": 0.008953211741011696,
+      "worst5": 0.03631907320220471,
+      "exit_cost": 0.0036264689495378163
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 0.003626468949537817
+   },
+   "impact": 0.7290000000000001
+  },
+  "base": {
+   "stats": {
+    "expected": 0.060814741034160735,
+    "var95": 0.2905083424124984,
+    "cvar95": 0.3504133188272657,
+    "p_any_loss": 0.33135
+   },
+   "neutre": {
+    "view": "neutre",
+    "L": 0.060814741034160735,
+    "x_star": 0.276430641064367,
+    "closed_form": 0.276430641064367,
+    "category": "vente partielle",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.060814741034160735,
+      "worst5": 0.3504133188272657,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 0.276430641064367,
+      "expected": 0.05240921210904248,
+      "worst5": 0.2619538693914705,
+      "exit_cost": 0.008405528925118259
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 0.008405528925118255
+   },
+   "prudent": {
+    "view": "prudent",
+    "L": 0.3504133188272657,
+    "x_star": 1.0,
+    "closed_form": 1.0,
+    "category": "tout vendre",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.060814741034160735,
+      "worst5": 0.3504133188272657,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 0.0
+   },
+   "impact": 1.0
+  },
+  "high": {
+   "stats": {
+    "expected": 0.27911389891267124,
+    "var95": 0.9707880476204372,
+    "cvar95": 0.9941803636883549,
+    "p_any_loss": 0.43245
+   },
+   "neutre": {
+    "view": "neutre",
+    "L": 0.27911389891267124,
+    "x_star": 1.0,
+    "closed_form": 1.0,
+    "category": "tout vendre",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.27911389891267124,
+      "worst5": 0.9941803636883549,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 0.0
+   },
+   "prudent": {
+    "view": "prudent",
+    "L": 0.9941803636883549,
+    "x_star": 1.0,
+    "closed_form": 1.0,
+    "category": "tout vendre",
+    "strategies": {
+     "rester": {
+      "x": 0.0,
+      "expected": 0.27911389891267124,
+      "worst5": 0.9941803636883549,
+      "exit_cost": 0.0
+     },
+     "partiel": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     },
+     "tout_vendre": {
+      "x": 1.0,
+      "expected": 0.11,
+      "worst5": 0.11,
+      "exit_cost": 0.11
+     }
+    },
+    "saving_vs_best_extreme": 0.0
+   },
+   "impact": 1.0
+  }
+ },
+ "sensitivity": {
+  "base_x": 0.276430641064367,
+  "tests": [
+   {
+    "input": "Sévérité de l'incident",
+    "low": {
+     "label": "bas",
+     "x_star": 0.04606926117456129,
+     "expected": 0.010135237458403484
+    },
+    "high": {
+     "label": "haut",
+     "x_star": 1.0,
+     "expected": 0.23005132282737964
+    },
+    "swing_x": 0.9539307388254387,
+    "swing_cost": 0.21991608536897617
+   },
+   {
+    "input": "Coût de sortie C(1) ×0,5 / ×1,5",
+    "low": {
+     "label": "bas",
+     "x_star": 0.552861282128734,
+     "expected": 0.060814741034160735
+    },
+    "high": {
+     "label": "haut",
+     "x_star": 0.1842870940429113,
+     "expected": 0.060814741034160735
+    },
+    "swing_x": 0.36857418808582265,
+    "swing_cost": 0.0
+   },
+   {
+    "input": "Probabilité de l'incident ±20 pts",
+    "low": {
+     "label": "bas",
+     "x_star": 0.09760238652214408,
+     "expected": 0.0214725250348717
+    },
+    "high": {
+     "label": "haut",
+     "x_star": 0.4655411892204789,
+     "expected": 0.10241906162850535
+    },
+    "swing_x": 0.3679388026983348,
+    "swing_cost": 0.08094653659363366
+   },
+   {
+    "input": "Poids des arêtes (w)",
+    "low": {
+     "label": "bas",
+     "x_star": 0.19945695319714354,
+     "expected": 0.04388052970337158
+    },
+    "high": {
+     "label": "haut",
+     "x_star": 0.28239191911411277,
+     "expected": 0.06212622220510481
+    },
+    "swing_x": 0.08293496591696922,
+    "swing_cost": 0.018245692501733232
+   },
+   {
+    "input": "Probabilités de fond (p_base)",
+    "low": {
+     "label": "bas",
+     "x_star": 0.27257617533037987,
+     "expected": 0.059966758572683576
+    },
+    "high": {
+     "label": "haut",
+     "x_star": 0.31610002244437524,
+     "expected": 0.06954200493776255
+    },
+    "swing_x": 0.04352384711399537,
+    "swing_cost": 0.009575246365078977
+   }
+  ],
+  "most_sensitive": "Sévérité de l'incident"
+ },
+ "propagation": {
+  "nodes_where_sum_differs": [
+   {
+    "id": "chain:ethereum",
+    "name": "Ethereum (chaîne de règlement)",
+    "max": 0.05,
+    "sum": 0.1
+   }
+  ],
+  "incident_max": 1.0,
+  "incident_sum": 1.0
+ },
+ "nodes": [
+  {
+   "id": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "name": "Aave V3 (pool Ethereum Core)",
+   "kind": "lending",
+   "p": 0.0007950880803646587,
+   "lam": 0.00967741935483871,
+   "sev": 0.15,
+   "lam_range": [
+    0.003,
+    0.00967741935483871,
+    0.049933333333333337
+   ],
+   "sev_range": [
+    0.02,
+    0.15,
+    0.6
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "name": "wstETH",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "name": "stETH",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "issuer:lido",
+   "name": "Lido (émetteur de stETH)",
+   "kind": "issuer",
+   "p": 0.0012321170320642727,
+   "lam": 0.015,
+   "sev": 0.2,
+   "lam_range": [
+    0.005,
+    0.015,
+    0.04
+   ],
+   "sev_range": [
+    0.03,
+    0.2,
+    0.77
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "oracle:lido-oracle-committee",
+   "name": "Comité d'oracles Lido (9 membres, rapporte les soldes)",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": []
+  },
+  {
+   "id": "admin:lido-dao",
+   "name": "Gouvernance Lido DAO (détenteurs de LDO)",
+   "kind": "admin",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 1.0,
+   "impact_sum": 1.0,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "oracle:1:0x5424384b256154046e9667ddfaaa5e550145215e",
+   "name": "ETH / USD (Chainlink)",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": []
+  },
+  {
+   "id": "oracle:1:0x87625393534d5c102cadb66d37201df24cc26d4c",
+   "name": "Capped weETH / eETH(ETH) / USD (Chainlink (adaptateur CAPO d'Aave))",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "rate_capped"
+   ]
+  },
+  {
+   "id": "oracle:1:0xdaa4b74c6bac4e25188e64ebc68db5050b690cac",
+   "name": "wBTC/BTC/USD (fournisseur non identifié)",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": []
+  },
+  {
+   "id": "oracle:1:0x260326c220e469358846b187ee53328303efe19c",
+   "name": "Capped USDT/USD (Chainlink (adaptateur CAPO d'Aave))",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "rate_capped"
+   ]
+  },
+  {
+   "id": "oracle:1:0x3f73f03aa83b2a48ed27e964ed0fdb590332095b",
+   "name": "Capped USDC / USD (Chainlink (adaptateur CAPO d'Aave))",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "rate_capped"
+   ]
+  },
+  {
+   "id": "oracle:1:0xb41e773f507f7a7ea890b1afb7d2b660c30c8b0a",
+   "name": "BTC / USD (Chainlink)",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "proxy_price"
+   ]
+  },
+  {
+   "id": "oracle:1:0xc26d4a1c46d884cff6de9800b6ae7a8cf48b4ff8",
+   "name": "Capped USDT/USD (Chainlink (adaptateur CAPO d'Aave))",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "rate_capped",
+    "proxy_price"
+   ]
+  },
+  {
+   "id": "oracle:1:0x2b86d519ef34f8adfc9349cdea17c09aa9db60e2",
+   "name": "Capped osETH / ETH / USD (Chainlink (adaptateur CAPO d'Aave))",
+   "kind": "oracle",
+   "p": 0.0008215801262994038,
+   "lam": 0.01,
+   "sev": 0.3,
+   "lam_range": [
+    0.003,
+    0.01,
+    0.08709677419354839
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.3,
+   "impact_sum": 0.3,
+   "assumption": false,
+   "why": "règle générale des oracles",
+   "flags": [
+    "rate_capped"
+   ]
+  },
+  {
+   "id": "custodian:lido-node-operators",
+   "name": "Opérateurs de nœuds Lido (choisis par la DAO)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.25,
+   "impact_sum": 0.25,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+   "name": "WETH",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.08000234182582901,
+   "impact_sum": 0.08000234182582901,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+   "name": "weETH",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.05573447386002723,
+   "impact_sum": 0.05573447386002723,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "chain:ethereum",
+   "name": "Ethereum (chaîne de règlement)",
+   "kind": "chain",
+   "p": 0.02033827473421357,
+   "lam": 0.25,
+   "sev": 0.02,
+   "lam_range": [
+    0.1,
+    0.25,
+    0.75
+   ],
+   "sev_range": [
+    0.0,
+    0.02,
+    0.1
+   ],
+   "impact_max": 0.05,
+   "impact_sum": 0.1,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+   "name": "WBTC",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.04187708603198699,
+   "impact_sum": 0.04187708603198699,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "name": "USDT",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.04034402287670155,
+   "impact_sum": 0.04034402287670155,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "issuer:tether",
+   "name": "Tether (émetteur d'USDT)",
+   "kind": "issuer",
+   "p": 0.0012321170320642727,
+   "lam": 0.015,
+   "sev": 0.2,
+   "lam_range": [
+    0.005,
+    0.015,
+    0.04
+   ],
+   "sev_range": [
+    0.03,
+    0.2,
+    0.77
+   ],
+   "impact_max": 0.04034402287670155,
+   "impact_sum": 0.04034402287670155,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "name": "USDC",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.03539286908868437,
+   "impact_sum": 0.03539286908868437,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "issuer:circle",
+   "name": "Circle (émetteur d'USDC)",
+   "kind": "issuer",
+   "p": 0.0012321170320642727,
+   "lam": 0.015,
+   "sev": 0.2,
+   "lam_range": [
+    0.005,
+    0.015,
+    0.04
+   ],
+   "sev_range": [
+    0.03,
+    0.2,
+    0.77
+   ],
+   "impact_max": 0.03539286908868437,
+   "impact_sum": 0.03539286908868437,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+   "name": "cbBTC",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.021096467494886476,
+   "impact_sum": 0.021096467494886476,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "custodian:cantor",
+   "name": "Cantor Fitzgerald (garde des bons du Trésor)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.010086005719175388,
+   "impact_sum": 0.010086005719175388,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "custodian:circle-reserve-fund",
+   "name": "Circle Reserve Fund (USDXX, fonds monétaire géré par BlackRock)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.008848217272171093,
+   "impact_sum": 0.008848217272171093,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "custodian:circle-banks",
+   "name": "Liquidités chez « quelques très grandes banques » (cf. SVB 2023)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.008848217272171093,
+   "impact_sum": 0.008848217272171093,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "name": "USDe",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.004839317415615408,
+   "impact_sum": 0.004839317415615408,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "issuer:ethena",
+   "name": "Ethena (émetteur d'USDe)",
+   "kind": "issuer",
+   "p": 0.0012321170320642727,
+   "lam": 0.015,
+   "sev": 0.2,
+   "lam_range": [
+    0.005,
+    0.015,
+    0.04
+   ],
+   "sev_range": [
+    0.03,
+    0.2,
+    0.77
+   ],
+   "impact_max": 0.004839317415615408,
+   "impact_sum": 0.004839317415615408,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "asset:1:0xf1c9acdc66974dfb6decb12aa385b9cd01190e38",
+   "name": "osETH",
+   "kind": "asset",
+   "p": 0.00023149934305122244,
+   "lam": 0.0028169014084507044,
+   "sev": 0.2,
+   "lam_range": [
+    0.001,
+    0.0028169014084507044,
+    0.0428
+   ],
+   "sev_range": [
+    0.06,
+    0.2,
+    0.7
+   ],
+   "impact_max": 0.004701305866278806,
+   "impact_sum": 0.004701305866278806,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "custodian:copper",
+   "name": "Copper (ClearLoop, garde hors-bourse)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.001209829353903852,
+   "impact_sum": 0.001209829353903852,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "custodian:ceffu",
+   "name": "Ceffu (MirrorX, garde hors-bourse)",
+   "kind": "custodian",
+   "p": 0.0004108744720655588,
+   "lam": 0.005,
+   "sev": 0.3,
+   "lam_range": [
+    0.002,
+    0.005,
+    0.02
+   ],
+   "sev_range": [
+    0.05,
+    0.3,
+    1.0
+   ],
+   "impact_max": 0.001209829353903852,
+   "impact_sum": 0.001209829353903852,
+   "assumption": true,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "perp:binance",
+   "name": "Binance (bourse de couverture)",
+   "kind": "perp_exchange",
+   "p": 0.0027359764031407163,
+   "lam": 0.03333333333333333,
+   "sev": 0.25,
+   "lam_range": [
+    0.01,
+    0.03333333333333333,
+    0.07628333333333333
+   ],
+   "sev_range": [
+    0.0,
+    0.25,
+    1.0
+   ],
+   "impact_max": 0.0001968857860015562,
+   "impact_sum": 0.0001968857860015562,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "perp:okx",
+   "name": "OKX (bourse de couverture)",
+   "kind": "perp_exchange",
+   "p": 0.0027359764031407163,
+   "lam": 0.03333333333333333,
+   "sev": 0.25,
+   "lam_range": [
+    0.01,
+    0.03333333333333333,
+    0.07628333333333333
+   ],
+   "sev_range": [
+    0.0,
+    0.25,
+    1.0
+   ],
+   "impact_max": 6.114651955984937e-05,
+   "impact_sum": 6.114651955984937e-05,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "perp:bybit",
+   "name": "Bybit (bourse de couverture)",
+   "kind": "perp_exchange",
+   "p": 0.0027359764031407163,
+   "lam": 0.03333333333333333,
+   "sev": 0.25,
+   "lam_range": [
+    0.01,
+    0.03333333333333333,
+    0.07628333333333333
+   ],
+   "sev_range": [
+    0.0,
+    0.25,
+    1.0
+   ],
+   "impact_max": 3.29293336298477e-05,
+   "impact_sum": 3.29293336298477e-05,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "perp:deribit",
+   "name": "Deribit (bourse de couverture)",
+   "kind": "perp_exchange",
+   "p": 0.0027359764031407163,
+   "lam": 0.03333333333333333,
+   "sev": 0.25,
+   "lam_range": [
+    0.01,
+    0.03333333333333333,
+    0.07628333333333333
+   ],
+   "sev_range": [
+    0.0,
+    0.25,
+    1.0
+   ],
+   "impact_max": 5.744148374894428e-06,
+   "impact_sum": 5.744148374894428e-06,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  },
+  {
+   "id": "perp:cde",
+   "name": "CDE (bourse de couverture)",
+   "kind": "perp_exchange",
+   "p": 0.0027359764031407163,
+   "lam": 0.03333333333333333,
+   "sev": 0.25,
+   "lam_range": [
+    0.01,
+    0.03333333333333333,
+    0.07628333333333333
+   ],
+   "sev_range": [
+    0.0,
+    0.25,
+    1.0
+   ],
+   "impact_max": 2.432725988042687e-06,
+   "impact_sum": 2.432725988042687e-06,
+   "assumption": false,
+   "why": null,
+   "flags": []
+  }
+ ],
+ "edges": [
+  {
+   "from": "chain:ethereum",
+   "to": "position:aave-v3-wsteth",
+   "mechanism": "settlement",
+   "status": "documented",
+   "w": 0.05,
+   "w_range": [
+    0.0,
+    0.05,
+    0.2
+   ],
+   "why": "règle du mécanisme « settlement »"
+  },
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "position:aave-v3-wsteth",
+   "mechanism": "backing",
+   "status": "api",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "to": "position:aave-v3-wsteth",
+   "mechanism": "backing",
+   "status": "api",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "settlement",
+   "status": "documented",
+   "w": 0.05,
+   "w_range": [
+    0.0,
+    0.05,
+    0.2
+   ],
+   "why": "règle du mécanisme « settlement »"
+  },
+  {
+   "from": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "to": "asset:1:0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "asset:1:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.08000234182582901,
+   "w_range": [
+    0.026667447275276337,
+    0.08000234182582901,
+    0.18667213092693433
+   ],
+   "why": "part mesurée 26.7% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0x5424384b256154046e9667ddfaaa5e550145215e",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.05573447386002723,
+   "w_range": [
+    0.018578157953342413,
+    0.05573447386002723,
+    0.13004710567339686
+   ],
+   "why": "part mesurée 18.6% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0x87625393534d5c102cadb66d37201df24cc26d4c",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.04187708603198699,
+   "w_range": [
+    0.013959028677328997,
+    0.04187708603198699,
+    0.09771320074130298
+   ],
+   "why": "part mesurée 14.0% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0xdaa4b74c6bac4e25188e64ebc68db5050b690cac",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.04034402287670155,
+   "w_range": [
+    0.013448007625567186,
+    0.04034402287670155,
+    0.09413605337897028
+   ],
+   "why": "part mesurée 13.4% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0x260326c220e469358846b187ee53328303efe19c",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.03539286908868437,
+   "w_range": [
+    0.01179762302956146,
+    0.03539286908868437,
+    0.0825833612069302
+   ],
+   "why": "part mesurée 11.8% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0x3f73f03aa83b2a48ed27e964ed0fdb590332095b",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.021096467494886476,
+   "w_range": [
+    0.007032155831628826,
+    0.021096467494886476,
+    0.04922509082140177
+   ],
+   "why": "part mesurée 7.0% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0xb41e773f507f7a7ea890b1afb7d2b660c30c8b0a",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.004839317415615408,
+   "w_range": [
+    0.0016131058052051362,
+    0.004839317415615408,
+    0.01129174063643595
+   ],
+   "why": "part mesurée 1.6% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0xc26d4a1c46d884cff6de9800b6ae7a8cf48b4ff8",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "asset:1:0xf1c9acdc66974dfb6decb12aa385b9cd01190e38",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "bad_debt",
+   "status": "api",
+   "w": 0.004701305866278806,
+   "w_range": [
+    0.0015671019554262687,
+    0.004701305866278806,
+    0.010969713687983879
+   ],
+   "why": "part mesurée 1.6% × facteur de perte 30%"
+  },
+  {
+   "from": "oracle:1:0x2b86d519ef34f8adfc9349cdea17c09aa9db60e2",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "pricing",
+   "status": "api",
+   "w": 0.3,
+   "w_range": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "why": "règle du mécanisme « pricing »"
+  },
+  {
+   "from": "issuer:lido",
+   "to": "asset:1:0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "issuer:tether",
+   "to": "asset:1:0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "issuer:circle",
+   "to": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "issuer:ethena",
+   "to": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "custodian:lido-node-operators",
+   "to": "issuer:lido",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  },
+  {
+   "from": "oracle:lido-oracle-committee",
+   "to": "issuer:lido",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "admin:lido-dao",
+   "to": "issuer:lido",
+   "mechanism": "backing",
+   "status": "documented",
+   "w": 1.0,
+   "w_range": [
+    0.9,
+    1.0,
+    1.0
+   ],
+   "why": "règle du mécanisme « backing »"
+  },
+  {
+   "from": "custodian:cantor",
+   "to": "issuer:tether",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  },
+  {
+   "from": "custodian:circle-reserve-fund",
+   "to": "issuer:circle",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  },
+  {
+   "from": "custodian:circle-banks",
+   "to": "issuer:circle",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  },
+  {
+   "from": "perp:binance",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "w": 0.04068461915026472,
+   "w_range": [
+    0.006780769858377455,
+    0.04068461915026472,
+    0.13561539716754908
+   ],
+   "why": "part mesurée 13.6% × facteur de perte 30%"
+  },
+  {
+   "from": "perp:okx",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "w": 0.012635360384202751,
+   "w_range": [
+    0.0021058933973671255,
+    0.012635360384202751,
+    0.042117867947342506
+   ],
+   "why": "part mesurée 4.2% × facteur de perte 30%"
+  },
+  {
+   "from": "perp:bybit",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "w": 0.006804540971747796,
+   "w_range": [
+    0.001134090161957966,
+    0.006804540971747796,
+    0.02268180323915932
+   ],
+   "why": "part mesurée 2.3% × facteur de perte 30%"
+  },
+  {
+   "from": "perp:deribit",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "w": 0.0011869749143462527,
+   "w_range": [
+    0.00019782915239104212,
+    0.0011869749143462527,
+    0.003956583047820842
+   ],
+   "why": "part mesurée 0.4% × facteur de perte 30%"
+  },
+  {
+   "from": "perp:cde",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "w": 0.000502700232101498,
+   "w_range": [
+    8.378337201691634e-05,
+    0.000502700232101498,
+    0.0016756674403383268
+   ],
+   "why": "part mesurée 0.2% × facteur de perte 30%"
+  },
+  {
+   "from": "custodian:copper",
+   "to": "issuer:ethena",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  },
+  {
+   "from": "custodian:ceffu",
+   "to": "issuer:ethena",
+   "mechanism": "custody",
+   "status": "documented",
+   "w": 0.25,
+   "w_range": [
+    0.05,
+    0.25,
+    0.5
+   ],
+   "why": "règle du mécanisme « custody »"
+  }
+ ]
+}

@@ -1,0 +1,1536 @@
+{
+ "position_id": "pt-susde-26nov2026",
+ "position": {
+  "id": "position:pt-susde-26nov2026",
+  "type": "pendle_pt",
+  "label": "PT-sUSDe-26NOV2026",
+  "chain_id": 1,
+  "market": "0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+  "pt": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390",
+  "size_usd": 2000000,
+  "main": true,
+  "config_id": "pt-susde-26nov2026",
+  "info": {
+   "market": "0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "venue": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "underlying": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "pt_price_usd": 0.992948867435899,
+   "expiry": "2026-11-26T00:00:00.000Z",
+   "liquidity_usd": 3819899.8469281546
+  }
+ },
+ "nodes": [
+  {
+   "id": "position:pt-susde-26nov2026",
+   "name": "PT-sUSDe-26NOV2026",
+   "kind": "position",
+   "chain": "ethereum",
+   "metrics": {
+    "size_usd": 2000000,
+    "pt_price_usd": 0.992948867435899,
+    "expiry": "2026-11-26T00:00:00.000Z",
+    "underlying_price_usd": 1.25128534,
+    "implied_apy": 0.05011036032441507
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "data/positions.json",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    },
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "details": {
+    "type": "pendle_pt"
+   },
+   "address": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390"
+  },
+  {
+   "id": "chain:ethereum",
+   "name": "Ethereum (chaîne de règlement)",
+   "kind": "chain",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": 51376949114.26337
+   },
+   "evidence": [
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/v2/chains",
+     "fetched_at": "2026-10-10T10:44:00Z"
+    },
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "name": "Contrat SY Pendle (sUSDe)",
+   "kind": "protocol",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_call readTokens()",
+     "url": "https://etherscan.io/address/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "address": "0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "details": {
+    "role": "Le PT se rachète contre le SY à l'échéance"
+   }
+  },
+  {
+   "id": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "name": "sUSDe",
+   "kind": "asset",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "etherscan",
+     "url": "https://etherscan.io/token/0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+  },
+  {
+   "id": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "name": "AMM Pendle sUSDe (2026-11-26)",
+   "kind": "venue",
+   "chain": "ethereum",
+   "metrics": {
+    "liquidity_usd": 3819899.8469281546,
+    "volume_24h_usd": 85770.1818427809,
+    "implied_apy": 0.05011036032441507,
+    "pt_discount": 0.006216048443787092,
+    "total_pt": 971271.206194636,
+    "total_sy": 2282035.210152903
+   },
+   "evidence": [
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "address": "0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e"
+  },
+  {
+   "id": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "name": "USDe",
+   "kind": "asset",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "etherscan",
+     "url": "https://etherscan.io/token/0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3"
+  },
+  {
+   "id": "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+   "name": "Morpho PT-sUSDE-26NOV2026/USDC (LLTV 91.5 %)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "collateral_usd": 7927287.880276859,
+    "borrow_usd": 6992169.685524775,
+    "supply_usd": 7756493.321118058,
+    "lltv": 0.915
+   },
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+    "protocol": "morpho-blue",
+    "protocol_tvl_usd": 11226921256.631933
+   }
+  },
+  {
+   "id": "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "name": "Méta-oracle 0xf8b2…1b08 (primaire + secours, bascule après 16 h)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "deviation_threshold": 0.0075,
+    "challenge_timelock_h": 16.0,
+    "healing_timelock_h": 24.0
+   },
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0xf8b29e7e9c00ce531434775f7923cc9fbca01b08#code",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    },
+    {
+     "source": "eth_call primaryOracle()",
+     "url": "https://etherscan.io/address/0xf8b29e7e9c00ce531434775f7923cc9fbca01b08#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "address": "0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "flags": [
+    "meta_oracle_with_fallback"
+   ],
+   "details": {
+    "api_type": "Unknown",
+    "proxy_implementation": "0x9b4655239e91dc9e1f7599bb88fba41b4542de5b",
+    "type": "meta_oracle",
+    "using": "primaire"
+   }
+  },
+  {
+   "id": "oracle:1:0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+   "name": "Oracle primaire 0x8fca…706d (combinaison de flux)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "address": "0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+   "details": {
+    "api_type": null,
+    "type": "morpho_chainlink_v2",
+    "base_vault": null
+   },
+   "flags": [
+    "single_source"
+   ]
+  },
+  {
+   "id": "oracle:1:0xa572dad7db3d975e9ce780db1cf3bf959401cd35",
+   "name": "Flux Pendle « décote linéaire » (6.0 %/an, ne regarde pas le marché)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "discount_per_year": 0.06
+   },
+   "evidence": [
+    {
+     "source": "eth_call baseDiscountPerYear()",
+     "url": "https://etherscan.io/address/0xa572dad7db3d975e9ce780db1cf3bf959401cd35#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "address": "0xa572dad7db3d975e9ce780db1cf3bf959401cd35",
+   "flags": [
+    "non_market_price",
+    "single_source"
+   ],
+   "details": {
+    "type": "pendle_linear_discount",
+    "pt": "0xb195b618ea52b77cb2a58846f452f59f8dfa9390"
+   }
+  },
+  {
+   "id": "oracle:1:0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+   "name": "Oracle secours 0xe2f4…5465 (combinaison de flux)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "address": "0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+   "details": {
+    "api_type": null,
+    "type": "morpho_chainlink_v2",
+    "base_vault": null
+   }
+  },
+  {
+   "id": "oracle:1:0xa569d910839ae8865da8f8e70fffb0cba869f961",
+   "name": "USDe / USD (Chainlink)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "answer": 0.99959682,
+    "updated_at": 1791604751,
+    "operators": 16,
+    "deviation": 0.005
+   },
+   "evidence": [
+    {
+     "source": "eth_call description()",
+     "url": "https://etherscan.io/address/0xa569d910839ae8865da8f8e70fffb0cba869f961#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "documentation",
+     "url": "https://data.chain.link/feeds/ethereum/mainnet/usde-usd",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0xa569d910839ae8865da8f8e70fffb0cba869f961",
+   "details": {
+    "type": "chainlink_proxy",
+    "description": "USDe / USD",
+    "aggregator": "0xcc16f670129f965b396f2e81312f6e339ffdb18e",
+    "provider": "Chainlink"
+   }
+  },
+  {
+   "id": "issuer:ethena",
+   "name": "Ethena (émetteur d'USDe)",
+   "kind": "issuer",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": 4778391301.322117,
+    "ethereum_tvl_usd": 4778391301.322117
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    },
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/protocols",
+     "fetched_at": "2026-10-10T11:26:57Z"
+    }
+   ],
+   "details": {
+    "category": "Basis Trading"
+   }
+  },
+  {
+   "id": "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+   "name": "Morpho sUSDe/PYUSD (LLTV 91.5 %)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "collateral_usd": 111454738.8946017,
+    "borrow_usd": 96941896.3782516,
+    "supply_usd": 108982651.56534344,
+    "lltv": 0.915
+   },
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+    "protocol": "morpho-blue",
+    "protocol_tvl_usd": 11226921256.631933
+   }
+  },
+  {
+   "id": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "name": "Oracle du marché 0xe621…9e7e (combinaison de flux)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0xe6212d05cb5af3c821fef1c1a233a678724f9e7e#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xe6212d05cb5af3c821fef1c1a233a678724f9e7e#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "details": {
+    "api_type": "ChainlinkOracleV2",
+    "type": "morpho_chainlink_v2",
+    "base_vault": "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+   }
+  },
+  {
+   "id": "oracle:1:0x8f1df6d7f2db73eece86a18b4381f4707b918fb1",
+   "name": "PYUSD / USD (Chainlink)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {
+    "answer": 1.000067,
+    "updated_at": 1791575591
+   },
+   "evidence": [
+    {
+     "source": "eth_call description()",
+     "url": "https://etherscan.io/address/0x8f1df6d7f2db73eece86a18b4381f4707b918fb1#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "address": "0x8f1df6d7f2db73eece86a18b4381f4707b918fb1",
+   "details": {
+    "type": "chainlink_proxy",
+    "description": "PYUSD / USD",
+    "aggregator": "0x39e31761911b9aabaef5fb81b18fd1c24a60e884",
+    "provider": "Chainlink"
+   }
+  },
+  {
+   "id": "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+   "name": "Morpho sUSDe/DAI (LLTV 86.0 %)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "collateral_usd": 1672371.0907094113,
+    "borrow_usd": 1289282.2529209892,
+    "supply_usd": 1390997.6781874362,
+    "lltv": 0.86
+   },
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+    "protocol": "morpho-blue",
+    "protocol_tvl_usd": 11226921256.631933
+   }
+  },
+  {
+   "id": "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25",
+   "name": "Oracle du marché 0x5d91…ae25 (taux du coffre sUSDe seulement, sans prix de marché)",
+   "kind": "oracle",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "eth_getCode",
+     "url": "https://etherscan.io/address/0x5d916980d5ae1737a8330bf24df812b2911aae25#code",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    },
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "address": "0x5d916980d5ae1737a8330bf24df812b2911aae25",
+   "flags": [
+    "non_market_price",
+    "single_source"
+   ],
+   "details": {
+    "api_type": "ChainlinkOracleV2",
+    "type": "vault_rate_only",
+    "base_vault": "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+   }
+  },
+  {
+   "id": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "name": "Aave V3 (pool Ethereum Core)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "total_supply_usd": 23188174782.22587,
+    "tvl_usd": 17354116295.02958,
+    "ethereum_tvl_usd": 14522977973.006773
+   },
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    },
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/protocols",
+     "fetched_at": "2026-10-10T11:26:57Z"
+    }
+   ],
+   "address": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "protocol": "aave-v3",
+    "oracles_defillama": [
+     "Chainlink"
+    ]
+   }
+  },
+  {
+   "id": "perp:binance",
+   "name": "Binance (bourse de couverture)",
+   "kind": "perp_exchange",
+   "chain": "ethereum",
+   "metrics": {
+    "ethena_collateral_usd": 649493732.0,
+    "ethena_share": 0.13561539716754908
+   },
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ]
+  },
+  {
+   "id": "perp:okx",
+   "name": "OKX (bourse de couverture)",
+   "kind": "perp_exchange",
+   "chain": "ethereum",
+   "metrics": {
+    "ethena_collateral_usd": 201712282.0,
+    "ethena_share": 0.042117867947342506
+   },
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ]
+  },
+  {
+   "id": "perp:bybit",
+   "name": "Bybit (bourse de couverture)",
+   "kind": "perp_exchange",
+   "chain": "ethereum",
+   "metrics": {
+    "ethena_collateral_usd": 108628440.0,
+    "ethena_share": 0.02268180323915932
+   },
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ]
+  },
+  {
+   "id": "perp:deribit",
+   "name": "Deribit (bourse de couverture)",
+   "kind": "perp_exchange",
+   "chain": "ethereum",
+   "metrics": {
+    "ethena_collateral_usd": 18948998.0,
+    "ethena_share": 0.003956583047820842
+   },
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ]
+  },
+  {
+   "id": "perp:cde",
+   "name": "CDE (bourse de couverture)",
+   "kind": "perp_exchange",
+   "chain": "ethereum",
+   "metrics": {
+    "ethena_collateral_usd": 8025161.76,
+    "ethena_share": 0.0016756674403383268
+   },
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ]
+  },
+  {
+   "id": "custodian:copper",
+   "name": "Copper (ClearLoop, garde hors-bourse)",
+   "kind": "custodian",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "custodian:ceffu",
+   "name": "Ceffu (MirrorX, garde hors-bourse)",
+   "kind": "custodian",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "chain:ethereum",
+   "to": "position:pt-susde-26nov2026",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Toute sortie ou remboursement passe par une transaction Ethereum"
+   }
+  },
+  {
+   "from": "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "to": "position:pt-susde-26nov2026",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call readTokens()",
+     "url": "https://etherscan.io/address/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "why": "À l'échéance, 1 PT = 1 unité du sous-jacent via le contrat SY"
+   }
+  },
+  {
+   "from": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "to": "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call yieldToken()",
+     "url": "https://etherscan.io/address/0xbf98480425a29197e5d99d003017f63a1e595d02#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "why": "Le SY détient le sous-jacent ; sa valeur fait celle du PT"
+   }
+  },
+  {
+   "from": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "to": "position:pt-susde-26nov2026",
+   "mechanism": "exit_liquidity",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "pendle",
+     "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+     "fetched_at": "2026-10-10T10:53:06Z"
+    }
+   ],
+   "details": {
+    "why": "Seul lieu pour vendre le PT avant l'échéance",
+    "liquidity_usd": 3819899.8469281546
+   }
+  },
+  {
+   "from": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "to": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "mechanism": "backing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call asset()",
+     "url": "https://etherscan.io/address/0x9d39a5de30e57443bff2a8307a4256c8797a3497#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "why": "sUSDe est une enveloppe de USDe (lu on-chain : asset())"
+   }
+  },
+  {
+   "from": "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+   "to": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+    "collateral_usd": 7927287.880276859,
+    "pressure_ratio": 2.0752606607347936,
+    "why": "Des liquidations forceraient la vente de cet actif : 7.9 M$ de collatéral face à 3.8 M$ de liquidité AMM"
+   }
+  },
+  {
+   "from": "oracle:1:0xa572dad7db3d975e9ce780db1cf3bf959401cd35",
+   "to": "oracle:1:0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0x8fca98c9abee4dcb33ba9f3d17db4ad57f72706d",
+   "to": "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call primaryOracle()",
+     "url": "https://etherscan.io/address/0xf8b29e7e9c00ce531434775f7923cc9fbca01b08#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "role": "primaire",
+    "why": "Source de prix primaire du méta-oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xa572dad7db3d975e9ce780db1cf3bf959401cd35",
+   "to": "oracle:1:0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xa569d910839ae8865da8f8e70fffb0cba869f961",
+   "to": "oracle:1:0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_2()",
+     "url": "https://etherscan.io/address/0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_2",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xe2f4cfe07aecd7fd8fb0d293a22cde7d08175465",
+   "to": "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call backupOracle()",
+     "url": "https://etherscan.io/address/0xf8b29e7e9c00ce531434775f7923cc9fbca01b08#readContract",
+     "fetched_at": "2026-10-10T10:20:00Z"
+    }
+   ],
+   "details": {
+    "role": "secours",
+    "why": "Source de prix secours du méta-oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xf8b29e7e9c00ce531434775f7923cc9fbca01b08",
+   "to": "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+   "mechanism": "pricing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+    "why": "Prix utilisé pour décider des liquidations"
+   }
+  },
+  {
+   "from": "issuer:ethena",
+   "to": "asset:1:0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/overview/how-usde-works",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Ethena (émetteur d'USDe) émet et garantit USDe"
+   }
+  },
+  {
+   "from": "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+   "to": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+    "collateral_usd": 111454738.8946017,
+    "pressure_ratio": null,
+    "why": "Des liquidations forceraient la vente de cet actif"
+   }
+  },
+  {
+   "from": "oracle:1:0xa569d910839ae8865da8f8e70fffb0cba869f961",
+   "to": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call BASE_FEED_1()",
+     "url": "https://etherscan.io/address/0xe6212d05cb5af3c821fef1c1a233a678724f9e7e#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "role": "BASE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0x8f1df6d7f2db73eece86a18b4381f4707b918fb1",
+   "to": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "mechanism": "pricing",
+   "status": "verified_onchain",
+   "evidence": [
+    {
+     "source": "eth_call QUOTE_FEED_1()",
+     "url": "https://etherscan.io/address/0xe6212d05cb5af3c821fef1c1a233a678724f9e7e#readContract",
+     "fetched_at": "2026-10-10T11:29:11Z"
+    }
+   ],
+   "details": {
+    "role": "QUOTE_FEED_1",
+    "why": "Flux de prix combiné par l'oracle"
+   }
+  },
+  {
+   "from": "oracle:1:0xe6212d05cb5af3c821fef1c1a233a678724f9e7e",
+   "to": "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+   "mechanism": "pricing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+    "why": "Prix utilisé pour décider des liquidations"
+   }
+  },
+  {
+   "from": "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+   "to": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+    "collateral_usd": 1672371.0907094113,
+    "pressure_ratio": null,
+    "why": "Des liquidations forceraient la vente de cet actif"
+   }
+  },
+  {
+   "from": "oracle:1:0x5d916980d5ae1737a8330bf24df812b2911aae25",
+   "to": "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+   "mechanism": "pricing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "morpho",
+     "url": "https://api.morpho.org/graphql",
+     "fetched_at": "2026-10-10T10:54:24Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+    "why": "Prix utilisé pour décider des liquidations"
+   }
+  },
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "asset:1:0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "collateral_usd": 130463241.26613513,
+    "why": "sUSDe accepté en garantie sur Aave (130 M$)"
+   }
+  },
+  {
+   "from": "perp:binance",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ],
+   "details": {
+    "share_of_backing": 0.13561539716754908,
+    "why": "13.6% du collatéral d'Ethena est alloué à Binance pour la couverture"
+   }
+  },
+  {
+   "from": "perp:okx",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ],
+   "details": {
+    "share_of_backing": 0.042117867947342506,
+    "why": "4.2% du collatéral d'Ethena est alloué à OKX pour la couverture"
+   }
+  },
+  {
+   "from": "perp:bybit",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ],
+   "details": {
+    "share_of_backing": 0.02268180323915932,
+    "why": "2.3% du collatéral d'Ethena est alloué à Bybit pour la couverture"
+   }
+  },
+  {
+   "from": "perp:deribit",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ],
+   "details": {
+    "share_of_backing": 0.003956583047820842,
+    "why": "0.4% du collatéral d'Ethena est alloué à Deribit pour la couverture"
+   }
+  },
+  {
+   "from": "perp:cde",
+   "to": "issuer:ethena",
+   "mechanism": "hedging",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/positions/current/collateral",
+     "fetched_at": "2026-10-10T11:27:21Z"
+    }
+   ],
+   "details": {
+    "share_of_backing": 0.0016756674403383268,
+    "why": "0.2% du collatéral d'Ethena est alloué à CDE pour la couverture"
+   }
+  },
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "issuer:ethena",
+   "mechanism": "backing",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "ethena",
+     "url": "https://app.ethena.fi/api/collateral-breakdown",
+     "fetched_at": "2026-10-10T10:40:00Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "share_of_backing": 0.18045374917937934,
+    "why": "36% du collatéral d'Ethena est placé en « DeFi Lending » (Aave, Morpho) ; HYPOTHÈSE : moitié chacun, soit 18% ici"
+   }
+  },
+  {
+   "from": "custodian:copper",
+   "to": "issuer:ethena",
+   "mechanism": "custody",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Copper (ClearLoop, garde hors-bourse)"
+   }
+  },
+  {
+   "from": "custodian:ceffu",
+   "to": "issuer:ethena",
+   "mechanism": "custody",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://docs.ethena.fi/backing-custody-and-security/backing-asset-custody",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Ceffu (MirrorX, garde hors-bourse)"
+   }
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "venue:pendle:1:0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:morpho:1:0x90ef0c5a0dc7c4de4ad4585002d44e9d411d212d2f6258e94948beecf8b4c0d5",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:morpho:1:0x39d11026eae1c6ec02aa4c0910778664089cdd97c3fd23f68f7cd05e2e95af48",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  }
+ ],
+ "loops": [],
+ "meta": {
+  "generated_at": "2026-10-10T11:59:53Z",
+  "offline": true,
+  "max_depth_limit": 5,
+  "sources": [
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/v2/chains",
+    "fetched_at": "2026-10-10T10:44:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/markets/active",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/protocols",
+    "fetched_at": "2026-10-10T11:26:57Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "aave",
+    "url": "https://api.v3.aave.com/graphql",
+    "fetched_at": "2026-10-10T11:25:20Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/positions/current/collateral",
+    "fetched_at": "2026-10-10T11:27:21Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/collateral-breakdown",
+    "fetched_at": "2026-10-10T10:40:00Z"
+   }
+  ]
+ },
+ "checks": {
+  "errors": [],
+  "coverage": {
+   "dependencies": 25,
+   "edges": 34,
+   "max_depth": 5,
+   "by_status": {
+    "verified_onchain": 10,
+    "api": 14,
+    "documented": 10,
+    "assumed": 0
+   },
+   "share_by_status": {
+    "verified_onchain": 0.29411764705882354,
+    "api": 0.4117647058823529,
+    "documented": 0.29411764705882354,
+    "assumed": 0.0
+   },
+   "verified_share": 1.0
+  }
+ }
+}

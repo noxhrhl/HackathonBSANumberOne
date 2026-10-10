@@ -1,0 +1,26 @@
+{
+  "position": "PT-sUSDe",
+  "description": "Graphe illustratif (valeurs à justifier). Remplacé automatiquement par data/graph_discovered.json quand discover.py a tourné.",
+  "default_incident": "Oracle",
+  "default_incident_p": 40,
+  "nodes": {
+    "PT-sUSDe":       {"kind": "position"},
+    "Ethereum":       {"kind": "chain"},
+    "Ethena":         {"kind": "issuer"},
+    "sUSDe":          {"kind": "asset"},
+    "Pendle AMM":     {"kind": "venue"},
+    "Oracle":         {"kind": "oracle"},
+    "Lending market": {"kind": "lending"}
+  },
+  "edges": [
+    {"from": "Ethereum",       "to": "sUSDe",          "w": 1.0, "source": "illustratif"},
+    {"from": "Ethereum",       "to": "Pendle AMM",     "w": 1.0, "source": "illustratif"},
+    {"from": "Ethereum",       "to": "Lending market", "w": 1.0, "source": "illustratif"},
+    {"from": "Ethereum",       "to": "Oracle",         "w": 1.0, "source": "illustratif"},
+    {"from": "Ethena",         "to": "sUSDe",          "w": 1.0, "source": "illustratif"},
+    {"from": "sUSDe",          "to": "PT-sUSDe",       "w": 1.0, "source": "illustratif"},
+    {"from": "Pendle AMM",     "to": "PT-sUSDe",       "w": 0.6, "source": "illustratif"},
+    {"from": "Oracle",         "to": "Lending market", "w": 0.8, "source": "illustratif"},
+    {"from": "Lending market", "to": "PT-sUSDe",       "w": 0.5, "source": "illustratif - à vérifier"}
+  ]
+}

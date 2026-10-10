@@ -1,0 +1,2133 @@
+{
+ "position_id": "usdc-hold",
+ "position": {
+  "id": "position:usdc-hold",
+  "type": "hold",
+  "label": "USDC détenu (poche de liquidités)",
+  "chain_id": 1,
+  "asset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "size_usd": 2000000,
+  "config_id": "usdc-hold",
+  "info": {
+   "asset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+  }
+ },
+ "nodes": [
+  {
+   "id": "position:usdc-hold",
+   "name": "USDC détenu (poche de liquidités)",
+   "kind": "position",
+   "chain": "ethereum",
+   "metrics": {
+    "size_usd": 2000000
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "data/positions.json",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "type": "hold"
+   }
+  },
+  {
+   "id": "chain:ethereum",
+   "name": "Ethereum (chaîne de règlement)",
+   "kind": "chain",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": 51376949114.26337
+   },
+   "evidence": [
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/v2/chains",
+     "fetched_at": "2026-10-10T10:44:00Z"
+    },
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "name": "USDC",
+   "kind": "asset",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "etherscan",
+     "url": "https://etherscan.io/token/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+  },
+  {
+   "id": "issuer:circle",
+   "name": "Circle (émetteur d'USDC)",
+   "kind": "issuer",
+   "chain": "ethereum",
+   "metrics": {
+    "tvl_usd": null,
+    "ethereum_tvl_usd": null
+   },
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "category": null
+   }
+  },
+  {
+   "id": "custodian:circle-reserve-fund",
+   "name": "Circle Reserve Fund (USDXX, fonds monétaire géré par BlackRock)",
+   "kind": "custodian",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "custodian:circle-banks",
+   "name": "Liquidités chez « quelques très grandes banques » (cf. SVB 2023)",
+   "kind": "custodian",
+   "chain": "ethereum",
+   "metrics": {},
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  },
+  {
+   "id": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "name": "Aave V3 (pool Ethereum Core)",
+   "kind": "lending",
+   "chain": "ethereum",
+   "metrics": {
+    "total_supply_usd": 23188174782.22587,
+    "tvl_usd": 17354116295.02958,
+    "ethereum_tvl_usd": 14522977973.006773
+   },
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    },
+    {
+     "source": "defillama",
+     "url": "https://api.llama.fi/protocols",
+     "fetched_at": "2026-10-10T11:26:57Z"
+    }
+   ],
+   "address": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "protocol": "aave-v3",
+    "oracles_defillama": [
+     "Chainlink"
+    ]
+   }
+  }
+ ],
+ "edges": [
+  {
+   "from": "chain:ethereum",
+   "to": "position:usdc-hold",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Toute sortie ou remboursement passe par une transaction Ethereum"
+   }
+  },
+  {
+   "from": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "to": "position:usdc-hold",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "data/positions.json",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "La position est l'actif lui-même"
+   }
+  },
+  {
+   "from": "issuer:circle",
+   "to": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "mechanism": "backing",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Circle (émetteur d'USDC) émet et garantit USDC"
+   }
+  },
+  {
+   "from": "custodian:circle-reserve-fund",
+   "to": "issuer:circle",
+   "mechanism": "custody",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Circle Reserve Fund (USDXX, fonds monétaire géré par BlackRock)"
+   }
+  },
+  {
+   "from": "custodian:circle-banks",
+   "to": "issuer:circle",
+   "mechanism": "custody",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://www.circle.com/transparency",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ],
+   "details": {
+    "why": "Liquidités chez « quelques très grandes banques » (cf. SVB 2023)"
+   }
+  },
+  {
+   "from": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "to": "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "mechanism": "collateral_liquidation",
+   "status": "api",
+   "evidence": [
+    {
+     "source": "aave",
+     "url": "https://api.v3.aave.com/graphql",
+     "fetched_at": "2026-10-10T11:25:20Z"
+    }
+   ],
+   "details": {
+    "market_id": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+    "collateral_usd": 2412446057.915025,
+    "why": "USDC accepté en garantie sur Aave (2412 M$)"
+   }
+  },
+  {
+   "from": "chain:ethereum",
+   "to": "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
+   "mechanism": "settlement",
+   "status": "documented",
+   "evidence": [
+    {
+     "source": "documentation",
+     "url": "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+     "fetched_at": "2026-10-10T12:00:00Z"
+    }
+   ]
+  }
+ ],
+ "loops": [],
+ "meta": {
+  "generated_at": "2026-10-10T11:59:56Z",
+  "offline": true,
+  "max_depth_limit": 5,
+  "sources": [
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/v2/chains",
+    "fetched_at": "2026-10-10T10:44:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/markets/active",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x47ad2cd1dd15739a7a035b9d3b7828d916fef77e/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb195b618ea52b77cb2a58846f452f59f8dfa9390,0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "defillama",
+    "url": "https://api.llama.fi/protocols",
+    "fetched_at": "2026-10-10T11:26:57Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T10:20:00Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "aave",
+    "url": "https://api.v3.aave.com/graphql",
+    "fetched_at": "2026-10-10T11:25:20Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/positions/current/collateral",
+    "fetched_at": "2026-10-10T11:27:21Z"
+   },
+   {
+    "source": "ethena",
+    "url": "https://app.ethena.fi/api/collateral-breakdown",
+    "fetched_at": "2026-10-10T10:40:00Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=503551000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=1007101000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=2014202000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=3021304000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb195b618ea52b77cb2a58846f452f59f8dfa9390&amountsIn=5035506000000000000000000&tokensOut=0x9d39a5de30e57443bff2a8307a4256c8797a3497&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x34280882267ffa6383b363e278b027be083bbe3b/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c,0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=206000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=411000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=822000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=1234000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xb253eff1104802b97ac7e3ac9fdd73aece295a2c&amountsIn=2056000000000000000000&tokensOut=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:46Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:33:06Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/1/markets/0x9c560ebaf78e596cbcc27411d633a74d628dd7dc/data",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v1/1/assets/prices?addresses=0xdc169abe56461a2e0c034da431ac2a3ebf596094,0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+    "fetched_at": "2026-10-10T10:53:06Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:13Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:13Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:13Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:13Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:33Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:31:13Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=503115000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=1006231000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=2012461000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=3018692000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "pendle",
+    "url": "https://api-v2.pendle.finance/core/v2/sdk/1/convert?receiver=0x000000000000000000000000000000000000dEaD&slippage=0.05&tokensIn=0xdc169abe56461a2e0c034da431ac2a3ebf596094&amountsIn=5031153000000000000000000&tokensOut=0xa3931d71877c0e7a3148cb7eb4463524fec27fbd&enableAggregator=false",
+    "fetched_at": "2026-10-10T11:34:51Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:29:11Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "rpc",
+    "url": "https://ethereum-rpc.publicnode.com",
+    "fetched_at": "2026-10-10T11:30:37Z"
+   },
+   {
+    "source": "morpho",
+    "url": "https://api.morpho.org/graphql",
+    "fetched_at": "2026-10-10T10:54:24Z"
+   }
+  ]
+ },
+ "checks": {
+  "errors": [],
+  "coverage": {
+   "dependencies": 6,
+   "edges": 7,
+   "max_depth": 3,
+   "by_status": {
+    "verified_onchain": 0,
+    "api": 1,
+    "documented": 6,
+    "assumed": 0
+   },
+   "share_by_status": {
+    "verified_onchain": 0.0,
+    "api": 0.14285714285714285,
+    "documented": 0.8571428571428571,
+    "assumed": 0.0
+   },
+   "verified_share": 1.0
+  }
+ }
+}

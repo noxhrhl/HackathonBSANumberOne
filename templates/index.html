@@ -3,40 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Belem — Explorer un risque DeFi</title>
+  <title>Belem — Risque de dépendances DeFi</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header class="site-header"><div class="shell"><span class="brand-mark">▲</span><span>BELEM <small>CAPITAL · PROTOTYPE</small></span></div></header>
+  <header class="site-header"><div class="shell"><span class="brand-mark">▲</span><span>BELEM <small>CAPITAL · PROTOTYPE DE RISQUE</small></span><span class="data-badge">$badge</span></div></header>
   <main class="shell">
     <section class="hero">
-      <div><p class="eyebrow">DeFi Risk Dependency Challenge</p><h1>Qu'arrive-t-il à notre position <em>si un maillon cède&nbsp;?</em></h1>
-      <p class="intro">Une première démonstration du trajet entre une dépendance, une perte possible et une décision de sortie.</p></div>
-      <div class="hero-badge"><span>POSITION SUIVIE</span><strong>$position_name</strong><small>Cas illustratif</small></div>
+      <div><p class="eyebrow">DeFi Risk Dependency Challenge</p><h1>Un maillon cède. <em>On reste, on vend une partie, ou on sort&nbsp;?</em></h1>
+      <p class="intro">Le moteur découvre automatiquement ce dont dépend la position (données réelles : API Pendle, Morpho, Aave, DeFiLlama, Ethena et lectures on-chain), simule la propagation d'un incident, puis compare le coût de sortie au coût de rester.</p></div>
+      <div class="hero-badge"><span>POSITION SUIVIE</span><strong>$position_name</strong><small>$position_size · horizon $horizon jours</small></div>
     </section>
-    <div class="notice"><strong>Démo pédagogique</strong><span>$demo_note</span></div>
-    <div class="layout">
-      <section class="panel dependency-panel" aria-labelledby="dependencies-title">
-        <div class="section-head"><div><p class="eyebrow">01 / COMPRENDRE</p><h2 id="dependencies-title">Les étages de dépendance</h2></div><span class="section-tag">5 composants</span></div>
-        <p class="section-intro">Un étage peut affecter la valeur, la possibilité de vendre ou une position empruntée. Le composant coloré est celui touché par le scénario de cette démo.</p>
-        <div class="dependency-list">$dependencies</div>
-      </section>
-      <div class="right-column">
-        <section class="panel" aria-labelledby="scenario-title">
-          <p class="eyebrow">02 / SIMULER</p><h2 id="scenario-title">$scenario_name</h2>
-          <p class="section-intro">Modifiez les hypothèses pour voir comment le résultat change. Les deux pourcentages portent sur la valeur actuelle de la position.</p>
-          <form method="get" action="/">
-            <label>Valeur de la position <span>USD</span><input type="number" name="position_usd" min="0.01" step="0.01" required value="$position_usd"></label>
-            <label>Perte si l'incident survient <span>%</span><input type="number" name="loss_percent" min="0" max="100" step="0.1" required value="$loss_percent"></label>
-            <label>Coût pour sortir maintenant <span>%</span><input type="number" name="exit_percent" min="0" max="100" step="0.1" required value="$exit_percent"></label>
-            <button type="submit">Recalculer <span aria-hidden="true">→</span></button>
-          </form>
-          $error
-        </section>
-        <section class="panel result-panel" aria-labelledby="result-title"><p class="eyebrow">03 / DÉCIDER</p><h2 id="result-title">Ce que disent les chiffres</h2>$result</section>
-      </div>
-    </div>
-    <footer>Prototype local · Aucun conseil d'investissement · Prochaine étape : remplacer les hypothèses par un marché réel et des sources vérifiées.</footer>
+    $controls
+    $answer
+    $graph
+    $decision
+    $robustness
+    $book
+    $evidence
+    <footer>Prototype local · Aucun conseil d'investissement · Méthode et sources : NOTES.md et docs/METHODE.md · Les tailles de poches sont illustratives ; les dépendances et les marchés sont réels.</footer>
   </main>
 </body>
 </html>

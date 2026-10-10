@@ -1,0 +1,47 @@
+{
+ "source": "ethena",
+ "key": "collateral_breakdown",
+ "url": "https://app.ethena.fi/api/collateral-breakdown",
+ "request": null,
+ "fetched_at": "2026-10-10T10:40:00Z",
+ "response": {
+  "breakdown": [
+   {
+    "category": "Crypto Basis",
+    "usdAmount": 884357940,
+    "assets": "BTC, ETH, SOL, XRP, BNB",
+    "percentage": 0.18466471065294113
+   },
+   {
+    "category": "Equity and RWA Basis",
+    "usdAmount": 13949192,
+    "assets": "CRCL, GOOGL, INTC, MSTR, MU, SNDK, SPCX, GOLD",
+    "percentage": 0.0029127612112832065
+   },
+   {
+    "category": "Institutional Lending",
+    "usdAmount": 680840423,
+    "assets": "BTC",
+    "percentage": 0.14216777396053124
+   },
+   {
+    "category": "Liquid Stables",
+    "usdAmount": 1197607170,
+    "assets": "USDT, USDC, USDtb, PYUSD",
+    "percentage": 0.2500749657134731
+   },
+   {
+    "category": "DeFi Lending",
+    "usdAmount": 1728383353,
+    "assets": "Aave, Morpho",
+    "percentage": 0.3609074983587587
+   },
+   {
+    "category": "RWA",
+    "usdAmount": 283854561,
+    "assets": "JAAA, STAC",
+    "percentage": 0.059272290103012625
+   }
+  ]
+ }
+}

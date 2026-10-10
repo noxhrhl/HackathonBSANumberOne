@@ -1,0 +1,17 @@
+{
+ "source": "morpho",
+ "key": "markets_collateral_1_0xb253eff1104802b97ac7e3ac9fdd73aece295a2c",
+ "url": "https://api.morpho.org/graphql",
+ "request": {
+  "query": "{ markets(first: 100, where: {chainId_in: [1], collateralAssetAddress_in: [\"0xb253eff1104802b97ac7e3ac9fdd73aece295a2c\"]}) { items { marketId lltv listed loanAsset { symbol address } collateralAsset { symbol address } oracle { address type data { ... on MorphoChainlinkOracleV2Data { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } baseOracleVault { address } quoteOracleVault { address } } ... on MorphoChainlinkOracleData { baseFeedOne { address } baseFeedTwo { address } quoteFeedOne { address } quoteFeedTwo { address } } } } state { supplyAssetsUsd borrowAssetsUsd collateralAssetsUsd } } } }"
+ },
+ "fetched_at": "2026-10-10T10:54:24Z",
+ "response": {
+  "data": {
+   "markets": {
+    "items": []
+   }
+  },
+  "_filtre": "marchés listés avec au moins 1 M$ de collatéral"
+ }
+}
