@@ -1,8 +1,8 @@
 import unittest
 
-import decide as D
-import model as M
-from schema import edge, evidence, node
+from risk_engine import decide as D
+from risk_engine import model as M
+from risk_engine.schema import edge, evidence, node
 
 EV = [evidence("test", "https://example.org", "2026-10-10T00:00:00Z")]
 

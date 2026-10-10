@@ -1,6 +1,6 @@
 import unittest
 
-from schema import coverage, depths, edge, evidence, find_cycle, node, validate
+from risk_engine.schema import coverage, depths, edge, evidence, find_cycle, node, validate
 
 EV = [evidence("test", "https://example.org", "2026-10-10T00:00:00Z")]
 

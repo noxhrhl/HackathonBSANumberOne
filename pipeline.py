@@ -12,11 +12,8 @@ import json
 import sys
 from pathlib import Path
 
-import decide as D
-import discover
-import model as M
-import rules
-import sources as S
+from risk_engine import decide as D
+from risk_engine import discover, model as M, rules, sources as S
 
 ROOT = Path(__file__).resolve().parent
 GRAPHS = ROOT / "data" / "graphs"

@@ -1,8 +1,8 @@
 """Tests de la découverte sur les réponses réelles en cache (aucun accès réseau)."""
 import unittest
 
-import discover
-import sources as S
+from risk_engine import discover
+from risk_engine import sources as S
 
 
 def graph(pid):

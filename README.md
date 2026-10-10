@@ -9,7 +9,7 @@ Le prototype **découvre automatiquement** ce dont dépend une position (donnée
 ```bash
 python pipeline.py --all --offline --book    # graphes + rapports depuis le cache (~15 s)
 python app.py                                 # puis ouvrir http://127.0.0.1:8000
-python -m unittest discover -s tests          # 41 tests (~2 min)
+python -m unittest discover -s tests          # vérifications du moteur et du site
 ```
 
 Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans `--offline`). Les réponses brutes sont enregistrées dans `data/cache/` avec leur heure de relevé ; recalcul des taux d'exploits : `python calibrate.py`.
@@ -23,25 +23,21 @@ Rafraîchir les données avec Internet : `python pipeline.py --all --book` (sans
 5. **Le livre** (10 poches de 10 %) : qui d'autre est touché, perte corrélée du livre, concentrations de TVL.
 6. **Preuves** : paramètres de chaque composant, 14 incidents réels, toutes les données relevées.
 
-## Fichiers
+## Où sont les fichiers ?
 
-| Fichier | Rôle |
+| Dossier ou fichier | Rôle |
 | --- | --- |
-| `pipeline.py` | Une commande : découvrir → enrichir → simuler → décider → `data/graphs/` et `data/reports/` |
-| `discover.py` | Découverte en largeur, un résolveur par type de nœud (Pendle, collatéral, oracle, actif, émetteur) |
-| `sources.py` | Accès aux API et au RPC Ethereum, avec cache disque (`--offline`) |
-| `keccak.py` | Keccak-256 en Python pur (sélecteurs des appels on-chain) |
-| `schema.py` | Contrat de données (types, mécanismes, statuts) et contrôles automatiques |
-| `rules.py` | Tous les nombres de risque (λ, sévérité, w) avec fourchettes ; justification dans `NOTES.md` |
-| `calibrate.py` | Taux d'exploits par catégorie depuis la base DeFiLlama |
-| `model.py` | Facteur d'impact et Monte Carlo (nombres aléatoires communs) |
-| `decide.py` | Coût de sortie, vente partielle optimale, robustesse |
-| `svg.py` | Dessin du graphe et des courbes (SVG côté serveur) |
-| `app.py`, `templates/`, `static/` | La page locale |
-| `risk.py` | Calcul de seuil simple de l'équipe (`assess`, utilisé dans la boîte de réponse) et premier modèle de graphe |
-| `data/positions.json` | Les 10 positions (adresses réelles, tailles illustratives) |
-| `data/documented.json`, `data/evidence.json` | Faits documentés et incidents, chacun avec un lien |
-| `NOTES.md` | D'où vient chaque nombre |
-| `docs/` | Méthode, questions du jury, pitch, script de démo, checklist des critères |
+| `app.py` | Lance le site local et compose la page. |
+| `pipeline.py` | Découvre les dépendances, simule les pertes et prépare les résultats. |
+| `calibrate.py` | Recalcule les taux historiques à partir de DeFiLlama si l'on veut actualiser les hypothèses. |
+| `risk_engine/` | Modules internes : collecte, graphe, règles, simulations, décision et dessin SVG. |
+| `templates/`, `static/` | HTML et CSS du site. |
+| `data/positions.json` | Les 10 positions : adresses réelles et tailles illustratives. |
+| `data/documented.json`, `data/evidence.json` | Relations et incidents documentés, avec leurs sources. |
+| `data/cache/` | Réponses API et Ethereum datées, nécessaires pour la démo hors ligne. |
+| `data/graphs/`, `data/reports/` | Graphes et analyses produits par le pipeline ; le site les lit directement. |
+| `tests/` | Vérifications des calculs, de la découverte et du rendu du site. |
+| `tools/` | Utilitaire de collecte du cache quand le réseau est limité. |
+| `NOTES.md`, `docs/` | Justification des nombres, méthode, architecture et documents de démonstration. |
 
-Le brief original est conservé dans `BelemCapital_EPFL-Hackathon_DeFi-Risk-Dependency-Challenge_EN_v1.pdf`. Aucun conseil d'investissement.
+Le rôle précis de chaque module et le chemin des données sont dans [l'architecture](docs/ARCHITECTURE.md). Le brief original est conservé dans `BelemCapital_EPFL-Hackathon_DeFi-Risk-Dependency-Challenge_EN_v1.pdf`. Aucun conseil d'investissement.

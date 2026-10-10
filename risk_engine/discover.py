@@ -14,7 +14,7 @@ Principe : parcours en largeur depuis la position. Chaque nœud découvert est c
 Direction : « A → B » = si A défaille, B est touché. La position est le seul puits.
 Une arête qui fermerait une boucle n'est pas ajoutée : la boucle est signalée à part.
 
-Usage : python discover.py [position_id] [--offline]
+Usage : python -m risk_engine.discover [position_id] [--offline]
 """
 
 import json
@@ -22,11 +22,11 @@ import sys
 from collections import deque
 from pathlib import Path
 
-import sources as S
-from keccak import selector
-from schema import coverage, edge, node, validate
+from . import sources as S
+from .keccak import selector
+from .schema import coverage, edge, node, validate
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 DOCUMENTED = json.loads((ROOT / "data" / "documented.json").read_text(encoding="utf-8"))
 POSITIONS = json.loads((ROOT / "data" / "positions.json").read_text(encoding="utf-8"))
 MAX_DEPTH = 5             # 5 étages, comme l'exemple de Belem

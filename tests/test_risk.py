@@ -1,6 +1,6 @@
 import unittest
 
-from risk import assess
+from risk_engine.risk import assess
 
 
 class RiskTests(unittest.TestCase):

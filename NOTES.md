@@ -1,6 +1,6 @@
 # NOTES — d'où vient chaque nombre
 
-Toutes les valeurs du code (`rules.py`) renvoient à une section de ce fichier. Chaque valeur a une fourchette **BAS / BASE / HAUT** ; la page montre que la recommandation tient (ou non) sur toute la fourchette.
+Toutes les valeurs du code (`risk_engine/rules.py`) renvoient à une section de ce fichier. Chaque valeur a une fourchette **BAS / BASE / HAUT** ; la page montre que la recommandation tient (ou non) sur toute la fourchette.
 
 Trois familles de paramètres :
 

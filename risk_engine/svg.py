@@ -8,7 +8,7 @@ Survol d'un nœud = preuves (source + date) ; clic = ouvre la première preuve.
 
 from html import escape
 
-from schema import depths
+from .schema import depths
 
 KIND_STYLE = {
     "position": ("#1d2633", "#ffffff", "Position"),

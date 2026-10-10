@@ -8,7 +8,7 @@ Méthode (explicable en 30 secondes) :
   4. Borne haute à 95 % (loi de Poisson) : avec 0 incident, c'est la « règle de trois » 3/exposition.
 
 Limite connue : biais du survivant (on compte les protocoles encore vivants aujourd'hui).
-Le résultat est enregistré dans data/calibration/hacks_rates.json et lu par rules.py.
+Le résultat est enregistré dans data/calibration/hacks_rates.json et lu par risk_engine/rules.py.
 
 Usage (avec Internet) : python calibrate.py
 """
@@ -63,7 +63,7 @@ def rates(hacks: list, protocols: list) -> dict:
 
 
 def main():
-    import sources as S
+    from risk_engine import sources as S
     hacks = S._get_json(f"{S.LLAMA}/hacks", 90)
     protocols = S._get_json(f"{S.LLAMA}/protocols", 90)
     result = {"method": __doc__.split("Usage")[0].strip(), "source": f"{S.LLAMA}/hacks + {S.LLAMA}/protocols",

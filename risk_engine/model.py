@@ -18,7 +18,7 @@ import random
 import zlib
 from datetime import datetime, timezone
 
-import rules
+from . import rules
 
 N_SIM = 20_000
 SEED = 2026

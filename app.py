@@ -15,11 +15,10 @@ from pathlib import Path
 from string import Template
 from urllib.parse import parse_qs, urlencode, urlparse
 
-import decide as D
-import model as M
-import rules
-import svg
-from risk import assess
+from risk_engine import decide as D
+from risk_engine import model as M
+from risk_engine import rules, svg
+from risk_engine.risk import assess
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATE = Template((ROOT / "templates" / "index.html").read_text(encoding="utf-8"))

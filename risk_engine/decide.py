@@ -19,7 +19,7 @@ contre 6 % (tout garder) et 11 % (tout vendre).
 
 import math
 
-import model as M
+from . import model as M
 
 GRID = [i / 100 for i in range(101)]
 STAY_MAX = 0.05     # en dessous : « garder »

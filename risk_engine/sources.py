@@ -15,7 +15,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "data" / "cache"
 RPC_URL = "https://ethereum-rpc.publicnode.com"
 PENDLE = "https://api-v2.pendle.finance/core"

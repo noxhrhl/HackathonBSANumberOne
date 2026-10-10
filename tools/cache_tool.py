@@ -12,11 +12,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import sources as S  # noqa: E402
+from risk_engine import sources as S  # noqa: E402
 
 
 def missing():
-    import discover
+    from risk_engine import discover
     S.set_offline(True)
     todo = S.start_collect()
     errors = []
