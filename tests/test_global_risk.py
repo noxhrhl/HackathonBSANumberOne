@@ -101,14 +101,15 @@ class GlobalRiskTests(unittest.TestCase):
         self.assertIn("n'est pas remplacée", html)
 
     def test_existing_view_is_rendered_by_existing_function(self):
-        import app_global
+        import app
         original = '<html><head></head><body><div class="tabs-wrap">ANCIEN_SITE</div></body></html>'
         decorated = web.add_tabs_to_current(original, "test")
         self.assertIn("ANCIEN_SITE", decorated)
         self.assertIn("Analyse globale des risques", decorated)
         self.assertIn("/global?pos=test", decorated)
         self.assertIn("/?pos=test", decorated)
-        self.assertIs(app_global.Handler.__mro__[1], app_global.app.Handler)
+        self.assertTrue(callable(app.render_page))
+        self.assertTrue(callable(app.live_analysis))
 
     def test_existing_graph_fixture_is_fully_covered(self):
         path = ROOT / "data" / "graphs" / "pt-susde-26nov2026.json"
@@ -121,10 +122,10 @@ class GlobalRiskTests(unittest.TestCase):
         self.assertEqual(len(result["rows"]), len(graph["nodes"]) - 1)
 
     def test_live_collection_failure_has_no_snapshot_fallback(self):
-        import app_global
-        with patch.object(app_global.app, "ensure_live_data", side_effect=ConnectionError("source absente")):
+        import app
+        with patch.object(app, "ensure_live_data", side_effect=ConnectionError("source absente")):
             with self.assertRaises(ConnectionError):
-                app_global.live_analysis("test", force=True)
+                app.live_analysis("test", force=True)
         page = web.render_unavailable("test", ConnectionError("source absente"))
         self.assertIn("Données indisponibles", page)
         self.assertIn("Aucune ancienne donnée", page)
@@ -159,7 +160,7 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         import app
         from global_risk.current import render_current
         asset = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "asset")
-        page = render_current("pos=" + self.pid + "&incident=" + asset, self.pid)
+        page = render_current("pos=" + self.pid + "&incident=" + asset, self.pid, app)
         self.assertEqual(page.count('class="dep-graph"'), 1)
         self.assertNotIn('class="tabbar"', page)
         self.assertIn('class="sim-form"', page)
@@ -171,7 +172,7 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         import app
         from global_risk.current import render_current
         issuer = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "issuer")
-        page = render_current("pos=" + self.pid + "&incident=" + issuer, self.pid)
+        page = render_current("pos=" + self.pid + "&incident=" + issuer, self.pid, app)
         self.assertEqual(page.count('class="dep-graph"'), 1)
         self.assertNotIn('class="sim-form"', page)
         self.assertNotIn('class="tabbar"', page)
@@ -181,7 +182,7 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         import app
         from global_risk.current import render_current
         asset = next(n["id"] for n in app.graph_for(self.other_pid)["nodes"] if n["kind"] == "asset")
-        page = render_current("pos=" + self.other_pid + "&incident=" + asset, self.other_pid)
+        page = render_current("pos=" + self.other_pid + "&incident=" + asset, self.other_pid, app)
         self.assertEqual(page.count('class="dep-graph"'), 1)
         self.assertNotIn('class="sim-form"', page)
 
@@ -192,21 +193,20 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         assets = [n["id"] for n in graph["nodes"] if n["kind"] == "asset"]
         query, advanced = _normalized_query(
             "pos=" + self.pid + "&incident=" + assets[0] + "&snode=" + assets[1] + "&run=1",
-            self.pid, graph, app.report_for(self.pid))
+            self.pid, graph, app.report_for(self.pid), app)
         self.assertTrue(advanced)
         self.assertEqual(parse_qs(query)["incident"], [assets[1]])
         self.assertNotIn("run", parse_qs(query))
 
     def test_amount_survives_both_pages_and_advanced_controls(self):
         import app
-        import app_global
         from global_risk.current import render_current
         asset = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "asset")
-        page = render_current("pos=" + self.pid + "&incident=" + asset + "&amount=10000000", self.pid)
+        page = render_current("pos=" + self.pid + "&incident=" + asset + "&amount=10000000", self.pid, app)
         self.assertIn('name="amount"', page)
         self.assertIn('name="amount" value="10000000"', page)
         self.assertIn("/global?pos=" + self.pid + "&amp;amount=10000000", page)
-        result, graph, report, context = app_global.live_analysis(
+        result, graph, report, context = app.live_analysis(
             self.pid, query="pos=" + self.pid + "&amount=10000000")
         self.assertEqual(result["position_size_usd"], 10000000)
         global_page = web.render_global(result, graph, report, context, app.available_positions())

@@ -1,4 +1,4 @@
-"""Page locale : une seule histoire, de la position à la décision (bibliothèque standard uniquement).
+"""Site local : analyse actuelle et analyse globale (bibliothèque standard uniquement).
 
   python app.py            puis ouvrir http://127.0.0.1:8000
   python app.py --port 8001
@@ -9,6 +9,7 @@ Une collecte échouée rend la page indisponible au lieu d'afficher un ancien ra
 
 import argparse
 import json
+import sys
 import threading
 import time
 from html import escape
@@ -23,6 +24,7 @@ from risk_engine import model as M
 from risk_engine import rules, svg
 from risk_engine import simulate as SIM
 from risk_engine.risk import assess
+from global_risk import analyze, current, web
 import pipeline
 
 ROOT = Path(__file__).resolve().parent
@@ -96,8 +98,8 @@ def report_for(pid):
     return _reports[pid]
 
 
-# Positions touchées par l'effet boule de neige (marché Morpho PT-sUSDe) : seules celles-ci ont
-# l'onglet « graphe avancé ». Les autres n'affichent que le graphe simple.
+# Positions touchées par l'effet boule de neige (marché Morpho PT-sUSDe) :
+# leurs incidents compatibles affichent le graphe approfondi dans l'analyse actuelle.
 ADVANCED_POSITIONS = {"pt-susde-26nov2026", "morpho-ptsusde-usdc", "morpho-ptsusde-borrow"}
 
 
@@ -700,17 +702,47 @@ def _api_simulate(query):
         return {"error": str(exc), "compatible": SIM.compatible_scenarios(g, node)}
 
 
+def selected_position(query):
+    """Choisit la position du lien, ou la position principale si l'identifiant est absent."""
+    requested = parse_qs(query).get("pos", [None])[0]
+    positions = available_positions()
+    main = next((p["id"] for p in positions if p.get("main")), positions[0]["id"])
+    return requested if requested in {p["id"] for p in positions} else main
+
+
+def live_analysis(pid, force=False, query=""):
+    """Analyse globale à partir du relevé en mémoire, sans lire d'ancien rapport."""
+    with _refresh_lock:
+        ensure_live_data(pid, force=force)
+        graph = graph_for(pid)
+        report = report_for(pid)
+        context = sim_ctx_for(pid)
+        amount = parse(query)["amount"]
+        return analyze(graph, report, context, amount=amount), graph, report, context
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         request = urlparse(self.path)
+        pid = selected_position(request.query)
         try:
             if request.path == "/static/style.css":
                 body, content_type, status = STYLE, "text/css; charset=utf-8", 200
             elif request.path == "/health":
                 body, content_type, status = b"ok", "text/plain; charset=utf-8", 200
             elif request.path == "/":
-                body = render_page(request.query).encode("utf-8")
+                body = current.render_current(request.query, pid, sys.modules[__name__]).encode("utf-8")
                 content_type, status = "text/html; charset=utf-8", 200
+            elif request.path in ("/global", "/api/global"):
+                result, graph, report, context = live_analysis(
+                    pid, force=parse_qs(request.query).get("refresh") == ["1"], query=request.query)
+                if request.path == "/api/global":
+                    body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+                    content_type, status = "application/json; charset=utf-8", 200
+                else:
+                    body = web.render_global(result, graph, report, context,
+                                             available_positions()).encode("utf-8")
+                    content_type, status = "text/html; charset=utf-8", 200
             elif request.path == "/api/simulate":
                 body = json.dumps(api_simulate(request.query), ensure_ascii=False).encode("utf-8")
                 content_type, status = "application/json; charset=utf-8", 200
@@ -722,12 +754,18 @@ class Handler(BaseHTTPRequestHandler):
                 content_type, status = "application/json; charset=utf-8", 200
             else:
                 body, content_type, status = b"Page introuvable", "text/plain; charset=utf-8", 404
-        except Exception as exc:  # la démo ne doit jamais afficher une page blanche
-            body = f"<h1>Erreur</h1><pre>{escape(type(exc).__name__)}: {escape(str(exc))}</pre>".encode("utf-8")
-            content_type, status = "text/html; charset=utf-8", 500
+        except Exception as exc:
+            if request.path in ("/", "/global", "/api/global"):
+                body = web.render_unavailable(pid, exc).encode("utf-8")
+                content_type, status = "text/html; charset=utf-8", 503
+            else:
+                body = f"<h1>Erreur</h1><pre>{escape(type(exc).__name__)}: {escape(str(exc))}</pre>".encode("utf-8")
+                content_type, status = "text/html; charset=utf-8", 500
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        if request.path in ("/", "/global", "/api/global"):
+            self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
@@ -736,12 +774,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Prototype local de risque DeFi")
+    parser = argparse.ArgumentParser(description="Belem : analyses actuelle et globale des risques")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
-    main = next((p["id"] for p in POSITIONS["positions"] if p.get("main")), POSITIONS["positions"][0]["id"])
+    main = selected_position("")
     print("Collecte en ligne de la position principale…", flush=True)
-    ensure_live_data(main)
+    try:
+        ensure_live_data(main)
+    except Exception as exc:
+        print(f"Données indisponibles au démarrage : {type(exc).__name__}: {exc}", flush=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     print(f"Ouvrez http://127.0.0.1:{args.port} (Ctrl+C pour arrêter)")
     try:

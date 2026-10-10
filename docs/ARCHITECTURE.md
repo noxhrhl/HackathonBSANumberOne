@@ -1,10 +1,11 @@
 # Architecture du projet
 
-Le site utilise une seule application : `app.py`. Il reconstruit en mémoire les graphes et rapports depuis les sources en ligne. `pipeline.py` exporte séparément ces résultats en JSON pour analyse ou tests. Les fichiers de `risk_engine/` contiennent les calculs ; ils ne définissent pas une seconde interface.
+Le site utilise une seule application et un seul point d'entrée : `app.py`. Il sert les pages « Analyse actuelle » et « Analyse globale des risques », et reconstruit en mémoire les graphes et rapports depuis les sources en ligne. `pipeline.py` exporte séparément ces résultats en JSON pour analyse ou tests. Les fichiers de `risk_engine/` contiennent les calculs ; ils ne définissent pas une seconde interface.
 
 ```text
 HackathonBSANumberOne/
-├── app.py                    Serveur local et assemblage de la page
+├── app.py                    Serveur unique, collecte en ligne et routes des deux pages
+├── global_risk/              Graphe unique de l'analyse actuelle et profil global
 ├── pipeline.py               Produit les graphes et rapports à partir des données
 ├── calibrate.py              Recalcule, si besoin, les taux historiques d'incident
 ├── risk_engine/              Logique réutilisable, indépendante de la page
@@ -48,12 +49,12 @@ positions.json + documented.json + API/RPC relevés en ligne
                          ↓
               rapport en mémoire
                          ↓
-     app.py + templates/index.html + static/style.css
+     app.py + global_risk/ + templates/index.html + static/style.css
                          ↓
-                   page locale
+              deux pages dans le même site
 ```
 
-`pipeline.py` orchestre les mêmes calculs pour produire des fichiers JSON. `app.py` relève en ligne la position principale avant d'ouvrir le site et les autres positions lorsqu'on les choisit ; chaque position est actualisée après cinq minutes ou à la demande. La page recalcule la décision quand un visiteur change l'incident ou une hypothèse. Le site n'ouvre pas les fichiers JSON exportés.
+`pipeline.py` orchestre les mêmes calculs pour produire des fichiers JSON. `app.py` tente de relever en ligne la position principale au démarrage et les autres positions lorsqu'on les choisit ; chaque position est actualisée après cinq minutes ou à la demande. Si la collecte échoue, le serveur peut afficher « données indisponibles » sans présenter un ancien relevé. L'analyse actuelle recalcule la décision quand un visiteur change l'incident ou une hypothèse ; l'analyse globale parcourt tous les nœuds du graphe découvert. Le site n'ouvre pas les fichiers JSON exportés.
 
 ## Où intervenir
 
@@ -65,5 +66,6 @@ positions.json + documented.json + API/RPC relevés en ligne
 | Modifier le calcul de perte ou de décision | `risk_engine/model.py`, `risk_engine/decide.py`, puis les tests. |
 | Ajouter une défaillance ou un protocole au simulateur | `risk_engine/simulate.py` : une entrée dans `SCENARIOS`, un modèle dans `MODELS` et sa règle dans `classify()`, un évaluateur de nœud ou de position ; puis `tests/test_simulate.py`. |
 | Changer l'apparence | `templates/index.html`, `static/style.css` et la composition de la page dans `app.py`. |
+| Modifier l'analyse globale ou le graphe unique | `global_risk/analysis.py`, `global_risk/current.py`, `global_risk/web.py` et leurs tests. |
 
 Les commandes pour démarrer et vérifier le projet sont dans le [README](../README.md). L'analyse du site porte sur des positions d'exemple ; les tailles sont illustratives, même si les adresses et marchés étudiés sont réels.

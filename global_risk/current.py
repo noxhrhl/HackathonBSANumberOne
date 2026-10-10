@@ -1,14 +1,14 @@
 """Une seule zone de graphe sur la page d'analyse actuelle.
 
-Le site original continue de rendre ses sections et de calculer la recommandation.
+L'application produit toujours ses sections et calcule sa recommandation.
 Ce module choisit laquelle des deux représentations déjà produites afficher selon
-la défaillance sélectionnée. Il ne modifie aucun fichier de l'application d'origine.
+la défaillance sélectionnée. Le module applicatif est passé explicitement pour
+partager le même état quand app.py est lancé comme script ou importé en test.
 """
 
 from html.parser import HTMLParser
 from urllib.parse import parse_qs, urlencode
 
-import app
 from risk_engine import simulate
 
 from . import web
@@ -55,7 +55,7 @@ def _spans(page):
     return locator.spans
 
 
-def _normalized_query(query, pid, graph, report):
+def _normalized_query(query, pid, graph, report, app_module):
     """Synchronise le composant du formulaire et un clic dans le graphe simulé."""
     args = {key: values[0] for key, values in parse_qs(query).items() if values}
     ids = {n["id"] for n in graph["nodes"] if n["kind"] != "position"}
@@ -65,7 +65,7 @@ def _normalized_query(query, pid, graph, report):
     if args.get("snode") in ids and args["snode"] != incident:
         incident = args["snode"]
         args.pop("run", None)
-    compatible = (pid in app.ADVANCED_POSITIONS and
+    compatible = (pid in app_module.ADVANCED_POSITIONS and
                   bool(simulate.compatible_scenarios(graph, incident)))
     args.update(pos=pid, incident=incident)
     if compatible:
@@ -101,12 +101,13 @@ def _one_graph(page, advanced):
     return page
 
 
-def render_current(query, pid):
+def render_current(query, pid, app_module):
     """Rend la page d'origine avec un seul graphe, sans recalculer ses résultats."""
-    with app._refresh_lock:
-        app.ensure_live_data(pid, force=parse_qs(query).get("refresh") == ["1"])
-        normalized, advanced = _normalized_query(query, pid, app.graph_for(pid), app.report_for(pid))
-        amount = app.parse(normalized)["amount"]
-        page = app.render_page(normalized)
+    with app_module._refresh_lock:
+        app_module.ensure_live_data(pid, force=parse_qs(query).get("refresh") == ["1"])
+        normalized, advanced = _normalized_query(query, pid, app_module.graph_for(pid),
+                                                 app_module.report_for(pid), app_module)
+        amount = app_module.parse(normalized)["amount"]
+        page = app_module.render_page(normalized)
         page = web.add_tabs_to_current(page, pid, amount)
         return _one_graph(page, advanced)

@@ -74,6 +74,6 @@ python app.py
 python -m unittest tests/test_cascade.py
 ```
 
-Choisir la position « USDC prêté sur Morpho contre PT-sUSDe » dans le site. Le lancement de `app.py` relance déjà ce collecteur. Il demande les positions Morpho (pagination), l'état du marché, `price()` au bloc Ethereum, le prix USD du sUSDe, puis une série de devis PT→sUSDe. Si une source échoue ou si les sommes ne concordent pas à 0,1 % près, le site ne démarre pas ; aucun ancien relevé n'est utilisé pour l'affichage.
+Choisir la position « USDC prêté sur Morpho contre PT-sUSDe » dans le site. Le lancement de `app.py` tente de relever la position principale, puis chaque autre position quand on la sélectionne. Le collecteur demande les positions Morpho (pagination), l'état du marché, `price()` au bloc Ethereum, le prix USD du sUSDe, puis une série de devis PT→sUSDe. Si une source échoue ou si les sommes ne concordent pas à 0,1 % près, la position affiche « données indisponibles » ; aucun ancien relevé n'est utilisé pour l'affichage.
 
 Les devis utilisent `POST /v3/sdk/1/convert`, l'endpoint recommandé par la documentation Pendle actuelle. Le modèle n'invente pas de devis de remplacement si cette route échoue : le collecteur échoue explicitement et conserve l'ancien relevé.

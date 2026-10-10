@@ -5,11 +5,11 @@
 À la racine du dépôt :
 
 ```bash
-python app_global.py
-# ou, selon votre installation : python3 app_global.py
+python app.py
+# ou, selon votre installation : python3 app.py
 ```
 
-Ouvrir `http://127.0.0.1:8000`. Si l'ancien serveur occupe le port, l'arrêter ou lancer `python3 app_global.py --port 8001`. `python app.py` conserve exactement son interface et son comportement. Le nouveau point d'entrée produit la page actuelle via `app.render_page()`, lui ajoute une navigation, et expose `/global?pos=<id>` et `/api/global?pos=<id>`. Les deux pages gardent l'identifiant de position dans le lien. Le formulaire de la page globale change de position sans demander d'incident. Le bouton **Actualiser** force un nouveau relevé.
+Ouvrir `http://127.0.0.1:8000`. Si le port est occupé, arrêter le serveur précédent ou lancer `python3 app.py --port 8001`. **`app.py` est l'unique point d'entrée du site.** Il sert l'analyse actuelle à `/`, l'analyse globale à `/global?pos=<id>` et son résultat JSON à `/api/global?pos=<id>`. Les deux pages gardent la position et le montant choisis dans leurs liens. Le formulaire de la page globale change de position sans demander d'incident. Le bouton **Actualiser** force un nouveau relevé.
 
 ### Deux pages et un seul graphe sur l'analyse actuelle
 
@@ -22,13 +22,13 @@ Dans le graphe approfondi, cliquer un autre nœud sélectionne aussi ce nœud co
 
 | Nouveau fichier | Rôle |
 | --- | --- |
-| `app_global.py` | Serveur : hérite des routes du site et ajoute les deux routes globales. |
+| `app.py` | Serveur unique : routes des deux pages, relevés en ligne et API. |
 | `global_risk/current.py` | Sur la page actuelle, synchronise le choix de défaillance et garde le graphe simple ou approfondi, selon la compatibilité. |
 | `global_risk/analysis.py` | Profil déterministe de tous les nœuds du graphe, regroupement, scénarios et manques. |
 | `global_risk/web.py` | Page, graphe cliquable, navigation, état « données indisponibles ». |
 | `tests/test_global_risk.py` | Tests sans réseau du calcul et du rendu. |
 
-Le code existant n'est ni copié, ni modifié. L'onglet importe `app.ensure_live_data`, `app.graph_for`, `app.report_for`, `app.sim_ctx_for`, `risk_engine.model.PositionModel`, `risk_engine.model.best_path`, `risk_engine.schema.coverage` et `risk_engine.svg.render`. Le relevé est gardé en mémoire par le site pendant cinq minutes. Lorsqu'un rafraîchissement échoue, `app.ensure_live_data` vide les données de la position avant de relancer la collecte : la nouvelle route affiche **données indisponibles**, jamais un fichier `data/graphs` ou `data/reports` ancien. Les fichiers de `data/` peuvent servir de fixtures aux tests, jamais au site global en production.
+Les modules d'analyse réutilisent `app.ensure_live_data`, `app.graph_for`, `app.report_for`, `app.sim_ctx_for`, `risk_engine.model.PositionModel`, `risk_engine.model.best_path`, `risk_engine.schema.coverage` et `risk_engine.svg.render`. Le relevé est gardé en mémoire par le site pendant cinq minutes. Lorsqu'un rafraîchissement échoue, `app.ensure_live_data` vide les données de la position avant de relancer la collecte : la page affiche **données indisponibles**, jamais un fichier `data/graphs` ou `data/reports` ancien. Les fichiers de `data/` peuvent servir de fixtures aux tests, jamais au site en production.
 
 ## Ce qui est réutilisable, et ce qui ne l'est pas
 

@@ -2,7 +2,7 @@
 
 Un maillon cède. On reste, on vend une partie, ou on sort ?
 
-Le prototype **découvre automatiquement** ce dont dépend une position (données réelles : API Pendle, Morpho, Aave, DeFiLlama, Ethena, et lectures on-chain sur Ethereum), **simule** la propagation d'un incident, puis **calcule combien vendre** en comparant un coût de sortie certain à une perte incertaine.
+Le site **découvre automatiquement** ce dont dépend une position (données réelles : API Pendle, Morpho, Aave, DeFiLlama, Ethena, et lectures on-chain sur Ethereum). Il comporte deux pages : **Analyse actuelle** pour choisir une défaillance, simuler sa propagation et calculer combien vendre ; **Analyse globale des risques** pour parcourir les risques couverts par le graphe sans choisir de défaillance.
 
 ## Démarrer (aucune installation : Python 3.10+ suffit)
 
@@ -13,7 +13,7 @@ python -m unittest discover -s tests          # vérifications du moteur et du s
 
 Une connexion Internet est requise. Le site relève la position principale au démarrage, puis chaque autre position lorsqu'on la sélectionne. Il relève à nouveau une position après cinq minutes ou via « Actualiser ». Une source indisponible produit une erreur visible ; aucune ancienne réponse n'est utilisée. Pour recalculer tout le livre sans ouvrir le site : `python pipeline.py --all --book`. Recalcul des taux d'exploits historiques : `python calibrate.py`.
 
-## Ce que montre la page
+## Ce que montrent les deux pages
 
 1. **La réponse à 3 h du matin** : la décision, son coût comparé aux deux extrêmes, et pourquoi (chemin du dommage, facteur d'impact, preuves).
 2. **Le graphe découvert** : colonnes par profondeur, couleur par type, chemin de propagation en rouge, preuve et heure au survol.
@@ -23,11 +23,14 @@ Une connexion Internet est requise. Le site relève la position principale au d�
 6. **Preuves** : paramètres de chaque composant, 14 incidents réels, toutes les données relevées.
 7. **Simulateur de défaillance** (sans probabilité) : cliquer un nœud du graphe, choisir un scénario (chute de prix / dépeg, défaillance d'oracle, crise de liquidité), régler la sévérité, lancer. La page montre les nœuds touchés, chaque étape de propagation (état initial, état simulé, mécanisme, formule), la LTV et le facteur de santé, l'éligibilité à la liquidation, le coût de sortie sur l'AMM et la perte en USD. API : `/api/simulate?pos=…&node=…&type=…&severity=0.05&hours=24`.
 
+La page actuelle affiche **un seul graphe** : elle montre le graphe approfondi et ses paramètres lorsque la défaillance choisie est compatible, sinon le graphe simple. La page globale classe les risques du graphe, leurs chemins, sources et limites ; elle ne somme pas les pertes de nœuds corrélés. La [méthode de l'analyse globale](docs/ANALYSE_GLOBALE.md) décrit ce périmètre.
+
 ## Où sont les fichiers ?
 
 | Dossier ou fichier | Rôle |
 | --- | --- |
-| `app.py` | Lance le site local et compose la page. |
+| `app.py` | Point d'entrée unique ; sert les deux pages et leurs API. |
+| `global_risk/` | Analyse globale et présentation du graphe unique de l'analyse actuelle. |
 | `pipeline.py` | Découvre les dépendances, simule les pertes et prépare les résultats. |
 | `calibrate.py` | Recalcule les taux historiques à partir de DeFiLlama si l'on veut actualiser les hypothèses. |
 | `risk_engine/` | Modules internes : collecte, graphe, règles, simulations, décision et dessin SVG. |
