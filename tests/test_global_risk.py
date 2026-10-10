@@ -98,7 +98,30 @@ class GlobalRiskTests(unittest.TestCase):
                                  [{"id": "test", "label": "Position test"}])
         self.assertIn("Prix de l’oracle", html)
         self.assertIn("Prix de vente / liquidité", html)
-        self.assertIn("n'est pas remplacée", html)
+        self.assertNotIn("Prix de vente et prix d'oracle", html)
+
+    def test_global_page_shows_three_priorities_and_node_details(self):
+        graph = fixture_graph()
+        result = analyze(graph, REPORT)
+        html = web.render_global(result, graph, REPORT, {},
+                                 [{"id": "test", "label": "Position test"}])
+        self.assertEqual(html.count('class="global-priority"'), 3)
+        for index, row in enumerate(result["adverse_scenarios"][:3], 1):
+            anchor = web._anchor(row["id"])
+            self.assertIn(f'Risque {index:02d} · {row["group"]}', html)
+            self.assertIn(f'data-risk-id="{anchor}"', html)
+        for row in result["rows"]:
+            anchor = web._anchor(row["id"])
+            self.assertIn(f'href="#{anchor}"', html)
+            self.assertEqual(html.count(f' id="{anchor}"'), 1)
+        self.assertIn('id="global-risk-detail-content"', html)
+        self.assertIn('class="global-all"', html)
+        self.assertIn('class="global-family"', html)
+        self.assertIn('selectRisk(link.getAttribute("href").slice(1), true)', html)
+        self.assertIn("leurs pertes ne s'additionnent pas", html)
+        for removed_section in ("Sensibilité aux hypothèses", "Prix de vente et prix d'oracle",
+                                "Sources, données manquantes et limites"):
+            self.assertNotIn(f'<h2>{removed_section}</h2>', html)
 
     def test_existing_view_is_rendered_by_existing_function(self):
         import app

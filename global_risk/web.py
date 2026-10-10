@@ -22,18 +22,30 @@ CSS = """
 .global-note strong{color:var(--partial)}
 .global-panel{padding:16px 18px}.global-panel h2{font-size:17px;margin:0 0 10px}.global-panel h3{font-size:14px;margin:16px 0 8px}
 .global-panel p,.global-panel li{line-height:1.55}.global-muted{color:var(--muted)}
-.global-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.global-chips a{border:1px solid #285074;border-radius:20px;padding:5px 10px;text-decoration:none;font-size:12px}
 .global-risk{padding:14px 0;border-top:1px solid var(--soft-line);scroll-margin-top:70px}
 .global-risk:first-of-type{border-top:0}.global-risk h3{margin:0 0 6px;font-size:15px}
 .global-risk .tag{display:inline-block;padding:2px 7px;border-radius:3px;background:#153c58;color:var(--cyan-soft);font-size:11px;margin-right:6px}
 .global-risk dl{display:grid;grid-template-columns:145px minmax(0,1fr);gap:6px 12px;margin:10px 0 0;font-size:12.5px}
 .global-risk dt{color:var(--muted)}.global-risk dd{margin:0;overflow-wrap:anywhere}
-.global-risk a,.global-panel a{overflow-wrap:anywhere}.global-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.global-card{border:1px solid var(--soft-line);background:#0c1d38;border-radius:4px;padding:12px}
-.global-card b{display:block;margin-bottom:6px}.global-card p{margin:0;font-size:12.5px}
-.global-list{padding-left:20px;margin-bottom:0}.global-graph{max-height:540px}
+.global-risk a,.global-panel a{overflow-wrap:anywhere}.global-graph{max-height:540px}
 .global-graph .dep-graph a:hover .node rect{stroke:var(--cyan-soft);stroke-width:2}
-@media(max-width:1000px){.global-kpis{grid-template-columns:repeat(2,1fr)}.global-grid{grid-template-columns:1fr}}
+.global-graph .dep-graph a.selected .node rect{stroke:var(--cyan);stroke-width:3}
+.global-priorities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.global-priority{width:100%;text-align:left;border:1px solid var(--soft-line);background:#0c1d38;color:var(--ink);padding:14px;border-radius:4px;cursor:pointer;box-shadow:none}
+.global-priority:hover,.global-priority[aria-pressed=true]{border-color:var(--cyan);background:#12304a}
+.global-priority span,.global-priority small{display:block;color:var(--muted);font-size:12px}
+.global-priority b{display:block;margin:8px 0;font-size:15px}.global-priority strong{display:block;font-size:20px;color:var(--cyan-soft)}
+.global-explore{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:14px;align-items:start}
+.global-explore .global-graph{min-width:0;margin:0}.global-detail{background:#0c1d38;border:1px solid var(--cyan);padding:14px;border-radius:4px;min-width:0;scroll-margin-top:16px}
+.global-detail-label{margin:0 0 8px;color:var(--cyan-soft);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.global-detail .global-risk{padding:0;border:0}.global-detail .global-risk h3{margin-top:0}
+.global-all,.global-family{border:1px solid var(--soft-line);border-radius:4px;margin-top:10px;background:#0c1d38}
+.global-all>summary,.global-family>summary{padding:12px 14px;cursor:pointer;font-weight:700}
+.global-all>div,.global-family>div{padding:0 14px 12px}.global-family{background:#10243e}
+.global-open-detail{margin-top:12px;padding:6px 10px;border:1px solid #285074;border-radius:4px;background:transparent;color:var(--cyan-soft);cursor:pointer;box-shadow:none}
+.global-open-detail:hover{border-color:var(--cyan)}
+@media(max-width:1000px){.global-kpis{grid-template-columns:repeat(2,1fr)}.global-explore{grid-template-columns:1fr}}
+@media(max-width:750px){.global-priorities{grid-template-columns:1fr}}
 @media(max-width:700px){.app{display:block;background:none}.side{position:static;height:auto}.main{padding:12px}.topbar{height:auto;min-height:48px;flex-wrap:wrap;padding:10px}.global-kpis{grid-template-columns:1fr 1fr}.global-risk dl{grid-template-columns:1fr}.global-risk dt{font-weight:700}}
 </style>
 """
@@ -91,7 +103,8 @@ def _sources_html(items):
     return " ; ".join(rendered)
 
 
-def _risk_html(row):
+def _risk_body(row):
+    """Décrit un risque isolé, partagé par la liste et la fiche du graphe."""
     path = " → ".join(_s(x) for x in row["path_names"])
     transmission = " ".join(_s(x) for x in row["transmission"]) or "Mécanisme non documenté."
     probability = (_pct(row["probability"], 2) + " — " + _s(row["probability_basis"])
@@ -105,8 +118,7 @@ def _risk_html(row):
         channel = '<span class="tag">Prix de vente / liquidité</span>'
     else:
         channel = ""
-    return (f'<article class="global-risk" id="{_anchor(row["id"])}">'
-            f'<h3>{_s(row["name"])} {channel}</h3>'
+    return (f'<h3>{_s(row["name"])} {channel}</h3>'
             f'<span class="tag">{_s(row["group"])}</span>'
             '<dl>'
             f'<dt>Chemin vers la position</dt><dd>{path}</dd>'
@@ -118,7 +130,16 @@ def _risk_html(row):
             f'<dt>Source du lien</dt><dd>{_sources_html(row["sources"])}</dd>'
             f'<dt>Statut du chemin</dt><dd>{_s(status_line or "indisponible")}</dd>'
             f'<dt>Limite principale</dt><dd>{_s(row["main_limit"])}</dd>'
-            '</dl></article>')
+            '</dl>')
+
+
+def _risk_html(row):
+    """Garde le détail complet accessible dans la liste des risques."""
+    anchor = _anchor(row["id"])
+    return (f'<article class="global-risk" id="{anchor}">'
+            f'<div class="global-risk-content">{_risk_body(row)}</div>'
+            f'<button type="button" class="global-open-detail" data-risk-id="{anchor}" '
+            f'aria-pressed="false">Afficher dans la fiche du graphe</button></article>')
 
 
 def render_global(analysis, graph, report, context, positions):
@@ -131,40 +152,22 @@ def render_global(analysis, graph, report, context, positions):
     for row in analysis["rows"]:
         if row["group"] not in groups:
             groups.append(row["group"])
-    chips = "".join(f'<a href="#{_anchor(row["id"])}">{_s(row["name"])}</a>' for row in analysis["rows"])
     risks = "".join(
-        f'<h3>{_s(group)} ({sum(r["group"] == group for r in analysis["rows"])})</h3>' +
-        "".join(_risk_html(row) for row in analysis["rows"] if row["group"] == group)
-        for group in groups)
+        f'<details class="global-family"><summary>{_s(group)} '
+        f'({sum(r["group"] == group for r in analysis["rows"])})</summary><div>'
+        + "".join(_risk_html(row) for row in analysis["rows"] if row["group"] == group)
+        + '</div></details>' for group in groups)
+    top_three = analysis["adverse_scenarios"][:3]
+    priorities = "".join(
+        f'<button type="button" class="global-priority" data-risk-id="{_anchor(row["id"])}" '
+        f'aria-pressed="false"><span>Risque {index:02d} · {_s(row["group"])}</span>'
+        f'<b>{_s(row["name"])}</b><strong>{_pct(row["conditional_loss_fraction"])}</strong>'
+        f'<small>de perte conditionnelle isolée ({_money(row["conditional_loss_usd"])})</small></button>'
+        for index, row in enumerate(top_three, 1))
+    initial_risk = top_three[0] if top_three else None
+    initial_anchor = _anchor(initial_risk["id"]) if initial_risk else ""
+    initial_body = _risk_body(initial_risk) if initial_risk else '<p>Données indisponibles : aucun risque couvert.</p>'
     drawing = svg.render(graph, node_href=lambda nid: "#summary" if nid == graph["position"]["id"] else "#" + _anchor(nid))
-    sensitivity = "".join(
-        f'<div class="global-card"><b>{_s({"low":"Basse", "base":"Centrale", "high":"Haute"}[s["scenario"]])}</b>'
-        f'<p>Plus forte perte conditionnelle isolée : {_pct(s["largest_single_loss_fraction"])} '
-        f'({_s(s["leading_name"] or "aucun composant")}).</p></div>' for s in analysis["sensitivity"])
-    scenarios = "".join(f'<li><a href="#{_anchor(r["id"])}">{_s(r["name"])}</a> : '
-                        f'{_pct(r["conditional_loss_fraction"])} de perte conditionnelle isolée.</li>'
-                        for r in analysis["adverse_scenarios"])
-    missing = "".join(f'<li>{_s(x)}</li>' for x in analysis["missing"])
-    if not missing:
-        missing = '<li>Aucun manque signalé par les collecteurs actuels ; couverture réelle non garantie.</li>'
-    absent = (", ".join(_s(x) for x in analysis["absent_groups"])
-              if analysis["absent_groups"] else "Aucune des grandes familles listées n'est absente")
-    limits = "".join(f'<li>{_s(x)}</li>' for x in analysis["limits"])
-    sources = _sources_html(analysis["sources"])
-    quote = (report.get("exit") or {}).get("quotes") or {}
-    quote_line = _s(quote.get("source") or "Données indisponibles")
-    exact_quote = next((q for q in quote.get("quotes", []) if q.get("cost") is not None
-                        and abs(q.get("size_usd", 0) - amount) <= max(1.0, amount * 0.001)), None)
-    if exact_quote:
-        quote_kind = "hypothétique" if quote.get("source") == "HYPOTHÈSE" else "relevé"
-        quote_line += f" ; coût {quote_kind} pour le montant choisi : " + _pct(exact_quote["cost"])
-    elif any(q.get("cost") is not None for q in quote.get("quotes", [])):
-        quote_line += " ; les cotations ont été relevées pour d'autres tailles. Le coût du montant choisi est calculé par l'analyse actuelle."
-    else:
-        quote_line += " ; cotation indisponible"
-    oracle_count = len((context or {}).get("oracles") or {})
-    oracle_line = (f"{oracle_count} relevé(s) price() on-chain disponible(s) dans le contexte de simulation"
-                   if oracle_count else "Données indisponibles ou aucun oracle de prêt dans cette position")
     fetched = analysis["fetched_at"] or "Données indisponibles"
     largest = analysis["summary"]["largest_single_event_fraction"]
     summary_text = (f'{_pct(largest)} si « {_s(analysis["summary"]["largest_single_event_node"])} » défaille seul'
@@ -189,23 +192,54 @@ def render_global(analysis, graph, report, context, positions):
 <p class="global-muted" style="margin-top:12px">Relevé : {_s(fetched)} · Taille de référence des cotations : {_money(analysis["reference_size_usd"])} · Groupes présents : {_s(", ".join(groups) or "aucun")}</p>
 <div class="global-note"><strong>Pas de score total fiable.</strong> {_s(analysis["summary"]["reason"])}<br>
 Repère de stress : plus forte perte conditionnelle d’un seul composant = {summary_text}. Ce n’est ni une prévision, ni une somme, ni la perte maximale de toutes les causes réunies.</div></section>
-<section class="panel global-panel"><h2>Chemins de dépendance</h2><p class="global-muted">Cliquez sur un nœud du graphe ou sur un nom pour voir son risque. Une flèche A → B signifie qu'une défaillance de A peut toucher B.</p>
-<div class="graph-wrap global-graph">{drawing}</div><div class="global-chips">{chips}</div></section>
-<section class="panel global-panel"><h2>Risques identifiés par famille</h2>
-<p class="global-muted">Familles classées selon leur plus forte perte conditionnelle isolée ; composants classés de même dans chaque famille. Chaque ligne traite une cause séparément. Les pourcentages ne doivent pas être additionnés.</p>{risks}</section>
-<section class="panel global-panel"><h2>Scénarios défavorables et sensibilité</h2><p class="global-muted">Trois chocs isolés les plus exposants dans le scénario central :</p><ol class="global-list">{scenarios}</ol>
-<h3>Hypothèses basse, centrale et haute</h3><div class="global-grid">{sensitivity}</div>
-<p class="global-muted" style="margin-top:10px">Ces variantes changent sévérité et poids de transmission. Elles ne constituent pas une distribution jointe des défaillances.</p></section>
-<section class="panel global-panel"><h2>Prix de vente et prix d'oracle</h2><div class="global-grid">
-<div class="global-card"><b>Vente / sortie</b><p>{quote_line}</p></div>
-<div class="global-card"><b>Oracle de prêt</b><p>{_s(oracle_line)}. Sa valeur n'est pas remplacée par une cotation Pendle.</p></div>
-<div class="global-card"><b>Liquidations</b><p>Le stress test de liquidations reste dans l'analyse actuelle. Aucune de ses pertes n'est ajoutée aux chiffres ci-dessus.</p></div></div></section>
-<section class="panel global-panel"><h2>Sources, données manquantes et limites</h2><p>Sources du relevé : {sources}</p>
-<h3>Dépendances absentes du graphe découvert</h3><p>{absent}. Leur absence dans le graphe ne prouve pas qu'elles n'existent pas dans la réalité.</p>
-<h3>Données manquantes ou à vérifier</h3><ul class="global-list">{missing}</ul>
-<h3>Limites du modèle</h3><ul class="global-list">{limits}</ul>
-<p class="global-muted">Les dépendances proviennent de lectures sur chaîne, d'API, de documentation ou de liens supposés, selon leur statut. Les cotations en ligne sont des observations de sortie normale. Les fréquences, sévérités et poids sont des paramètres historiques ou des hypothèses ; les pertes sont des résultats du modèle.</p></section>
-</main></div></body></html>'''
+<section class="panel global-panel"><h2>Les 3 risques les plus importants</h2>
+<p class="global-muted">Classement selon la perte conditionnelle isolée dans le scénario central : ce n'est pas un classement par probabilité. Plusieurs lignes peuvent partager une même cause ; leurs pertes ne s'additionnent pas.</p>
+<div class="global-priorities">{priorities or '<p>Données indisponibles : aucun risque couvert.</p>'}</div></section>
+<section class="panel global-panel"><h2>Graphe et détail du risque</h2><p class="global-muted">Cliquez sur un nœud pour lire son risque dans la fiche. Une flèche A → B signifie qu'une défaillance de A peut toucher B.</p>
+<div class="global-explore"><div class="graph-wrap global-graph">{drawing}</div>
+<aside class="global-detail" id="global-risk-detail" tabindex="-1" aria-live="polite"><p class="global-detail-label">Risque sélectionné</p>
+<div class="global-risk" id="global-risk-detail-content">{initial_body}</div></aside></div>
+<details class="global-all"><summary>Voir tous les risques du graphe ({len(analysis["rows"])})</summary><div>
+<p class="global-muted">Risques regroupés par famille et classés selon leur perte conditionnelle isolée. Chaque ligne traite une cause séparément.</p>{risks}</div></details></section>
+</main></div><script>
+(function () {{
+  const detail = document.getElementById("global-risk-detail");
+  const content = document.getElementById("global-risk-detail-content");
+  function selectRisk(id, scrollToDetail) {{
+    const article = document.getElementById(id);
+    const body = article && article.querySelector(".global-risk-content");
+    if (!body) return;
+    content.innerHTML = body.innerHTML;
+    document.querySelectorAll(".global-graph .dep-graph a").forEach(link => {{
+      link.classList.toggle("selected", link.getAttribute("href") === "#" + id);
+    }});
+    document.querySelectorAll("[data-risk-id]").forEach(button => {{
+      button.setAttribute("aria-pressed", button.dataset.riskId === id ? "true" : "false");
+    }});
+    if (scrollToDetail) {{
+      if (window.matchMedia("(max-width: 1000px)").matches) {{
+        detail.scrollIntoView({{behavior: "smooth", block: "start"}});
+      }}
+      detail.focus({{preventScroll: true}});
+    }}
+  }}
+  document.addEventListener("click", event => {{
+    if (!(event.target instanceof Element)) return;
+    const link = event.target.closest('.global-graph a[href^="#risk-"]');
+    if (link) {{
+      event.preventDefault();
+      selectRisk(link.getAttribute("href").slice(1), true);
+      return;
+    }}
+    const button = event.target.closest("[data-risk-id]");
+    if (button) {{
+      event.preventDefault();
+      selectRisk(button.dataset.riskId, true);
+    }}
+  }});
+  selectRisk("{initial_anchor}", false);
+}})();
+</script></body></html>'''
 
 
 def render_unavailable(pid, error):
