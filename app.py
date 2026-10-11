@@ -22,6 +22,7 @@ from risk_engine import discover, sources as S
 from risk_engine import model as M
 from risk_engine import svg
 from risk_engine import simulate as SIM
+from risk_engine import exit_rule
 from global_risk import analyze, current, web
 import pipeline
 
@@ -156,7 +157,7 @@ def controls(q, g):
       <label class="wide">Position<select name="pos" onchange="this.form.submit()">{pos_opts}</select></label>
       <input type="hidden" name="incident" value="{escape(q['incident'], quote=True)}">
       <label>Montant de la position <span>$</span>
-        <input type="number" name="amount" min="10000" step="100000" value="{round(q['amount'])}"><small>Exemple : {usd(g["position"]["size_usd"])}. Change les montants en dollars.</small></label>
+        <input type="number" name="amount" min="10000" step="any" value="{round(q['amount'])}"><small>Exemple : {usd(g["position"]["size_usd"])}. Change les montants en dollars.</small></label>
       <p class="wide controls-hint">Bloc en défaillance : <strong>cliquez sur un bloc du graphe</strong>. On suppose qu'il défaille ;
         la page calcule l'impact sur la position, sans probabilité.</p>
       <button type="submit">Afficher <span aria-hidden="true">→</span></button>
@@ -193,8 +194,186 @@ def failure_box(q, g):
       <p class="eyebrow">DÉFAILLANCE SUPPOSÉE — {escape(kind)}</p>
       <h2>{escape(node["name"])}</h2>
       <p>{escape(body)} Cliquez sur un autre bloc du graphe pour changer.</p>
-      <p class="why">Recommandation « rester ou sortir » : en cours de développement (perte simulée comparée au coût réel
-        de sortie sur l'AMM, voir docs/SIMULATION_MODEL.md § 14). Aucune probabilité n'est utilisée sur cette page.</p>
+    </section>"""
+
+
+# ---------------------------------------------------------------------------
+# Rester ou sortir (règle sans probabilité, docs/SIMULATION_MODEL.md § 14 ; risk_engine/exit_rule.py)
+# ---------------------------------------------------------------------------
+
+def sev_text(stype, sev):
+    spec = SIM.SCENARIOS.get(stype, {})
+    return f"+{num(sev * 100, 0)} points" if spec.get("unit") == "pts" else f"−{pct(sev, 0)}"
+
+
+def decision_for(q, g):
+    """Compare rester / vendre une partie / tout vendre pour la défaillance choisie (None si aucun scénario)."""
+    if not q["snode"] or not q["stype"]:
+        return None
+    ctx = scaled_ctx(sim_ctx_for(q["pos"]), q["amount"] / g["position"]["size_usd"])
+    if ctx is None:
+        return {"ok": False, "why": "données de simulation indisponibles"}
+    try:
+        return exit_rule.decide(g, ctx, q["stype"], q["snode"], q["sev"], q["hours"])
+    except (ValueError, KeyError, ZeroDivisionError) as exc:
+        return {"ok": False, "why": f"calcul impossible ({exc})"}
+
+
+def _verb(d, x):
+    if d["kind"] == "retirer":
+        return "RETIRER" if x >= 1 - 1e-9 else f"RETIRER {pct(x, 0)}"
+    return "TOUT VENDRE" if x >= 1 - 1e-9 else f"VENDRE {pct(x, 0)}"
+
+
+def recommendation_box(q, g, d):
+    """La réponse, en haut de la page : rester ou sortir, et pourquoi, en dollars."""
+    if d is None:
+        return """
+    <section class="verdict none"><p class="eyebrow">RESTER OU SORTIR ?</p>
+      <h2 class="verdict-word">Pas de recommandation chiffrée pour ce bloc</h2>
+      <p>Ce type de bloc n'a pas de scénario de défaillance chiffré. Cliquez sur un actif, un oracle, un pool AMM ou un marché de prêt.</p></section>"""
+    if not d["ok"]:
+        return f"""
+    <section class="verdict none"><p class="eyebrow">RESTER OU SORTIR ?</p>
+      <h2 class="verdict-word">Pas de recommandation chiffrée</h2><p>{escape(d["why"])}.</p></section>"""
+    b, cat = d["best"], d["category"]
+    amount_txt = ""
+    scen = f'{escape(d["scenario_label"])} {sev_text(q["stype"], d["severity"])} sur <strong>{escape(d["node_name"])}</strong>'
+    act = "sortir" if d["kind"] == "vendre" else "retirer"
+    if cat == "inconnu":
+        word, cls = "RESTER, SOUS RÉSERVE", "stay"
+        why = ("Le simulateur ne trouve aucune perte chiffrable pour la position, mais certains effets ne sont pas chiffrés "
+               "(voir « non chiffré » ci-dessous). Sortir coûterait " + usd(d["all"]["total"]) + " : rien ne le justifie avec les chiffres connus.")
+    elif cat == "rester":
+        word, cls = "RESTER", "stay"
+        why = (f"Si ça arrive, rester fait perdre {usd(d['stay'])}. {act.capitalize()} ne protège pas mieux : "
+               f"{_verb(d, d['all']['x']).lower()} coûterait {usd(d['all']['total'])} au total.") if d["stay"] > 1 else \
+              (f"Rester ne fait rien perdre dans ce scénario ({usd(d['stay'])}). {act.capitalize()} coûterait {usd(d['all']['total'])}.")
+    else:
+        word = _verb(d, b["x"]) + (" (le maximum possible)" if cat == "tout" and d["cap"] < 1 - 1e-9 else "")
+        cls = "exit" if cat == "tout" else "partial"
+        amount_txt = f'{"vendre" if d["kind"] == "vendre" else "retirer"} {usd(b["x"] * d["size"])} sur {usd(d["size"])}' + (
+            f', garder {usd((1 - b["x"]) * d["size"])}' if b["x"] < 1 - 1e-9 else "")
+        why = (f"Si ça arrive, rester fait perdre <strong>{usd(d['stay'])}</strong>. {word.capitalize()} maintenant, avant que le choc "
+               f"n'atteigne la position, coûte <strong>{usd(b['total'])}</strong> au total "
+               f"({usd(b['exec'])} de coût de {'vente' if d['kind'] == 'vendre' else 'sortie'}"
+               + (f" + {usd(b['rest'])} de perte sur ce qui reste" if b["rest"] > 1 else "") + ").")
+        if cat == "partiel":
+            why += f" Vendre plus coûterait plus cher : tout vendre, {usd(d['all']['total'])}."
+    saved = d["stay"] - b["total"]
+    tiles = [("Rester", usd(d["stay"]), "perte si la défaillance arrive"),
+             ("Meilleure option", usd(b["total"]), _verb(d, b["x"]).capitalize() if b["x"] > 0 else "rester"),
+             (("Tout vendre" if d["kind"] == "vendre" else "Tout retirer") if d["cap"] >= 1 - 1e-9 else f"Sortie maximale ({pct(d['cap'], 0)})",
+              usd(d["all"]["total"]), "coût total"),
+             ("Économie", usd(max(saved, 0.0)), "par rapport à rester")]
+    tiles_html = "".join(f'<div class="vt"><span>{escape(a)}</span><strong>{v}</strong><small>{escape(c)}</small></div>'
+                         for a, v, c in tiles)
+    note = f'<p class="fine-print">{escape(d["note"])}.</p>' if d.get("note") else ""
+    st = d.get("sim_total")
+    if st is not None and abs(st - d["stay"]) > 1.0:
+        note += (f'<p class="fine-print">Le simulateur affiche une perte de {usd(st)} : il compte aussi ce que coûterait une vente '
+                 f'après le choc. Ici « rester » veut dire garder la position, sans vendre ({usd(d["stay"])} = perte de marché + liquidation).</p>')
+    return f"""
+    <section class="verdict {cls}" aria-live="polite">
+      <p class="eyebrow">RESTER OU SORTIR ? — si {scen}</p>
+      <h2 class="verdict-word">{escape(word)}</h2>
+      {f'<p class="verdict-amount">Concrètement : {amount_txt}</p>' if cat in ("partiel", "tout") else ""}
+      <p class="verdict-why">{why}</p>
+      <div class="verdict-tiles">{tiles_html}</div>
+      {note}
+      <p class="fine-print">Aucune probabilité : on suppose que la défaillance arrive. Gravité et durée se changent dans le simulateur plus bas ; détail et courbe en bas de page.</p>
+    </section>"""
+
+
+def _curve(d):
+    """Courbe : coût total (vente + perte restante) selon la part vendue maintenant."""
+    rows = d["rows"]
+    W, H, L, R, T, B = 680, 260, 70, 16, 16, 40
+    ymax = max(max(r["total"] for r in rows), max(r["rest"] for r in rows), max(r["exec"] for r in rows), 1.0) * 1.1
+    ymin = min(0.0, min(r["total"] for r in rows), min(r["rest"] for r in rows))
+    fx = lambda x: L + x * (W - L - R)
+    fy = lambda y: T + (ymax - y) / (ymax - ymin) * (H - T - B)
+    def line(key, style):
+        pts = " ".join(f"{fx(r['x']):.1f},{fy(r[key]):.1f}" for r in rows)
+        return f'<polyline points="{pts}" fill="none" style="{style}"/>'
+    grid = ""
+    for i in range(5):
+        y = ymin + (ymax - ymin) * i / 4
+        grid += (f'<line x1="{L}" x2="{W - R}" y1="{fy(y):.1f}" y2="{fy(y):.1f}" style="stroke:var(--line,#1c3557);stroke-width:1"/>'
+                 f'<text x="{L - 8}" y="{fy(y) + 4:.1f}" text-anchor="end">{escape(usd(y))}</text>')
+    for i in range(0, 11, 2):
+        x = i / 10
+        grid += f'<text x="{fx(x):.1f}" y="{H - B + 18}" text-anchor="middle">{i * 10} %</text>'
+    if d["cap"] < 1 - 1e-9:
+        grid += (f'<line x1="{fx(d["cap"]):.1f}" x2="{fx(d["cap"]):.1f}" y1="{T}" y2="{H - B}" style="stroke:var(--exit);stroke-dasharray:4 4"/>'
+                 f'<text x="{fx(d["cap"]) + 4:.1f}" y="{T + 12}">limite : {pct(d["cap"], 0)}</text>')
+    b = d["best"]
+    return f"""
+      <svg class="curve" viewBox="0 0 {W} {H}" role="img" aria-label="Coût total selon la part vendue">
+        {grid}
+        {line("exec", "stroke:var(--partial);stroke-width:2;stroke-dasharray:6 4")}
+        {line("rest", "stroke:var(--exit);stroke-width:2;stroke-dasharray:2 4")}
+        {line("total", "stroke:var(--cyan);stroke-width:3")}
+        <circle cx="{fx(b['x']):.1f}" cy="{fy(b['total']):.1f}" r="7" style="fill:var(--stay);stroke:#07101d;stroke-width:2"/>
+        <text x="{W / 2:.0f}" y="{H - 4}" text-anchor="middle">part de la position {"vendue" if d["kind"] == "vendre" else "retirée"} maintenant</text>
+      </svg>
+      <div class="legend"><span class="lg"><i class="line" style="border-top-color:var(--cyan)"></i>coût total</span>
+        <span class="lg"><i class="line" style="border-top-color:var(--partial);border-top-style:dashed"></i>coût de {"vente sur l'AMM" if d["kind"] == "vendre" else "sortie"}</span>
+        <span class="lg"><i class="line" style="border-top-color:var(--exit);border-top-style:dotted"></i>perte sur ce qui reste</span>
+        <span class="lg"><i style="background:var(--stay);border-radius:50%"></i>meilleur choix</span></div>"""
+
+
+def decision_section(q, g, d):
+    """En bas de page : le détail du calcul (tableau des stratégies et courbe)."""
+    if not d or not d.get("ok"):
+        return ""
+    b, rows = d["best"], d["rows"]
+    open_ = d["category"] == "partiel"   # la courbe justifie une vente partielle ; sinon elle reste repliée
+    picks = {0.0: "Rester", b["x"]: "Meilleur choix", rows[-1]["x"]: "Sortie maximale"}
+    show = sorted({0.0, b["x"], rows[-1]["x"]} | {r["x"] for r in rows if abs(r["x"] * 4 - round(r["x"] * 4)) < 1e-9})
+    trs = ""
+    for r in rows:
+        if r["x"] not in show:
+            continue
+        after = "—" if r["x"] == 0 else (usd(r["exec_after"]) if r.get("exec_after") is not None else "impossible")
+        tag = picks.get(r["x"], "")
+        trs += (f'<tr class="{"best" if r is b else ""}"><td>{pct(r["x"], 0)}{(" · " + tag) if tag else ""}</td>'
+                f'<td>{usd(r["exec"])}</td><td>{usd(r["rest"])}</td><td><strong>{usd(r["total"])}</strong></td>'
+                + (f'<td>{after}</td>' if d["kind"] == "vendre" else "") + "</tr>")
+    head_after = "<th>Coût de vente APRÈS le choc</th>" if d["kind"] == "vendre" else ""
+    if d["kind"] == "vendre":
+        how = ("Coût de vente = valeur de marché des PT vendus − ce que rapporte la vente sur le pool Pendle "
+               "(formule on-chain de l'AMM Pendle V2, réserves actuelles). Perte sur ce qui reste = la position restante, "
+               "re-simulée avec la même défaillance" + (" (la vente rembourse d'abord la dette : facteur de santé recalculé)."
+                                                        if d["type"] == "morpho_borrow" else "."))
+    else:
+        how = ("Retirer ne coûte pas de glissement, mais l'argent retiré reste dans l'actif prêté : il subit encore sa baisse de prix. "
+               "Le retrait est limité par la liquidité disponible du marché.")
+    be = ""
+    if d.get("breakeven_p") is not None:
+        p = d["breakeven_p"]
+        be = (f'<p class="breakeven">Et si on n\'est pas sûr que ça arrive ? Sortir coûte {usd(b["exec"])} tout de suite et évite '
+              f'{usd(d["stay"] - b["rest"])} si ça arrive : sortir vaut le coup dès qu\'on pense que la défaillance a plus de '
+              f'<strong>{pct(p, 1) if p >= 0.001 else "0 %"}</strong> de chances de se produire.</p>') if p > 0 else \
+             '<p class="breakeven">Sortir ne coûte rien ici : c\'est intéressant dès qu\'il y a un doute.</p>'
+    unk = ""
+    if d.get("unknown"):
+        unk = ("<details><summary>Non chiffré (" + str(len(d["unknown"])) + ")</summary><ul>" +
+               "".join(f"<li>{escape(u)}</li>" for u in d["unknown"][:8]) + "</ul></details>")
+    return f"""
+    <section class="panel" id="decision" aria-labelledby="d-title">
+      <div class="section-head"><div><p class="eyebrow">DÉCISION — COMBIEN VENDRE MAINTENANT ?</p>
+        <h2 id="d-title">Coût total selon la part vendue, pour {usd(d["size"])}</h2></div></div>
+      <p class="section-intro">Pour chaque part vendue maintenant (de 0 à 100 %, par pas de 5 %) :
+        <strong>coût total = coût de la vente + perte sur ce qui reste</strong> si la défaillance arrive. Le point vert est le moins cher.</p>
+      {"" if open_ else '<details class="sim-more"><summary>Voir le calcul : coût total selon la part vendue</summary>'}
+      {_curve(d)}
+      <table class="data small"><thead><tr><th>Part {"vendue" if d["kind"] == "vendre" else "retirée"}</th><th>Coût de {"vente" if d["kind"] == "vendre" else "sortie"} (avant le choc)</th>
+        <th>Perte sur ce qui reste</th><th>Coût total</th>{head_after}</tr></thead><tbody>{trs}</tbody></table>
+      <p class="fine-print">{escape(how)}{" La colonne « après le choc » montre le coût de la même vente une fois le choc arrivé, en plus de la baisse déjà subie : attendre ne fait pas éviter la perte." if d["kind"] == "vendre" else ""}</p>
+      {be}
+      {unk}
+      {"" if open_ else "</details>"}
     </section>"""
 
 
@@ -413,18 +592,20 @@ def sim_dashboard(res):
     missing = "".join(f"<li class='flag'>Donnée manquante : {escape(m)}</li>" for m in data.get("missing", []))
     return f"""
       <div class="kpis">{kpis}</div>
-      <h3>Sévérité financière</h3>
+      <p class="sim-path"><strong>Chemin de propagation :</strong> {path or "la défaillance n'atteint pas la position par un chemin modifiant sa valeur."}</p>
+      {forced}
+      <details class="sim-more"><summary>Voir le détail du calcul (sévérité par cause, effets non chiffrés, étapes, sources)</summary>
+      <h3>Sévérité financière : perte par cause</h3>
       <table class="data sim-metrics"><thead><tr><th>Métrique</th><th>Avant</th><th>Après</th><th>Variation</th><th>% valeur initiale</th><th>Méthode</th></tr></thead><tbody>{rows}</tbody></table>
       <p class="fine-print">{escape(T["note"]) + ". " if T.get("note") else ""}Pourcentages rapportés à la valeur initiale de la position.</p>
-      <h3>Chemin de propagation</h3><p class="sim-path">{path or "La défaillance n'atteint pas la position par un chemin modifiant sa valeur."}</p>
       <h3>Transmissions non chiffrées (INCONNU)</h3>{unk}
-      {forced}
       {"<h3>Effets secondaires estimés</h3><ul class='plain'>" + sec + "</ul>" if sec else ""}
-      <details open><summary>Détail de chaque étape ({len(res["steps"])})</summary>
+      <details><summary>Détail de chaque étape ({len(res["steps"])})</summary>
         <table class="data small"><thead><tr><th>Nœud</th><th>Variable</th><th>Avant</th><th>Après</th><th>Mécanisme et modèle</th><th>Hypothèses</th></tr></thead><tbody>{steps}</tbody></table></details>
       <details><summary>Modèle de chaque dépendance traversée ({len(res["edges"])})</summary>
         <table class="data small"><thead><tr><th>Arête</th><th>Type</th><th>Transmet</th><th>Modèle</th><th>Paramètres</th><th>Source</th><th>Hypothèses</th><th>Chiffré</th></tr></thead><tbody>{edges}</tbody></table></details>
-      <details><summary>Données utilisées : vérifiées et hypothèses</summary><ul class="evidence">{ev}{assumed}{missing}</ul></details>"""
+      <details><summary>Données utilisées : vérifiées et hypothèses</summary><ul class="evidence">{ev}{assumed}{missing}</ul></details>
+      </details>"""
 
 
 def forced_html(rows):
@@ -521,6 +702,7 @@ def _render_page(query: str) -> str:
     g = graph_for(q["pos"])
     rep = report_for(q["pos"])
     size = q["amount"]
+    dec = decision_for(q, g)
     ts = rep["data_fetched_at"]
     badge = f"Données relevées en ligne le {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC"
     subs = {
@@ -530,10 +712,10 @@ def _render_page(query: str) -> str:
         "badge": badge,
         "refresh_url": "/?" + escape(urlencode({"pos": q["pos"], "refresh": 1}), quote=True),
         "controls": controls(q, g),
-        "answer": failure_box(q, g),
+        "answer": recommendation_box(q, g, dec) + failure_box(q, g),
         "graph": graph_section(q, g),
         "simulation": simulation_section(q, g) if q["pos"] in ADVANCED_POSITIONS else "",
-        "decision": "",  # « Combien vendre » (C(x) = c·x²) retiré : voir SIMULATION_MODEL.md § 18
+        "decision": decision_section(q, g, dec),  # règle § 14 : coût réel de sortie sur l'AMM, sans probabilité
     }
     return TEMPLATE.substitute(subs)
 

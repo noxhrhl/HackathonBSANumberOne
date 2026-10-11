@@ -29,7 +29,11 @@ CSS = """
 .global-risk dt{color:var(--muted)}.global-risk dd{margin:0;overflow-wrap:anywhere}
 .global-risk a,.global-panel a{overflow-wrap:anywhere}.global-graph{max-height:540px}
 .global-graph .dep-graph a:hover .node rect{stroke:var(--cyan-soft);stroke-width:2}
-.global-graph .dep-graph a.selected .node rect{stroke:var(--cyan);stroke-width:3}
+.global-graph .dep-graph.has-selected a:not(.selected){opacity:.28;transition:opacity .2s}
+.global-graph .dep-graph a.selected .node rect{stroke:#ffffff;stroke-width:5;fill:#2a3a52;filter:drop-shadow(0 0 12px #ffffff);animation:risk-pulse 1.4s ease-in-out infinite}
+.global-graph .dep-graph a.selected .node text{fill:#ffffff}
+@keyframes risk-pulse{0%,100%{stroke-width:4;filter:drop-shadow(0 0 6px #ffffff)}50%{stroke-width:6;filter:drop-shadow(0 0 16px #ffffff)}}
+.global-priority[aria-pressed=true]{border-color:#ffffff;box-shadow:0 0 0 1px #ffffff inset}
 .global-priorities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .global-priority{width:100%;text-align:left;border:1px solid var(--soft-line);background:#0c1d38;color:var(--ink);padding:14px;border-radius:4px;cursor:pointer;box-shadow:none}
 .global-priority:hover,.global-priority[aria-pressed=true]{border-color:var(--cyan);background:#12304a}
@@ -75,8 +79,8 @@ def tabs(pid, active="global", amount=None):
     current = "/?" + urlencode(params)
     global_url = "/global?" + urlencode(params)
     return (f'<nav class="global-tabs" aria-label="Vues de la position">'
-            f'<a href="{_s(current)}" {"aria-current=page" if active == "current" else ""}>Analyse actuelle</a>'
-            f'<a href="{_s(global_url)}" {"aria-current=page" if active == "global" else ""}>Analyse globale des risques</a>'
+            f'<a href="{_s(current)}" {"aria-current=page" if active == "current" else ""}><b>Si un bloc casse</b> : rester ou sortir ?</a>'
+            f'<a href="{_s(global_url)}" {"aria-current=page" if active == "global" else ""}><b>Analyse globale des risques</b> : lesquels sont les plus probables ?</a>'
             '</nav>')
 
 
@@ -85,7 +89,11 @@ def add_tabs_to_current(page, pid, amount=None):
     marker = '<div class="tabs-wrap">'
     if marker not in page:
         raise ValueError("Repère d'onglet absent dans le site existant")
-    return page.replace("</head>", CSS + "</head>", 1).replace(marker, tabs(pid, "current", amount) + marker, 1)
+    page = page.replace("</head>", CSS + "</head>", 1)
+    top = '<main class="main">'
+    if top in page:   # en haut de la page, au-dessus de la réponse « rester ou sortir »
+        return page.replace(top, top + tabs(pid, "current", amount), 1)
+    return page.replace(marker, tabs(pid, "current", amount) + marker, 1)
 
 
 def _sources_html(items):
@@ -106,7 +114,7 @@ def _sources_html(items):
 def _risk_body(row):
     """Décrit un risque isolé, partagé par la liste et la fiche du graphe."""
     path = " → ".join(_s(x) for x in row["path_names"])
-    transmission = " ".join(_s(x) for x in row["transmission"]) or "Mécanisme non documenté."
+    transmission = " ".join(_s(x) for x in dict.fromkeys(row["transmission"])) or "Mécanisme non documenté."
     probability = (_pct(row["probability"], 2) + " — " + _s(row["probability_basis"])
                    if row["probability"] is not None else "Non estimable avec fiabilité")
     statuses = {"verified_onchain": "lu sur chaîne", "api": "API", "documented": "documentation",
@@ -179,7 +187,7 @@ def render_global(analysis, graph, report, context, positions):
 <span class="stamp">Relevé en ligne : {_s(fetched[:16].replace("T", " "))} UTC <a href="/global?{_s(urlencode({"pos": pid, "refresh": 1}))}">Actualiser</a></span></header>
 <div class="app"><aside class="side"><p class="side-title">Position analysée</p>
 <form class="controls" action="/global" method="get"><label>Choisir une position<select name="pos">{options}</select></label>
-<label>Montant à analyser <span>$</span><input type="number" name="amount" min="10000" max="10000000000" step="100000" value="{round(amount)}"></label>
+<label>Montant à analyser <span>$</span><input type="number" name="amount" min="10000" max="10000000000" step="any" value="{round(amount)}"></label>
 <button type="submit">Analyser</button></form>
 <p class="side-note">Aucune défaillance à sélectionner. Cette page parcourt toutes les dépendances découvertes pour cette position.</p></aside>
 <main class="main">{tabs(pid, amount=amount)}
@@ -210,9 +218,20 @@ Repère de stress : plus forte perte conditionnelle d’un seul composant = {sum
     const body = article && article.querySelector(".global-risk-content");
     if (!body) return;
     content.innerHTML = body.innerHTML;
+    let picked = null;
     document.querySelectorAll(".global-graph .dep-graph a").forEach(link => {{
-      link.classList.toggle("selected", link.getAttribute("href") === "#" + id);
+      const on = link.getAttribute("href") === "#" + id;
+      link.classList.toggle("selected", on);
+      if (on) picked = link;
     }});
+    document.querySelectorAll(".global-graph .dep-graph").forEach(g => g.classList.toggle("has-selected", !!picked));
+    if (picked) {{
+      picked.parentNode.appendChild(picked);   // au premier plan
+      const wrap = picked.closest(".global-graph");
+      const r = picked.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+      wrap.scrollLeft += (r.left + r.width / 2) - (w.left + w.width / 2);
+      wrap.scrollTop += (r.top + r.height / 2) - (w.top + w.height / 2);
+    }}
     document.querySelectorAll("[data-risk-id]").forEach(button => {{
       button.setAttribute("aria-pressed", button.dataset.riskId === id ? "true" : "false");
     }});
@@ -235,6 +254,10 @@ Repère de stress : plus forte perte conditionnelle d’un seul composant = {sum
     if (button) {{
       event.preventDefault();
       selectRisk(button.dataset.riskId, true);
+      if (button.classList.contains("global-priority")) {{   // un des 3 risques : on descend jusqu'au graphe
+        const g = document.querySelector(".global-explore");
+        if (g) g.scrollIntoView({{behavior: "smooth", block: "start"}});
+      }}
     }}
   }});
   selectRisk("{initial_anchor}", false);

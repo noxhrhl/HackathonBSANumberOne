@@ -74,5 +74,20 @@ class PageSmokeTests(unittest.TestCase):
                 self.assertIn("DÉFAILLANCE SUPPOSÉE", app.render_page(extra))  # anciens paramètres ignorés
 
 
+    def test_stay_or_exit_on_top_and_curve_below(self):
+        import app
+        g = app.graph_for("morpho-ptsusde-borrow")
+        oid = next(n["id"] for n in g["nodes"] if n["id"].startswith("oracle:1:0xf8b29e7e9c00ce53143"))
+        html = app.render_page(f"pos=morpho-ptsusde-borrow&incident={oid}&snode={oid}")
+        top, bottom = html.find('class="verdict'), html.find('id="decision"')
+        self.assertTrue(0 < top < html.find("DÉFAILLANCE SUPPOSÉE") < bottom)   # réponse en haut, détail en bas
+        self.assertIn("VENDRE 20 %", html)
+        self.assertIn('class="curve"', html)
+        # bloc sans scénario chiffré : on le dit, pas de chiffre inventé
+        html = app.render_page("pos=pt-susde-26nov2026&incident=chain:ethereum")
+        self.assertIn("Pas de recommandation chiffrée", html)
+        self.assertNotIn('id="decision"', html)
+
+
 if __name__ == "__main__":
     unittest.main()
