@@ -304,7 +304,6 @@ class SimulatorPageTests(unittest.TestCase):
         for node, sc, sev in ((USDE, "price_shock", 5), (LINEAR_FEED, "oracle_failure", 10), (VENUE, "liquidity_crisis", 80)):
             with self.subTest(sc):
                 html = app.render_page(f"pos=morpho-ptsusde-borrow&snode={node}&stype={sc}&sev={sev}&run=1")
-                self.assertIn("Sévérité financière", html)
                 self.assertIn("Facteur de santé", html)
                 self.assertIn("Chemin de propagation", html)
 
@@ -316,7 +315,6 @@ class SimulatorPageTests(unittest.TestCase):
         h80 = app.render_page(f"pos=pt-susde-26nov2026&snode={VENUE}&stype=liquidity_crisis&sev=80&run=1")
         self.assertIn("Sortie complète IMPOSSIBLE", h80)
         self.assertIn("Perte si sortie forcée maintenant", h80)
-        self.assertIn("Impact si sortie forcée maintenant", h80)
 
     def test_node_selection_and_bad_input(self):
         import app

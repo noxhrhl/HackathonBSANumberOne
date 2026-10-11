@@ -178,22 +178,18 @@ NO_SCENARIO_WHY.update({
 
 
 def failure_box(q, g):
-    """Défaillance supposée (sans probabilité) : ce que la page calcule pour ce composant."""
+    """Bloc sans scénario chiffré : on dit pourquoi, sans inventer de chiffre."""
     node = next((n for n in g["nodes"] if n["id"] == q["incident"]), None)
     if node is None:
         return ""
-    comp = SIM.compatible_scenarios(g, node["id"])
     kind = KIND_FR.get(node["kind"], node["kind"])
-    if comp:
-        body = ("Le simulateur ci-dessous calcule son impact sur la position, nœud par nœud, avec les formules des "
-                "protocoles : choisissez le type de défaillance, sa gravité et sa durée, puis lancez la simulation.")
-    else:
-        body = NO_SCENARIO_WHY.get(node["kind"], "Pas de simulation chiffrée pour ce type de composant.")
+    body = NO_SCENARIO_WHY.get(node["kind"], "Pas de simulation chiffrée pour ce type de composant.")
     return f"""
-    <section class="answer partial" aria-live="polite">
-      <p class="eyebrow">DÉFAILLANCE SUPPOSÉE — {escape(kind)}</p>
-      <h2>{escape(node["name"])}</h2>
-      <p>{escape(body)} Cliquez sur un autre bloc du graphe pour changer.</p>
+    <section class="verdict none" aria-live="polite">
+      <p class="eyebrow">DÉFAILLANCE SUPPOSÉE : <strong>{escape(node["name"])}</strong> ({escape(kind)})</p>
+      <h2 class="verdict-word">Pas de recommandation chiffrée pour ce bloc</h2>
+      <p>{escape(body)}</p>
+      <p class="fine-print">Cliquez sur un actif, un oracle, un pool AMM ou un marché de prêt pour obtenir « rester ou sortir ».</p>
     </section>"""
 
 
@@ -228,13 +224,10 @@ def _verb(d, x):
 def recommendation_box(q, g, d):
     """La réponse, en haut de la page : rester ou sortir, et pourquoi, en dollars."""
     if d is None:
-        return """
-    <section class="verdict none"><p class="eyebrow">RESTER OU SORTIR ?</p>
-      <h2 class="verdict-word">Pas de recommandation chiffrée pour ce bloc</h2>
-      <p>Ce type de bloc n'a pas de scénario de défaillance chiffré. Cliquez sur un actif, un oracle, un pool AMM ou un marché de prêt.</p></section>"""
+        return failure_box(q, g)
     if not d["ok"]:
         return f"""
-    <section class="verdict none"><p class="eyebrow">RESTER OU SORTIR ?</p>
+    <section class="verdict none"><p class="eyebrow">DÉFAILLANCE SUPPOSÉE — RESTER OU SORTIR ?</p>
       <h2 class="verdict-word">Pas de recommandation chiffrée</h2><p>{escape(d["why"])}.</p></section>"""
     b, cat = d["best"], d["category"]
     amount_txt = ""
@@ -275,13 +268,12 @@ def recommendation_box(q, g, d):
                  f'après le choc. Ici « rester » veut dire garder la position, sans vendre ({usd(d["stay"])} = perte de marché + liquidation).</p>')
     return f"""
     <section class="verdict {cls}" aria-live="polite">
-      <p class="eyebrow">RESTER OU SORTIR ? — si {scen}</p>
+      <p class="eyebrow">DÉFAILLANCE SUPPOSÉE : {scen} — RESTER OU SORTIR ?</p>
       <h2 class="verdict-word">{escape(word)}</h2>
       {f'<p class="verdict-amount">Concrètement : {amount_txt}</p>' if cat in ("partiel", "tout") else ""}
       <p class="verdict-why">{why}</p>
       <div class="verdict-tiles">{tiles_html}</div>
       {note}
-      <p class="fine-print">Aucune probabilité : on suppose que la défaillance arrive. Gravité et durée se changent dans le simulateur plus bas ; détail et courbe en bas de page.</p>
     </section>"""
 
 
@@ -477,7 +469,7 @@ def sim_form(q, g):
     hidden = "".join(f'<input type="hidden" name="{k}" value="{escape(str(v), quote=True)}">' for k, v in
                      (("pos", q["pos"]), ("amount", round(q["amount"])), ("incident", q["incident"]), ("snode", q["snode"])))
     if not n:
-        return ('<p class="sim-hint">① Cliquez un nœud du graphe ci-dessous : un <strong>actif</strong> (chute de prix / dépeg), '
+        return ('<p class="sim-hint">Cliquez un nœud du graphe ci-dessous : un <strong>actif</strong> (chute de prix / dépeg), '
                 'un <strong>oracle</strong> (prix rapporté faux) ou un <strong>pool AMM</strong> (crise de liquidité).</p>')
     comp = SIM.compatible_scenarios(g, n["id"])
     if not comp:
@@ -486,19 +478,21 @@ def sim_form(q, g):
     opts = "".join(f'<option value="{k}"{" selected" if k == q["stype"] else ""}>{escape(SIM.SCENARIOS[k]["label"])}</option>'
                    for k in comp)
     spec = SIM.SCENARIOS[q["stype"]]
+    if len(comp) > 1:   # seul le pool Pendle a deux scénarios possibles
+        scen_html = f'<label>Scénario<select name="stype">{opts}</select><small>{escape(spec["help"])}</small></label>'
+    else:               # un seul scénario possible : affiché, pas à choisir
+        scen_html = (f'<div class="sim-node"><span>Scénario</span><strong>{escape(spec["label"])}</strong>'
+                     f'<small>{escape(spec["help"])}</small><input type="hidden" name="stype" value="{escape(q["stype"], quote=True)}"></div>')
     sev = round(q["sev"] * 100, 1)
     sign, unit = spec.get("sign", "−"), spec.get("unit", "%")
     return f"""
       <form method="get" action="/#sim" class="sim-form">{hidden}
-        <div class="sim-node"><span>② Nœud en défaillance</span><strong>{escape(n["name"])}</strong><small>{escape(KIND_FR.get(n["kind"], n["kind"]))}</small></div>
-        <label>③ Scénario<select name="stype">{opts}</select><small>{escape(spec["help"])}</small></label>
-        <label>④ Sévérité ({escape(spec["variable"])}) <output id="sev-out">{sign}{num(sev, 0) if sev == int(sev) else num(sev, 1)} {unit}</output>
+        <div class="sim-node"><span>Bloc en défaillance</span><strong>{escape(n["name"])}</strong><small>{escape(KIND_FR.get(n["kind"], n["kind"]))}</small></div>
+        {scen_html}
+        <label>Gravité ({escape(spec["variable"])}) <output id="sev-out">{sign}{num(sev, 0) if sev == int(sev) else num(sev, 1)} {unit}</output>
           <input type="range" name="sev" min="1" max="{round(spec['max'] * 100)}" step="1" value="{sev}"
             oninput="document.getElementById('sev-out').value='{sign}'+this.value+' {unit}'"></label>
-        <label>Durée de l'incident<select name="hours"><option value="24"{" selected" if q["hours"] == 24 else ""}>24 h (persistant)</option>
-          <option value="1"{" selected" if q["hours"] == 1 else ""}>1 h (bref)</option></select>
-          <small>Compte pour les méta-oracles (délai de contestation avant bascule).</small></label>
-        <button type="submit" name="run" value="1">⑤ Lancer la simulation <span aria-hidden="true">→</span></button>
+        <button type="submit" name="run" value="1">Lancer la simulation <span aria-hidden="true">→</span></button>
       </form>"""
 
 
@@ -593,19 +587,7 @@ def sim_dashboard(res):
     return f"""
       <div class="kpis">{kpis}</div>
       <p class="sim-path"><strong>Chemin de propagation :</strong> {path or "la défaillance n'atteint pas la position par un chemin modifiant sa valeur."}</p>
-      {forced}
-      <details class="sim-more"><summary>Voir le détail du calcul (sévérité par cause, effets non chiffrés, étapes, sources)</summary>
-      <h3>Sévérité financière : perte par cause</h3>
-      <table class="data sim-metrics"><thead><tr><th>Métrique</th><th>Avant</th><th>Après</th><th>Variation</th><th>% valeur initiale</th><th>Méthode</th></tr></thead><tbody>{rows}</tbody></table>
-      <p class="fine-print">{escape(T["note"]) + ". " if T.get("note") else ""}Pourcentages rapportés à la valeur initiale de la position.</p>
-      <h3>Transmissions non chiffrées (INCONNU)</h3>{unk}
-      {"<h3>Effets secondaires estimés</h3><ul class='plain'>" + sec + "</ul>" if sec else ""}
-      <details><summary>Détail de chaque étape ({len(res["steps"])})</summary>
-        <table class="data small"><thead><tr><th>Nœud</th><th>Variable</th><th>Avant</th><th>Après</th><th>Mécanisme et modèle</th><th>Hypothèses</th></tr></thead><tbody>{steps}</tbody></table></details>
-      <details><summary>Modèle de chaque dépendance traversée ({len(res["edges"])})</summary>
-        <table class="data small"><thead><tr><th>Arête</th><th>Type</th><th>Transmet</th><th>Modèle</th><th>Paramètres</th><th>Source</th><th>Hypothèses</th><th>Chiffré</th></tr></thead><tbody>{edges}</tbody></table></details>
-      <details><summary>Données utilisées : vérifiées et hypothèses</summary><ul class="evidence">{ev}{assumed}{missing}</ul></details>
-      </details>"""
+      {forced}"""
 
 
 def forced_html(rows):
@@ -648,11 +630,10 @@ def scaled_ctx(ctx, k):
 
 def simulation_section(q, g):
     head = """<section class="panel" id="sim" aria-labelledby="s-title">
-      <p class="eyebrow">SIMULER — SI CE MAILLON CÈDE, COMBIEN PERD LA POSITION ?</p>
-      <h2 id="s-title">Simulateur de défaillance : propagation et sévérité financière</h2>
-      <p class="section-intro">Aucune probabilité ici : on suppose que la défaillance se produit et on calcule ses conséquences, nœud par nœud,
-        avec les formules des protocoles (oracle Morpho, règle de liquidation Morpho Blue, courbe de l'AMM Pendle V2).
-        Une transmission impossible à modéliser est marquée <strong>INCONNU</strong> et n'entre pas dans les chiffres.</p>"""
+      <p class="eyebrow">SIMULATION</p>
+      <h2 id="s-title">Simulateur de défaillance : comment le choc arrive jusqu'à la position</h2>
+      <p class="section-intro">On suppose que ce bloc casse et on suit le choc jusqu'à la position. Les chiffres viennent des vraies formules
+        de Morpho et de Pendle ; ce qui ne peut pas être calculé est marqué <strong>INCONNU</strong> et n'est pas compté.</p>"""
     ctx = scaled_ctx(sim_ctx_for(q["pos"]), q["amount"] / g["position"]["size_usd"])
     if ctx is None:
         return head + "<p class='error'>Données de simulation indisponibles depuis les sources en ligne.</p></section>"
@@ -712,7 +693,7 @@ def _render_page(query: str) -> str:
         "badge": badge,
         "refresh_url": "/?" + escape(urlencode({"pos": q["pos"], "refresh": 1}), quote=True),
         "controls": controls(q, g),
-        "answer": recommendation_box(q, g, dec) + failure_box(q, g),
+        "answer": recommendation_box(q, g, dec),
         "graph": graph_section(q, g),
         "simulation": simulation_section(q, g) if q["pos"] in ADVANCED_POSITIONS else "",
         "decision": decision_section(q, g, dec),  # règle § 14 : coût réel de sortie sur l'AMM, sans probabilité
