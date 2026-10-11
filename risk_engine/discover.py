@@ -435,10 +435,6 @@ def expand_collateral(b, asset_id, depth, address, chain_id, venue=None, venue_l
 # Résolveur « oracle » : décodage on-chain
 # ---------------------------------------------------------------------------
 
-def _ok(hexdata):
-    return bool(hexdata) and hexdata != "0x"
-
-
 def resolve_oracle(b, address, depth, api_type=None, api_data=None, label="Oracle"):
     """Identifie un oracle en lisant le contrat ; renvoie l'id du nœud."""
     a = address.lower()

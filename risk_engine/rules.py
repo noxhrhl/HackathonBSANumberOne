@@ -13,10 +13,8 @@ Trois familles de paramètres, chacune avec une fourchette BAS / BASE / HAUT :
 3. w — part du dommage qui traverse une arête, selon son MÉCANISME. Certaines arêtes ont
    un w mesuré dans les données (part d'Ethena sur une bourse, part d'un collatéral dans Aave).
 
-Ne pas confondre :
-  p_base     = probabilité d'une défaillance en temps normal (fréquences historiques) ;
-  incident_p = probabilité qu'une ALERTE EN COURS devienne un vrai dommage — c'est une
-               entrée du gérant (fourchettes suggérées dans INCIDENT_P_HINTS).
+Ces paramètres alimentent la page « Analyse globale des risques ». La page principale n'utilise
+aucune probabilité : elle passe par le simulateur de défaillance (risk_engine/simulate.py).
 """
 
 import json
@@ -100,16 +98,6 @@ FEED_ROLE_W = {
     "secours": (0.05, 0.2, 0.5),   # utilisé seulement après une contestation
     "combo": (0.9, 1.0, 1.0),      # flux multiplié dans le prix : son erreur passe entièrement
 }
-
-# Fourchettes suggérées pour incident_p (probabilité qu'une alerte devienne un dommage)
-INCIDENT_P_HINTS = {
-    "oracle": "10–40 % : la plupart des écarts d'oracle se résorbent (USDe/Binance : 40 min).",
-    "issuer": "5–30 % : un émetteur sous pression rachète souvent au pair (USDC 2023 : retour à 0,97 $ le jour même).",
-    "perp_exchange": "10–50 % : un piratage de bourse est souvent absorbé (Bybit 2025), parfois non (FTX 2022).",
-    "lending": "10–40 %.", "venue": "10–40 %.", "asset": "10–40 %.", "protocol": "20–60 % : un exploit confirmé.",
-    "chain": "20–60 % pour un arrêt ; la perte de valeur reste faible.", "custodian": "5–30 %.",
-}
-
 
 def horizon_p(lam: float, horizon_days: float) -> float:
     """p = 1 − exp(−λ·H/365) : probabilité d'au moins une défaillance sur l'horizon."""

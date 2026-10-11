@@ -18,12 +18,10 @@ from pathlib import Path
 from string import Template
 from urllib.parse import parse_qs, urlencode, urlparse
 
-from risk_engine import decide as D
 from risk_engine import discover, sources as S
 from risk_engine import model as M
-from risk_engine import rules, svg
+from risk_engine import svg
 from risk_engine import simulate as SIM
-from risk_engine.risk import assess
 from global_risk import analyze, current, web
 import pipeline
 
@@ -31,10 +29,9 @@ ROOT = Path(__file__).resolve().parent
 TEMPLATE = Template((ROOT / "templates" / "index.html").read_text(encoding="utf-8"))
 STYLE = (ROOT / "static" / "style.css").read_bytes()
 POSITIONS = json.loads((ROOT / "data" / "positions.json").read_text(encoding="utf-8"))
-EVIDENCE = json.loads((ROOT / "data" / "evidence.json").read_text(encoding="utf-8"))["incidents"]
 KIND_FR = {k: v[2] for k, v in svg.KIND_STYLE.items()}
 
-_models, _graphs, _reports, _sims = {}, {}, {}, {}
+_graphs, _reports, _sims = {}, {}, {}
 _refresh_lock = threading.RLock()
 _last_refresh = {}
 REFRESH_SECONDS = 300
@@ -49,9 +46,6 @@ def ensure_live_data(pid, force=False):
         if not force and last and time.monotonic() - last < REFRESH_SECONDS:
             return
         _last_refresh.pop(pid, None)
-        for key in list(_models):
-            if key[0] == pid:
-                del _models[key]
         _graphs.pop(pid, None)
         _reports.pop(pid, None)
         _sims.pop(pid, None)
@@ -98,9 +92,10 @@ def report_for(pid):
     return _reports[pid]
 
 
-# Positions touchées par l'effet boule de neige (marché Morpho PT-sUSDe) :
-# leurs incidents compatibles affichent le graphe approfondi dans l'analyse actuelle.
-ADVANCED_POSITIONS = {"pt-susde-26nov2026", "morpho-ptsusde-usdc", "morpho-ptsusde-borrow"}
+# Les 5 positions du site ; toutes ont une simulation : un bloc compatible (actif, oracle,
+# pool AMM) affiche le graphe approfondi.
+SITE_POSITIONS = POSITIONS["positions"]
+ADVANCED_POSITIONS = {p["id"] for p in SITE_POSITIONS}
 
 
 def sim_ctx_for(pid):
@@ -108,15 +103,8 @@ def sim_ctx_for(pid):
     return _sims[pid]
 
 
-def pm_for(pid, scenario="base", propagation="max", **ov):
-    key = (pid, scenario, propagation, tuple(sorted(ov.items())))
-    if key not in _models:
-        _models[key] = M.PositionModel(graph_for(pid), scenario, propagation, overrides=ov or None)
-    return _models[key]
-
-
 def available_positions():
-    return POSITIONS["positions"]
+    return SITE_POSITIONS
 
 
 def parse(query):
@@ -149,173 +137,72 @@ def parse(query):
     sim = {"snode": snode, "stype": stype, "sev": fnum("sev", 100 * spec["default"], 1, 100 * spec["max"]) / 100,
            "hours": 1 if f.get("hours") == "1" else 24, "run": "1" if f.get("run") == "1" and stype else "0"}
     ref = g["position"]["size_usd"]
-    return {**sim, "pos": pid, "incident": incident, "p": fnum("p", 100 * rep["default_incident_p"], 0, 100) / 100,
-            "amount": fnum("amount", ref, 10_000, 10_000_000_000),
-            "c1": fnum("c1", 100 * rep["exit"]["stress"]["c1"], 0, 100) / 100,
-            "regime": f.get("regime", "crise") if f.get("regime") in ("crise", "normal") else "crise",
-            "view": f.get("view", "neutre") if f.get("view") in ("neutre", "prudent") else "neutre",
-            "prop": f.get("prop", "max") if f.get("prop") in ("max", "sum") else "max"}
-
-
-def _quote_rate(ok, v):
-    """Coût (part du montant vendu) pour vendre v dollars, interpolé entre les cotations relevées.
-    En dessous de la plus petite cotation : son taux ; au-delà de la plus grande : son taux (HYPOTHÈSE)."""
-    if v <= ok[0][0]:
-        return ok[0][1]
-    for (v0, r0), (v1, r1) in zip(ok, ok[1:]):
-        if v <= v1:
-            return r0 + (r1 - r0) * (v - v0) / (v1 - v0)
-    return ok[-1][1]
-
-
-def normal_exit(rep, amount):
-    """Hors crise : cotations réelles relevées (en dollars), ramenées au montant choisi.
-    Si le marché a refusé une taille, on ne vend pas plus que la plus grande vente acceptée."""
-    qs = rep["exit"].get("quotes", {})
-    ok = sorted((x["size_usd"], x["cost"]) for x in qs.get("quotes", []) if x.get("cost") is not None)
-    refused = [x["size_usd"] for x in qs.get("quotes", []) if x.get("cost") is None]
-    if not ok:
-        n = rep["exit"]["normal"]
-        return D.ExitCost(n["c1"], n["capacity"], n["label"], n["shape"], [tuple(x) for x in n["points"]])
-    cap_usd = max(v for v, _ in ok) if refused else None
-    if qs.get("available_liquidity_usd") is not None:
-        cap_usd = qs["available_liquidity_usd"]
-    cap = min(1.0, cap_usd / amount) if cap_usd else 1.0
-    xs = sorted({min(cap, v / amount) for v, _ in ok} | {cap})
-    points = [(x, _quote_rate(ok, x * amount) * x) for x in xs if x > 0]
-    src = qs.get("source") or "cotation réelle"
-    if cap < 1.0:
-        label = (f"Hors crise ({src}) : au plus {usd(cap_usd)} vendables d'un coup, soit {pct(cap, 0)} de la position ; "
-                 f"au-delà, le marché refuse")
-    else:
-        label = f"Hors crise ({src}) : {pct(_quote_rate(ok, amount), 2)} pour tout vendre {usd(amount)}"
-    return D.ExitCost(points[-1][1] if points else 0.0, cap, label, "points", points)
-
-
-def exit_model(rep, q, ref):
-    """Coût de sortie pour le montant choisi. Crise : le chiffre de Belem vaut pour la taille de référence
-    et grandit avec le montant (HYPOTHÈSE : impact de prix proportionnel au montant vendu)."""
-    if q["regime"] == "normal":
-        return normal_exit(rep, q["amount"])
-    k = q["amount"] / ref if ref else 1.0
-    c1 = min(1.0, q["c1"] * k)
-    if abs(k - 1) < 1e-9:
-        label = f"Crise : {pct(c1, 1)} pour tout vendre (chiffre de Belem)"
-    else:
-        label = (f"Crise : {pct(c1, 1)} pour tout vendre {usd(q['amount'])}, soit {pct(q['c1'], 1)} pour {usd(ref)} "
-                 f"(chiffre de Belem) × {num(k, 2)} ; HYPOTHÈSE : l'impact de prix grandit avec le montant")
-    return D.ExitCost(c1, 1.0, label, "quadratic")
+    return {**sim, "pos": pid, "incident": incident, "amount": fnum("amount", ref, 10_000, 10_000_000_000)}
 
 
 def link(q, **changes):
-    return "/?" + urlencode({**q, "p": round(q["p"] * 100), "c1": round(q["c1"] * 100, 2),
-                             "sev": round(q["sev"] * 100, 1), **changes})
-
-
-def relevant_evidence(kind, mechanisms):
-    return [e for e in EVIDENCE if kind in e["kinds"] or any(m in e["mechanisms"] for m in mechanisms)]
+    return "/?" + urlencode({**q, "sev": round(q["sev"] * 100, 1), **changes})
 
 
 # ---------------------------------------------------------------------------
 # Sections
 # ---------------------------------------------------------------------------
 
-def controls(q, g, pm):
+def controls(q, g):
     pos_opts = "".join(f'<option value="{p["id"]}"{" selected" if p["id"] == q["pos"] else ""}>{escape(p["label"])}</option>'
                        for p in available_positions())
-    groups = {}
-    for n in g["nodes"]:
-        if n["kind"] == "position":
-            continue
-        groups.setdefault(n["kind"], []).append(n)
-    inc_opts = ""
-    for kind in svg.KIND_STYLE:
-        if kind not in groups:
-            continue
-        opts = "".join(
-            f'<option value="{escape(n["id"], quote=True)}"{" selected" if n["id"] == q["incident"] else ""}>'
-            f'{escape(svg._clip(n["name"], 60))} — I = {num(pm.impact.get(n["id"], 0), 3)}</option>'
-            for n in sorted(groups[kind], key=lambda n: -pm.impact.get(n["id"], 0)))
-        inc_opts += f'<optgroup label="{KIND_FR.get(kind, kind)}">{opts}</optgroup>'
-    sel = lambda name, val: " selected" if q[name] == val else ""  # noqa: E731
-    hint = rules.INCIDENT_P_HINTS.get(pm.node_by_id[q["incident"]]["kind"], "")
     return f"""
     <form method="get" action="/" class="controls">
       <label class="wide">Position<select name="pos" onchange="this.form.submit()">{pos_opts}</select></label>
-      <label class="wide">Composant en alerte<select name="incident">{inc_opts}</select></label>
-      <label>Probabilité que l'alerte devienne un dommage <span>%</span>
-        <input type="number" name="p" min="0" max="100" step="1" value="{round(q['p'] * 100)}"><small>{escape(hint)}</small></label>
+      <input type="hidden" name="incident" value="{escape(q['incident'], quote=True)}">
       <label>Montant de la position <span>$</span>
-        <input type="number" name="amount" min="10000" step="100000" value="{round(q['amount'])}"><small>Exemple : {usd(g["position"]["size_usd"])}. Change les montants en dollars et le coût pour vendre.</small></label>
-      <label>Coût en crise pour vendre {usd(g["position"]["size_usd"])} <span>%</span>
-        <input type="number" name="c1" min="0" max="100" step="0.5" value="{round(q['c1'] * 100, 2)}"><small>Défaut : 11 % (énoncé de Belem). Pour un autre montant, il est ajusté en proportion.</small></label>
-      <label>Régime de sortie<select name="regime"><option value="crise"{sel('regime', 'crise')}>Crise (C(x) = c·x²)</option>
-        <option value="normal"{sel('regime', 'normal')}>Hors crise (cotation réelle)</option></select></label>
-      <label>Vue du risque<select name="view"><option value="neutre"{sel('view', 'neutre')}>Neutre (perte attendue)</option>
-        <option value="prudent"{sel('view', 'prudent')}>Prudente (pire 5 %)</option></select></label>
-      <label>Propagation<select name="prop"><option value="max"{sel('prop', 'max')}>Chemin le plus fort</option>
-        <option value="sum"{sel('prop', 'sum')}>Somme des chemins (plafonnée)</option></select></label>
-      <button type="submit">Recalculer <span aria-hidden="true">→</span></button>
+        <input type="number" name="amount" min="10000" step="100000" value="{round(q['amount'])}"><small>Exemple : {usd(g["position"]["size_usd"])}. Change les montants en dollars.</small></label>
+      <p class="wide controls-hint">Bloc en défaillance : <strong>cliquez sur un bloc du graphe</strong>. On suppose qu'il défaille ;
+        la page calcule l'impact sur la position, sans probabilité.</p>
+      <button type="submit">Afficher <span aria-hidden="true">→</span></button>
     </form>"""
 
 
-def answer_box(q, g, pm, st, dec, cost, sweep_info, size):
-    s = dec["strategies"]
-    x = dec["x_star"]
-    inc = pm.node_by_id[q["incident"]]
-    if dec["category"] == "rester":
-        head = "Rester : ne rien vendre."
-    elif dec["category"] == "tout vendre":
-        head = "Tout vendre maintenant."
+NO_SCENARIO_WHY = {
+    "chain": "Un arrêt de la chaîne bloque les transactions pendant sa durée, mais ne change aucun prix : "
+             "il n'y a pas de perte de valeur à calculer. Son risque est de ne pas pouvoir agir pendant un autre incident.",
+    "admin": "Une défaillance de gouvernance n'a pas de mécanisme de prix écrit : pas de simulation chiffrée.",
+    "bridge": "Pas de mécanisme de prix modélisé pour un pont : pas de simulation chiffrée.",
+}
+NO_SCENARIO_WHY.update({
+    "lending": "Pool Aave multi-collatéral : une créance douteuse passe d'abord par les mécanismes de couverture d'Aave, "
+               "et les positions de chaque emprunteur ne sont pas publiées par l'API. Pas de chiffre (INCONNU).",
+    "protocol": "Pas de modèle d'exploit pour ce contrat (seul le contrat SY de Pendle est modélisé).",
+})
+
+
+def failure_box(q, g):
+    """Défaillance supposée (sans probabilité) : ce que la page calcule pour ce composant."""
+    node = next((n for n in g["nodes"] if n["id"] == q["incident"]), None)
+    if node is None:
+        return ""
+    comp = SIM.compatible_scenarios(g, node["id"])
+    kind = KIND_FR.get(node["kind"], node["kind"])
+    if comp:
+        body = ("Le simulateur ci-dessous calcule son impact sur la position, nœud par nœud, avec les formules des "
+                "protocoles : choisissez le type de défaillance, sa gravité et sa durée, puis lancez la simulation.")
     else:
-        head = f"Vendre {pct(x, 0)} maintenant, garder {pct(1 - x, 0)}."
-    capped = cost.capacity < 0.999
-    if capped and x >= cost.capacity - 1e-6:
-        head = (f"Vendre {pct(x, 0)} maintenant, le maximum que le marché accepte d'un coup ; "
-                f"garder {pct(1 - x, 0)}.")
-    all_label = f"vendre le maximum, {pct(cost.capacity, 0)}" if capped else "tout vendre"
-    key = "expected" if q["view"] == "neutre" else "worst5"
-    lab = "Coût attendu" if q["view"] == "neutre" else "Coût dans les 5 % pires cas"
-    body = (f"{lab} {pct(s['partiel'][key])} ({usd(size * s['partiel'][key])}) contre "
-            f"{pct(s['tout_vendre'][key])} ({all_label}) et {pct(s['rester'][key])} (tout garder).")
-    tail = f"Pire 5 % si on applique la recommandation : {pct(s['partiel']['worst5'])}."
-    a, b = sweep_info["from_p"], sweep_info["to_p"]
-    stab = f"Recommandation « {sweep_info['category']} » stable pour p entre {pct(a, 0)} et {pct(b, 0)}"
-    if sweep_info["first_all_p"] is not None and sweep_info["category"] != "tout vendre":
-        stab += f" ; tout vendre au-delà de {pct(sweep_info['first_all_p'], 0)}"
-    stab += "."
-    path = M.best_path(g, pm.route, q["incident"])
-    names = " → ".join(svg._clip(pm.node_by_id[i]["name"], 26) for i in path)
-    sev = pm.params[q["incident"]]["sev"]
-    imp = pm.impact.get(q["incident"], 0)
-    ev = relevant_evidence(inc["kind"], [e["mechanism"] for e in g["edges"] if e["from"] == q["incident"]])[:3]
-    ev_txt = ", ".join(f'<a href="{e["url"]}" target="_blank" rel="noopener">{escape(e["title"])} ({e["date"][:7]})</a>' for e in ev)
-    simple = assess(size, min(100.0, 100 * sev * imp), min(100.0, 100 * cost(1.0)))
-    be = simple["break_even_probability_percent"]
-    be_txt = ("aucune perte possible par ce chemin" if be is None else
-              (f"au-dessus de {num(be, 1)} %" if be <= 100 else "jamais (même certain, l'incident coûte moins que la sortie)"))
-    tone = {"rester": "stay", "vente partielle": "partial", "tout vendre": "exit"}[dec["category"]]
+        body = NO_SCENARIO_WHY.get(node["kind"], "Pas de simulation chiffrée pour ce type de composant.")
     return f"""
-    <section class="answer {tone}" aria-live="polite">
-      <p class="eyebrow">LA RÉPONSE À 3 H DU MATIN — {escape(svg._clip(inc['name'], 60))}, p = {pct(q['p'], 0)}</p>
-      <h2>{escape(head)}</h2>
-      <p class="big">{body}</p>
-      <p>{tail} {stab}</p>
-      <p class="why"><strong>Pourquoi :</strong> le dommage voyage par {escape(names)}.
-        Facteur d'impact I = {num(imp, 3)} ; si l'incident se produit, perte sur la position ≈ sévérité {pct(sev, 0)} × I = {pct(sev * imp, 2)}.
-        Perte attendue (vue neutre) {pct(st['expected'], 2)}, pire 5 % {pct(st['cvar95'], 2)} (20 000 scénarios).</p>
-      <p class="why"><strong>Seuil simple</strong> (calcul de l'équipe, risk.assess) : tout vendre devient rentable si la probabilité est {be_txt}.</p>
-      <p class="why"><strong>Preuves :</strong> {ev_txt or "—"}</p>
+    <section class="answer partial" aria-live="polite">
+      <p class="eyebrow">DÉFAILLANCE SUPPOSÉE — {escape(kind)}</p>
+      <h2>{escape(node["name"])}</h2>
+      <p>{escape(body)} Cliquez sur un autre bloc du graphe pour changer.</p>
+      <p class="why">Recommandation « rester ou sortir » : en cours de développement (perte simulée comparée au coût réel
+        de sortie sur l'AMM, voir docs/SIMULATION_MODEL.md § 14). Aucune probabilité n'est utilisée sur cette page.</p>
     </section>"""
 
 
-def graph_section(q, g, pm):
+def graph_section(q, g):
     cov = g["checks"]["coverage"]
-    path = M.best_path(g, pm.route, q["incident"])
-    info = {nid: {"p": prm["p"], "impact": pm.impact.get(nid, 0)} for nid, prm in pm.params.items()}
-    if q["incident"] in info:
-        info[q["incident"]]["p"] = q["p"]
-    drawing = svg.render(g, info, pm.weights, q["incident"], path)
+    nodes = {n["id"]: n for n in g["nodes"]}
+    drawing = svg.render(g, None, None, q["incident"], [],
+                         node_href=lambda nid: link(q, incident=nid, snode=nid, run="0") + "#g-title")
     sh = cov["share_by_status"]
     cov_line = (f"{cov['dependencies']} dépendances · {cov['edges']} arêtes · profondeur {cov['max_depth']} · "
                 f"{pct(cov['verified_share'], 0)} non supposées (on-chain {pct(sh['verified_onchain'], 0)}, "
@@ -324,8 +211,8 @@ def graph_section(q, g, pm):
     checks = ("Contrôles automatiques : chaque arête a une preuve, pas de cycle, tout nœud atteint la position, "
               "aucune arête de prêt sans identifiant de marché réel — <strong>OK</strong>." if not errs else
               "Contrôles : " + "; ".join(escape(e) for e in errs))
-    loops = "".join(f"<li>{escape(pm.node_by_id.get(lp['from'], {}).get('name', lp['from']))} → "
-                    f"{escape(pm.node_by_id.get(lp['to'], {}).get('name', lp['to']))} ({escape(lp['mechanism'])}) : "
+    loops = "".join(f"<li>{escape(nodes.get(lp['from'], {}).get('name', lp['from']))} → "
+                    f"{escape(nodes.get(lp['to'], {}).get('name', lp['to']))} ({escape(lp['mechanism'])}) : "
                     f"{escape(lp['note'])}</li>" for lp in g.get("loops", []))
     assumed = [e for e in g["edges"] if e["status"] == "assumed"]
     assumed_html = ("<p class='fine-print'>Aucune arête supposée : toutes viennent d'un contrat, d'une API ou d'une documentation.</p>"
@@ -334,63 +221,14 @@ def graph_section(q, g, pm):
     <section class="panel" aria-labelledby="g-title">
       <div class="section-head"><div><p class="eyebrow">01 / DÉCOUVRIR</p><h2 id="g-title">Ce dont dépend la position — découvert automatiquement</h2></div>
         <span class="section-tag">{escape(cov_line)}</span></div>
-      <p class="section-intro">Une flèche A → B veut dire « si A cède, B est touché ». Survolez un nœud ou une flèche pour voir la preuve et son heure de relevé ; cliquez pour l'ouvrir.
-        Cliquez sur un composant dans la liste ci-dessus pour simuler son incident.</p>
+      <p class="section-intro">Une flèche A → B veut dire « si A cède, B est touché ». <strong>Cliquez sur un bloc</strong> pour supposer sa défaillance ;
+        survolez un nœud ou une flèche pour voir la preuve et son heure de relevé.</p>
       <div class="graph-wrap">{drawing}</div>
       {svg.legend(g)}
       <p class="fine-print">{checks}</p>
       {assumed_html}
       {"<details open><summary>Boucles réflexives détectées (" + str(len(g.get('loops', []))) + ")</summary><ul>" + loops + "</ul></details>" if loops else ""}
     </section>"""
-
-
-def decision_section(q, rep, st, dec, cost, size):
-    s = dec["strategies"]
-    rows = ""
-    all_label = f"Vendre le maximum ({pct(cost.capacity, 0)})" if cost.capacity < 0.999 else "Tout vendre"
-    for key, label in (("rester", "Tout garder"), ("partiel", f"Vendre {pct(dec['x_star'], 0)}"), ("tout_vendre", all_label)):
-        v = s[key]
-        rows += (f"<tr{' class=best' if key == 'partiel' else ''}><td>{label}</td><td>{pct(v['exit_cost'], 2)}</td>"
-                 f"<td>{pct(v['expected'], 2)}</td><td>{pct(v['worst5'], 2)}</td><td>{usd(size * v['expected'])}</td></tr>")
-    L_n, L_p = st["expected"], st["cvar95"]
-    xs = [i / 50 for i in range(51)]
-    series = [("Coût attendu (vue neutre)", "#087e82", [(x, cost(x) + (1 - x) * L_n) for x in xs]),
-              ("Coût pire 5 % (vue prudente)", "#d1495b", [(x, cost(x) + (1 - x) * L_p) for x in xs]),
-              ("Coût de sortie C(x)", "#9aa5b1", [(x, cost(x)) for x in xs])]
-    dn = D.decide(st, cost, "neutre")
-    dp = D.decide(st, cost, "prudent")
-    markers = [(dn["x_star"], dn["strategies"]["partiel"]["expected"], "#087e82", f"x* neutre {pct(dn['x_star'], 0)}"),
-               (dp["x_star"], dp["strategies"]["partiel"]["worst5"], "#d1495b", f"x* prudent {pct(dp['x_star'], 0)}")]
-    finite = [y for _, _, pts in series for _, y in pts if y != float("inf")]
-    chart = svg.line_chart(series, x_label="fraction vendue x", markers=markers, y_max=max(finite) * 1.1 if finite else None)
-    quotes = rep["exit"]["quotes"]
-    qrows = "".join(f"<tr><td>{pct(qq['fraction'], 0)} ({usd(qq['size_usd'])})</td><td>{pct(qq['cost'], 3) if qq.get('cost') is not None else 'refusé : ' + escape((qq.get('error') or '')[:80])}</td>"
-                    f"<td>{escape(qq.get('note', ''))}</td></tr>" for qq in quotes["quotes"])
-    closed = f" Forme fermée x* = L / (2c) = {pct(dec['L'], 2)} / {num(2 * cost.c1, 2)} = {pct(dec['closed_form'], 1)}." if dec.get("closed_form") is not None else ""
-    return f"""
-    <section class="panel" aria-labelledby="d-title">
-      <p class="eyebrow">02 / DÉCIDER — COMBIEN VENDRE</p><h2 id="d-title">Vendre une partie peut coûter moins que les deux extrêmes</h2>
-      <p class="section-intro">Vendre coûte de plus en plus cher par dollar : C(x) = c·x² avec C(1) = {pct(cost.c1, 1)} ({escape(cost.label)}).
-        Garder la part restante coûte (1 − x) × L. On choisit x* qui minimise la somme.{closed}
-        Économie par rapport au meilleur des deux extrêmes : <strong>{pct(dec['saving_vs_best_extreme'], 2)}</strong> ({usd(size * dec['saving_vs_best_extreme'])}).</p>
-      <div class="two-col">
-        <table class="data"><thead><tr><th>Stratégie</th><th>Coût de sortie</th><th>Coût attendu</th><th>Pire 5 %</th><th>Coût attendu ($)</th></tr></thead><tbody>{rows}</tbody></table>
-        <div>{chart}<p class="fine-print">Courbes : coût total selon la fraction vendue. Les points marquent l'optimum de chaque vue.</p></div>
-      </div>
-      <details><summary>Coût de sortie réel hors crise ({escape(quotes.get('source') or '')})</summary>
-        <table class="data"><thead><tr><th>Taille vendue</th><th>Coût total (impact + frais)</th><th>Note</th></tr></thead><tbody>{qrows}</tbody></table>
-        <p class="fine-print">Hors crise, sortir est presque gratuit ; les 11 % de Belem décrivent une crise, quand la liquidité s'en va. Le régime « hors crise » du formulaire utilise ces cotations.</p>
-      </details>
-    </section>"""
-
-
-def sweep_rows(q, pm, cost):
-    rows = []
-    for k in range(0, 101, 2):
-        st = M.stats(pm.losses(q["incident"], k / 100))
-        d = D.decide(st, cost, q["view"])
-        rows.append({"p": k / 100, "x_star": d["x_star"], "category": d["category"]})
-    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -458,8 +296,7 @@ def sim_overlay(res):
 def sim_form(q, g):
     n = next((x for x in g["nodes"] if x["id"] == q["snode"]), None)
     hidden = "".join(f'<input type="hidden" name="{k}" value="{escape(str(v), quote=True)}">' for k, v in
-                     (("pos", q["pos"]), ("amount", round(q["amount"])), ("incident", q["incident"]), ("p", round(q["p"] * 100)), ("c1", round(q["c1"] * 100, 2)),
-                      ("regime", q["regime"]), ("view", q["view"]), ("prop", q["prop"]), ("snode", q["snode"])))
+                     (("pos", q["pos"]), ("amount", round(q["amount"])), ("incident", q["incident"]), ("snode", q["snode"])))
     if not n:
         return ('<p class="sim-hint">① Cliquez un nœud du graphe ci-dessous : un <strong>actif</strong> (chute de prix / dépeg), '
                 'un <strong>oracle</strong> (prix rapporté faux) ou un <strong>pool AMM</strong> (crise de liquidité).</p>')
@@ -471,13 +308,14 @@ def sim_form(q, g):
                    for k in comp)
     spec = SIM.SCENARIOS[q["stype"]]
     sev = round(q["sev"] * 100, 1)
+    sign, unit = spec.get("sign", "−"), spec.get("unit", "%")
     return f"""
       <form method="get" action="/#sim" class="sim-form">{hidden}
         <div class="sim-node"><span>② Nœud en défaillance</span><strong>{escape(n["name"])}</strong><small>{escape(KIND_FR.get(n["kind"], n["kind"]))}</small></div>
         <label>③ Scénario<select name="stype">{opts}</select><small>{escape(spec["help"])}</small></label>
-        <label>④ Sévérité ({escape(spec["variable"])}) <output id="sev-out">−{num(sev, 0) if sev == int(sev) else num(sev, 1)} %</output>
+        <label>④ Sévérité ({escape(spec["variable"])}) <output id="sev-out">{sign}{num(sev, 0) if sev == int(sev) else num(sev, 1)} {unit}</output>
           <input type="range" name="sev" min="1" max="{round(spec['max'] * 100)}" step="1" value="{sev}"
-            oninput="document.getElementById('sev-out').value='−'+this.value+' %'"></label>
+            oninput="document.getElementById('sev-out').value='{sign}'+this.value+' {unit}'"></label>
         <label>Durée de l'incident<select name="hours"><option value="24"{" selected" if q["hours"] == 24 else ""}>24 h (persistant)</option>
           <option value="1"{" selected" if q["hours"] == 1 else ""}>1 h (bref)</option></select>
           <small>Compte pour les méta-oracles (délai de contestation avant bascule).</small></label>
@@ -493,7 +331,9 @@ def sim_dashboard(res):
     ex0, ex1 = R.get("exit_before"), R.get("exit_after")
     blocked = T.get("blocked_usd") or 0.0
     share = (lambda v: f"{pct(v / T['initial'], 2)} de la valeur initiale" if T["initial"] else "")
-    tiles = [("Défaillance", f"{escape(res['scenario_label'])} −{pct(res['severity'], 0)}", escape(svg._clip(res["node_name"], 48)), ""),
+    spec = SIM.SCENARIOS[res["scenario"]]
+    sev_txt = (f"+{num(res['severity'] * 100, 0)} points" if spec.get("unit") == "pts" else f"−{pct(res['severity'], 0)}")
+    tiles = [("Défaillance", f"{escape(res['scenario_label'])} {sev_txt}", escape(svg._clip(res["node_name"], 48)), ""),
              ("Valeur initiale de la position", usd_exact(T["initial"]), "fonds propres au prix de marché" if L else "au prix de marché", ""),
              ("Valeur après l'incident", usd_exact(T["after"]),
               "liquidation simulée incluse" if L and L["eligible"] else ("hors part bloquée" if blocked else ""), ""),
@@ -515,8 +355,10 @@ def sim_dashboard(res):
     if ex0 and ex1:
         tiles += [("Impact de prix à la sortie", f"{pct(ex0['price_impact'], 2)} → {pct(ex1['price_impact'], 2)}", "AMM seul (courbe Pendle V2)", ""),
                   ("Produit exécutable", f"{usd_exact(ex0['proceeds_usd'])} → {usd_exact(ex1['proceeds_usd'])}",
-                   "sortie complète possible" if ex1["full_exit"] else
-                   f"sortie complète IMPOSSIBLE : {svg.fmt_pct(ex1['sold_units'] / ex1['units'], 0)} vendable", "")]
+                   ("sortie complète possible" if ex1["full_exit"] else
+                    f"sortie complète IMPOSSIBLE : {svg.fmt_pct(ex1['sold_units'] / ex1['units'], 0)} vendable")
+                   + (" — après les liquidations des autres emprunteurs" if any(f["quantified"] for f in res.get("forced_liquidations") or []) else ""),
+                   "alert" if not ex1["full_exit"] else "")]
     kpis = "".join(f'<div class="kpi{" " + k if k else ""}"><span>{a}</span><strong>{b}</strong><small>{c}</small></div>'
                    for a, b, c, k in tiles)
     rows = ""
@@ -556,7 +398,8 @@ def sim_dashboard(res):
     unk = ("<ul class='plain'>" + "".join(f"<li class='flag'>{escape(u)}</li>" for u in unknown) + "</ul>") if unknown else \
         "<p class='fine-print'>Aucune transmission non chiffrée n'atteint la position.</p>"
     sec = "".join(f"<li>{escape(names.get(e['from'], e['from']))} → {escape(names.get(e['to'], e['to']))} : {escape(e.get('text', ''))} "
-                  f"<em>(non inclus dans le total)</em></li>" for e in res["secondary_effects"])
+                  f"<em>(estimation avec un emprunteur moyen, non incluse dans le total)</em></li>" for e in res["secondary_effects"])
+    forced = forced_html(res.get("forced_liquidations") or [])
     edges = "".join(f"<tr><td>{escape(svg._clip(names.get(e['from'], e['from']), 32))} → {escape(svg._clip(names.get(e['to'], e['to']), 32))}</td>"
                     f"<td>{escape(e['dependency'])}</td><td>{escape(e['transmission'])}</td><td>{escape(e['formula'])}</td>"
                     f"<td>{escape(', '.join(e['params']) or '—')}</td><td>{escape(e['source'])}</td>"
@@ -575,12 +418,36 @@ def sim_dashboard(res):
       <p class="fine-print">{escape(T["note"]) + ". " if T.get("note") else ""}Pourcentages rapportés à la valeur initiale de la position.</p>
       <h3>Chemin de propagation</h3><p class="sim-path">{path or "La défaillance n'atteint pas la position par un chemin modifiant sa valeur."}</p>
       <h3>Transmissions non chiffrées (INCONNU)</h3>{unk}
+      {forced}
       {"<h3>Effets secondaires estimés</h3><ul class='plain'>" + sec + "</ul>" if sec else ""}
       <details open><summary>Détail de chaque étape ({len(res["steps"])})</summary>
         <table class="data small"><thead><tr><th>Nœud</th><th>Variable</th><th>Avant</th><th>Après</th><th>Mécanisme et modèle</th><th>Hypothèses</th></tr></thead><tbody>{steps}</tbody></table></details>
       <details><summary>Modèle de chaque dépendance traversée ({len(res["edges"])})</summary>
         <table class="data small"><thead><tr><th>Arête</th><th>Type</th><th>Transmet</th><th>Modèle</th><th>Paramètres</th><th>Source</th><th>Hypothèses</th><th>Chiffré</th></tr></thead><tbody>{edges}</tbody></table></details>
       <details><summary>Données utilisées : vérifiées et hypothèses</summary><ul class="evidence">{ev}{assumed}{missing}</ul></details>"""
+
+
+def forced_html(rows):
+    """Liquidations des autres emprunteurs (positions réelles), incluses dans les chiffres ci-dessus."""
+    if not rows:
+        return ""
+    trs = ""
+    for f in rows:
+        cap = (f"{num(f['capacity_before'], 0)} → {num(f['capacity_after'], 0)} PT" if f["capacity_before"] is not None
+               else "pas de pool modélisé")
+        trs += (f"<tr><td>{escape(svg._clip(f['market_name'], 44))}<br><small>{f['borrowers']} emprunteurs réels</small></td>"
+                f"<td>{f['liquidations']}</td><td>{num(f['collateral_sold'], 0)}</td><td>{usd_exact(f['debt_repaid_usd'])}</td>"
+                f"<td>{cap}<br><small>prix spot {'+' if f['spot_change'] > 0 else ''}{pct(f['spot_change'], 2)}</small></td>"
+                f"<td>{f['stuck_count']}<br><small>{usd_exact(f['stuck_debt_usd'])} de dette</small></td>"
+                f"<td>{usd_exact(f['bad_debt_usd'])}</td>"
+                f"<td>{'incluses' if f['quantified'] else 'effet sur le prix non chiffré'}</td></tr>")
+    return f"""
+      <h3>Liquidations des autres emprunteurs</h3>
+      <p class="fine-print">Positions réelles (API Morpho). Un liquidateur n'agit que si la revente couvre la dette remboursée et ses frais ;
+        le collatéral saisi est revendu sur le pool Pendle avant ta sortie. Les ventes de panique ne sont pas chiffrées.</p>
+      <table class="data small"><thead><tr><th>Marché</th><th>Liquidations</th><th>Collatéral revendu</th><th>Dette remboursée</th>
+        <th>Capacité du pool</th><th>Liquidables non liquidés</th><th>Créance douteuse potentielle</th><th>Dans les chiffres</th></tr></thead>
+        <tbody>{trs}</tbody></table>"""
 
 
 def graph_for_id(res):
@@ -622,7 +489,7 @@ def simulation_section(q, g):
         overlay = {q["snode"]: {"status": "origin", "label": "nœud choisi"}} if q["snode"] else None
         crossed, path = set(), []
     drawing = svg.render(g, path=path, sim=overlay, sim_edges=crossed,
-                         node_href=lambda nid: link(q, snode=nid, run="0") + "#sim")
+                         node_href=lambda nid: link(q, incident=nid, snode=nid, run="0") + "#sim")
     legend = ('<div class="legend"><span class="lg"><i style="background:#d1495b;border-color:#9e1b32"></i>défaillance</span>'
               '<span class="lg"><i style="border-color:#d1495b"></i>état modifié</span>'
               '<span class="lg"><i style="border-color:#e08a2c;border-style:dashed"></i>INCONNU (non chiffré)</span>'
@@ -645,34 +512,28 @@ def render_page(query: str) -> str:
 
 def _render_page(query: str) -> str:
     args = parse_qs(query)
-    main = next((p["id"] for p in POSITIONS["positions"] if p.get("main")), POSITIONS["positions"][0]["id"])
+    main = next((p["id"] for p in SITE_POSITIONS if p.get("main")), SITE_POSITIONS[0]["id"])
     pid = args.get("pos", [main])[0]
-    if pid not in {p["id"] for p in POSITIONS["positions"]}:
+    if pid not in {p["id"] for p in SITE_POSITIONS}:
         pid = main
     ensure_live_data(pid, force=args.get("refresh") == ["1"])
     q = parse(query)
     g = graph_for(q["pos"])
     rep = report_for(q["pos"])
-    pm = pm_for(q["pos"], "base", q["prop"])
-    cost = exit_model(rep, q, g["position"]["size_usd"])
-    st = M.stats(pm.losses(q["incident"], q["p"]))
-    dec = D.decide(st, cost, q["view"])
-    sweep = sweep_rows(q, pm, cost)
-    stab = D.stability_sentence(sweep, q["p"])
     size = q["amount"]
     ts = rep["data_fetched_at"]
     badge = f"Données relevées en ligne le {escape((ts.get('newest') or '?')[:16].replace('T', ' '))} UTC"
     subs = {
         "position_name": escape(g["position"]["label"]),
         "position_size": usd(size),
-        "horizon": num(pm.horizon, 0),
+        "horizon": num(M.horizon_days(g), 0),
         "badge": badge,
         "refresh_url": "/?" + escape(urlencode({"pos": q["pos"], "refresh": 1}), quote=True),
-        "controls": controls(q, g, pm),
-        "answer": answer_box(q, g, pm, st, dec, cost, stab, size),
-        "graph": graph_section(q, g, pm),
+        "controls": controls(q, g),
+        "answer": failure_box(q, g),
+        "graph": graph_section(q, g),
         "simulation": simulation_section(q, g) if q["pos"] in ADVANCED_POSITIONS else "",
-        "decision": decision_section(q, rep, st, dec, cost, size),
+        "decision": "",  # « Combien vendre » (C(x) = c·x²) retiré : voir SIMULATION_MODEL.md § 18
     }
     return TEMPLATE.substitute(subs)
 

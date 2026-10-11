@@ -225,36 +225,3 @@ def legend(graph):
     return f'<div class="legend">{items}</div>'
 
 
-def line_chart(series, width=520, height=180, x_label="", y_label="", markers=None, x_fmt=None, y_max=None):
-    """Petit graphique en lignes (SVG). series = [(nom, couleur, [(x, y), …])], x et y dans [0, 1]."""
-    markers = markers or []
-    pad_l, pad_b, pad_t, pad_r = 44, 30, 12, 12
-    ys = [y for _, _, pts in series for _, y in pts if y is not None] + [m[1] for m in markers]
-    top = y_max or (max(ys) * 1.1 if ys and max(ys) > 0 else 1)
-    W, H = width - pad_l - pad_r, height - pad_t - pad_b
-
-    def X(x):
-        return pad_l + x * W
-
-    def Y(y):
-        return pad_t + H - min(y, top) / top * H
-
-    out = [f'<svg viewBox="0 0 {width} {height}" class="mini-chart" role="img">']
-    for k in range(5):
-        yv = top * k / 4
-        out.append(f'<line x1="{pad_l}" x2="{width - pad_r}" y1="{Y(yv):.1f}" y2="{Y(yv):.1f}" stroke="#eef1f4"/>'
-                   f'<text x="{pad_l - 6}" y="{Y(yv) + 3:.1f}" text-anchor="end" font-size="10" fill="#657181">{fmt_pct(yv, 0 if top > 0.1 else 1)}</text>')
-    for k in range(6):
-        xv = k / 5
-        lab = x_fmt(xv) if x_fmt else fmt_pct(xv, 0)
-        out.append(f'<text x="{X(xv):.1f}" y="{height - 10}" text-anchor="middle" font-size="10" fill="#657181">{lab}</text>')
-    for name, color, pts in series:
-        d = " ".join(f"{'M' if i == 0 else 'L'}{X(x):.1f},{Y(y):.1f}" for i, (x, y) in enumerate(pts) if y is not None)
-        out.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="2.2"><title>{escape(name)}</title></path>')
-    for x, y, color, label in markers:
-        out.append(f'<circle cx="{X(x):.1f}" cy="{Y(y):.1f}" r="4.5" fill="{color}"/>'
-                   f'<text x="{X(x) + 7:.1f}" y="{Y(y) - 7:.1f}" font-size="10.5" font-weight="700" fill="{color}">{escape(label)}</text>')
-    if x_label:
-        out.append(f'<text x="{pad_l + W / 2:.1f}" y="{height}" text-anchor="middle" font-size="10" fill="#657181">{escape(x_label)}</text>')
-    out.append("</svg>")
-    return "".join(out)

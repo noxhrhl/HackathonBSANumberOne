@@ -1,56 +1,23 @@
-"""Propagation d'un incident et simulation Monte Carlo (bibliothèque standard uniquement).
+"""Facteurs d'impact et paramètres de risque par composant (bibliothèque standard uniquement).
 
-1. Facteur d'impact I(n) : part d'une défaillance du nœud n qui arrive jusqu'à la position.
-   - « max » (par défaut) : produit des poids w sur le chemin le plus fort.
-     Exemple : oracle → marché de prêt (0,3) → AMM (0,3) → position (0,1) : I = 0,009.
-     Limite : ignore qu'un dommage peut arriver par plusieurs chemins à la fois.
-   - « sum » : somme des produits sur tous les chemins, plafonnée à 1 (prudent ; peut
-     compter deux fois un même dommage).
-2. Monte Carlo : dans chaque scénario simulé, chaque nœud défaille avec sa probabilité p
-   (Bernoulli) ; s'il défaille, sa perte suit une loi Bêta de moyenne sev. La perte de la
-   position est la somme de sev × I sur les nœuds défaillants, plafonnée à 100 %.
-3. Nombres aléatoires communs : les tirages d'un nœud dépendent seulement de son identifiant.
-   Changer p, ou combiner plusieurs positions dans un livre, réutilise les mêmes tirages :
-   les comparaisons sont stables, et deux positions qui partagent un nœud défaillent ensemble.
+Utilisé par la page « Analyse globale des risques » (global_risk/analysis.py), qui affiche
+pour chaque composant sa sévérité, son facteur d'impact et le chemin jusqu'à la position,
+sans jamais les additionner.
+
+Facteur d'impact I(n) : part d'une défaillance du nœud n qui arrive jusqu'à la position.
+  - « max » (par défaut) : produit des poids w sur le chemin le plus fort.
+    Exemple : oracle → marché de prêt (0,3) → AMM (0,3) → position (0,1) : I = 0,009.
+    Limite : ignore qu'un dommage peut arriver par plusieurs chemins à la fois.
+  - « sum » : somme des produits sur tous les chemins, plafonnée à 1 (peut compter deux fois
+    un même dommage).
+
+L'ancienne simulation Monte Carlo et la décision « combien vendre » ont été retirées : la page
+principale utilise le simulateur de défaillance (risk_engine/simulate.py), sans probabilité.
 """
 
-import random
-import zlib
 from datetime import datetime, timezone
 
 from . import rules
-
-N_SIM = 20_000
-SEED = 2026
-_Q_POINTS = 200          # quantiles tabulés de la loi Bêta
-_BETA_CONCENTRATION = 4  # a = 4, b = 4(1 − sev)/sev : moyenne = sev
-
-_draw_cache = {}
-_quantile_cache = {}
-
-
-def node_draws(node_id: str, n: int = N_SIM):
-    """(U, V) : deux suites uniformes propres au nœud (U décide la défaillance, V la sévérité)."""
-    key = (node_id, n)
-    if key not in _draw_cache:
-        rng = random.Random(SEED ^ zlib.crc32(node_id.encode()))
-        u = [rng.random() for _ in range(n)]
-        v = [rng.random() for _ in range(n)]
-        _draw_cache[key] = (u, v)
-    return _draw_cache[key]
-
-
-def beta_quantiles(sev: float):
-    """Table de quantiles d'une Bêta de moyenne sev (tirée une fois, puis réutilisée)."""
-    sev = min(max(sev, 0.001), 0.999)
-    key = round(sev, 6)
-    if key not in _quantile_cache:
-        rng = random.Random(SEED + int(sev * 1e6))
-        a = _BETA_CONCENTRATION
-        b = a * (1 - sev) / sev
-        draws = sorted(rng.betavariate(a, b) for _ in range(4000))
-        _quantile_cache[key] = [draws[int((i + 0.5) / _Q_POINTS * len(draws))] for i in range(_Q_POINTS)]
-    return _quantile_cache[key]
 
 
 def horizon_days(graph: dict, today=None) -> float:
@@ -105,82 +72,17 @@ def best_path(graph, route, start):
 
 
 class PositionModel:
-    """Tout ce qu'il faut pour simuler une position dans un scénario BAS / BASE / HAUT."""
+    """Poids des arêtes, facteurs d'impact et paramètres (p, sev) d'une position, en BAS / BASE / HAUT.
 
-    def __init__(self, graph, scenario="base", propagation="max", horizon=None,
-                 overrides=None, n=N_SIM):
+    `n` n'est plus utilisé (ancienne taille du Monte Carlo) : conservé pour les appels existants."""
+
+    def __init__(self, graph, scenario="base", propagation="max", horizon=None, n=None):
         self.graph = graph
         self.scenario = scenario
         self.propagation = propagation
-        self.n = n
         self.horizon = horizon if horizon is not None else horizon_days(graph)
-        ov = overrides or {}
-        self.weights, self.weight_info = {}, {}
-        w_scen = ov.get("w_scenario", scenario)
-        for e in graph["edges"]:
-            info = rules.edge_weight(e, w_scen)
-            self.weights[(e["from"], e["to"])] = info["w"]
-            self.weight_info[(e["from"], e["to"])] = info
+        self.weights = {(e["from"], e["to"]): rules.edge_weight(e, scenario)["w"] for e in graph["edges"]}
         self.impact, self.route = impact_factors(graph, self.weights, propagation)
-        self.params = {}
         pos = graph["position"]["id"]
-        for nd in graph["nodes"]:
-            if nd["id"] == pos:
-                continue
-            prm = rules.node_params(nd, self.horizon, ov.get("p_scenario", scenario))
-            sev_prm = rules.node_params(nd, self.horizon, ov.get("sev_scenario", scenario))
-            prm["sev"] = sev_prm["sev"]
-            self.params[nd["id"]] = prm
-        self.node_by_id = {nd["id"]: nd for nd in graph["nodes"]}
-        self._background = {}
-
-    def components(self):
-        return [k for k in self.params]
-
-    def contribution(self, node_id, p=None, sev=None):
-        """Liste des pertes (par scénario simulé) causées par ce seul nœud."""
-        u, v = node_draws(node_id, self.n)
-        prm = self.params[node_id]
-        p = prm["p"] if p is None else p
-        sev = prm["sev"] if sev is None else sev
-        imp = self.impact.get(node_id, 0.0)
-        if imp <= 0 or sev <= 0 or p <= 0:
-            return None
-        q = beta_quantiles(sev)
-        m = len(q)
-        return [q[int(v[s] * m)] * imp if u[s] < p else 0.0 for s in range(self.n)]
-
-    def background(self, exclude):
-        """Somme des pertes de tous les nœuds sauf `exclude`, à leur probabilité normale."""
-        if exclude not in self._background:
-            total = [0.0] * self.n
-            for nid in self.params:
-                if nid == exclude:
-                    continue
-                c = self.contribution(nid)
-                if c is None:
-                    continue
-                for s in range(self.n):
-                    if c[s]:
-                        total[s] += c[s]
-            self._background[exclude] = total
-        return self._background[exclude]
-
-    def losses(self, incident=None, incident_p=None, incident_sev=None):
-        """Pertes simulées de la position (fractions entre 0 et 1)."""
-        bg = self.background(incident)
-        if incident is None:
-            return [min(x, 1.0) for x in bg]
-        c = self.contribution(incident, p=incident_p, sev=incident_sev)
-        if c is None:
-            return [min(x, 1.0) for x in bg]
-        return [min(bg[s] + c[s], 1.0) for s in range(self.n)]
-
-
-def stats(losses) -> dict:
-    """Perte attendue, VaR 95 et CVaR 95 (moyenne des 5 % pires scénarios)."""
-    srt = sorted(losses)
-    n = len(srt)
-    tail = srt[int(0.95 * n):]
-    return {"expected": sum(srt) / n, "var95": srt[int(0.95 * n)], "cvar95": sum(tail) / len(tail),
-            "p_any_loss": sum(1 for x in srt if x > 0) / n}
+        self.params = {nd["id"]: rules.node_params(nd, self.horizon, scenario)
+                       for nd in graph["nodes"] if nd["id"] != pos}

@@ -176,6 +176,51 @@ def morpho_markets_by_collateral(chain_id: int, collateral: str) -> list:
     return resp["data"]["markets"]["items"]
 
 
+def _morpho_graphql(query):
+    result = _post_json(MORPHO_GQL, {"query": query})
+    if result.get("errors"):
+        raise RuntimeError(f"Morpho GraphQL : {result['errors']}")
+    return result["data"]
+
+
+def morpho_market_borrowers(chain_id: int, market_id: str) -> dict:
+    """Toutes les positions d'emprunt d'un marché Morpho (GraphQL marketPositions, pagination complète).
+
+    Même requête que tools/collect_cascade.py. La somme des dettes et des garanties doit
+    correspondre à l'état du marché (à 0,1 % près), sinon le relevé est rejeté."""
+    mid = market_id.lower()
+
+    def fetch():
+        market = _morpho_graphql(
+            '{ marketById(marketId:"%s", chainId:%d) { marketId loanAsset { symbol decimals } '
+            'collateralAsset { symbol decimals } state { borrowAssets collateralAssets } } }' % (mid, chain_id))["marketById"]
+        rows, skip = [], 0
+        while True:
+            items = _morpho_graphql(
+                '{ marketPositions(first:100, skip:%d, orderBy:BorrowShares, orderDirection:Desc, '
+                'where:{marketUniqueKey_in:["%s"]}) { items { state { borrowAssets collateral } } } }'
+                % (skip, mid))["marketPositions"]["items"]
+            rows += [[x["state"]["collateral"] or "0", x["state"]["borrowAssets"] or "0"] for x in items]
+            if len(items) < 100:
+                break
+            skip += len(items)
+        return {"market": market, "rows": rows}
+
+    resp = cached("morpho", f"borrowers_{chain_id}_{mid}", MORPHO_GQL, fetch)
+    market = resp["market"]
+    if not market or market["marketId"].lower() != mid:
+        raise ValueError(f"Marché Morpho introuvable : {market_id}")
+    dl, dc = int(market["loanAsset"]["decimals"]), int(market["collateralAsset"]["decimals"])
+    debt_raw = sum(int(d) for _, d in resp["rows"])
+    coll_raw = sum(int(c) for c, _ in resp["rows"])
+    m_debt, m_coll = int(market["state"]["borrowAssets"]), int(market["state"]["collateralAssets"])
+    if abs(debt_raw - m_debt) > max(100, m_debt // 1000) or abs(coll_raw - m_coll) > max(100, m_coll // 1000):
+        raise ValueError("Positions des emprunteurs incomplètes : leur somme ne correspond pas à l'état du marché")
+    borrowers = [[int(c) / 10 ** dc, int(d) / 10 ** dl] for c, d in resp["rows"] if int(d) > 0]
+    return {"loan_decimals": dl, "collateral_decimals": dc, "borrowers": borrowers,
+            "loan_symbol": market["loanAsset"]["symbol"], "collateral_symbol": market["collateralAsset"]["symbol"]}
+
+
 def morpho_market(chain_id: int, market_id: str) -> dict:
     query = ("{ markets(first: 1, where: {chainId_in: [%d], uniqueKey_in: [\"%s\"]}) "
              "{ items { marketId lltv listed loanAsset { symbol address } "
@@ -288,6 +333,32 @@ def ethena_collateral_breakdown() -> list:
     return cached("ethena", "collateral_breakdown", url, lambda: _get_json(url))["breakdown"]
 
 
+def ethena_reserve_fund() -> dict:
+    """Dernière valeur du fonds de réserve d'Ethena (série publiée sur la page Transparency)."""
+    url = f"{ETHENA}/solvency/reserve-fund"
+
+    def transform(resp):
+        last = resp["queryIndex"][0]["yields"][-1]
+        return {"value": last["value"], "timestamp": last["timestamp"]}
+
+    return cached("ethena", "reserve_fund", url, lambda: _get_json(url), transform=transform)
+
+
+def erc20_total_supply(token: str):
+    """Offre en circulation d'un jeton (totalSupply() / 10^decimals(), lecture seule)."""
+    from .keccak import selector
+    supply = dec_uint(eth_call(token, selector("totalSupply()")))
+    dec = dec_uint(eth_call(token, selector("decimals()")))
+    return supply / 10 ** dec if supply is not None and dec is not None else None
+
+
+def lido_total_pooled_ether(steth: str):
+    """ETH détenu par Lido pour adosser stETH (getTotalPooledEther(), lecture seule)."""
+    from .keccak import selector
+    v = dec_uint(eth_call(steth, selector("getTotalPooledEther()")))
+    return v / 1e18 if v is not None else None
+
+
 # ---------------------------------------------------------------------------
 # RPC Ethereum (lecture seule)
 # ---------------------------------------------------------------------------
@@ -349,15 +420,6 @@ def pendle_market_state(market: str) -> dict:
 
 
 PENDLE_ROUTER_STATIC = "0x263833d47ea3fa4a30f269323aba6a107f9eb14c"
-
-
-def pendle_static_sell_pt(market: str, pt_units: int):
-    """Cotation on-chain AMM seul (RouterStatic.swapExactPtForSyStatic) : SY reçus, ou None si refus."""
-    from .keccak import selector
-    data = (selector("swapExactPtForSyStatic(address,uint256)") + _arg_address(market)
-            + hex(int(pt_units) * 10 ** 18)[2:].rjust(64, "0"))
-    v = dec_uint(eth_call(PENDLE_ROUTER_STATIC, data))
-    return v / 1e18 if v is not None else None
 
 
 def sy_exchange_rate(sy: str):
