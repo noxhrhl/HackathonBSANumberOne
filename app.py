@@ -316,56 +316,21 @@ def _curve(d):
 
 
 def decision_section(q, g, d):
-    """En bas de page : le détail du calcul (tableau des stratégies et courbe)."""
+    """En bas de page : la courbe qui justifie la part à vendre (sans tableau ni texte technique)."""
     if not d or not d.get("ok"):
         return ""
-    b, rows = d["best"], d["rows"]
     open_ = d["category"] == "partiel"   # la courbe justifie une vente partielle ; sinon elle reste repliée
-    picks = {0.0: "Rester", b["x"]: "Meilleur choix", rows[-1]["x"]: "Sortie maximale"}
-    show = sorted({0.0, b["x"], rows[-1]["x"]} | {r["x"] for r in rows if abs(r["x"] * 4 - round(r["x"] * 4)) < 1e-9})
-    trs = ""
-    for r in rows:
-        if r["x"] not in show:
-            continue
-        after = "—" if r["x"] == 0 else (usd(r["exec_after"]) if r.get("exec_after") is not None else "impossible")
-        tag = picks.get(r["x"], "")
-        trs += (f'<tr class="{"best" if r is b else ""}"><td>{pct(r["x"], 0)}{(" · " + tag) if tag else ""}</td>'
-                f'<td>{usd(r["exec"])}</td><td>{usd(r["rest"])}</td><td><strong>{usd(r["total"])}</strong></td>'
-                + (f'<td>{after}</td>' if d["kind"] == "vendre" else "") + "</tr>")
-    head_after = "<th>Coût de vente APRÈS le choc</th>" if d["kind"] == "vendre" else ""
-    if d["kind"] == "vendre":
-        how = ("Coût de vente = valeur de marché des PT vendus − ce que rapporte la vente sur le pool Pendle "
-               "(formule on-chain de l'AMM Pendle V2, réserves actuelles). Perte sur ce qui reste = la position restante, "
-               "re-simulée avec la même défaillance" + (" (la vente rembourse d'abord la dette : facteur de santé recalculé)."
-                                                        if d["type"] == "morpho_borrow" else "."))
-    else:
-        how = ("Retirer ne coûte pas de glissement, mais l'argent retiré reste dans l'actif prêté : il subit encore sa baisse de prix. "
-               "Le retrait est limité par la liquidité disponible du marché.")
-    be = ""
-    if d.get("breakeven_p") is not None:
-        p = d["breakeven_p"]
-        be = (f'<p class="breakeven">Et si on n\'est pas sûr que ça arrive ? Sortir coûte {usd(b["exec"])} tout de suite et évite '
-              f'{usd(d["stay"] - b["rest"])} si ça arrive : sortir vaut le coup dès qu\'on pense que la défaillance a plus de '
-              f'<strong>{pct(p, 1) if p >= 0.001 else "0 %"}</strong> de chances de se produire.</p>') if p > 0 else \
-             '<p class="breakeven">Sortir ne coûte rien ici : c\'est intéressant dès qu\'il y a un doute.</p>'
-    unk = ""
-    if d.get("unknown"):
-        unk = ("<details><summary>Non chiffré (" + str(len(d["unknown"])) + ")</summary><ul>" +
-               "".join(f"<li>{escape(u)}</li>" for u in d["unknown"][:8]) + "</ul></details>")
+    verb = "vend" if d["kind"] == "vendre" else "retire"
+    body = f"""
+      <p class="section-intro">Pour chaque part qu'on {verb} maintenant : <strong>ce que coûte la vente + ce qu'on perd sur le reste</strong>
+        si la défaillance arrive. Vendre trop peu, on subit la perte ; vendre trop, la vente coûte cher. Le point vert est le moins cher.</p>
+      {_curve(d)}"""
+    if not open_:
+        body = f'<details class="sim-more"><summary>Voir la courbe</summary>{body}</details>'
     return f"""
     <section class="panel" id="decision" aria-labelledby="d-title">
-      <div class="section-head"><div><p class="eyebrow">DÉCISION — COMBIEN VENDRE MAINTENANT ?</p>
-        <h2 id="d-title">Coût total selon la part vendue, pour {usd(d["size"])}</h2></div></div>
-      <p class="section-intro">Pour chaque part vendue maintenant (de 0 à 100 %, par pas de 5 %) :
-        <strong>coût total = coût de la vente + perte sur ce qui reste</strong> si la défaillance arrive. Le point vert est le moins cher.</p>
-      {"" if open_ else '<details class="sim-more"><summary>Voir le calcul : coût total selon la part vendue</summary>'}
-      {_curve(d)}
-      <table class="data small"><thead><tr><th>Part {"vendue" if d["kind"] == "vendre" else "retirée"}</th><th>Coût de {"vente" if d["kind"] == "vendre" else "sortie"} (avant le choc)</th>
-        <th>Perte sur ce qui reste</th><th>Coût total</th>{head_after}</tr></thead><tbody>{trs}</tbody></table>
-      <p class="fine-print">{escape(how)}{" La colonne « après le choc » montre le coût de la même vente une fois le choc arrivé, en plus de la baisse déjà subie : attendre ne fait pas éviter la perte." if d["kind"] == "vendre" else ""}</p>
-      {be}
-      {unk}
-      {"" if open_ else "</details>"}
+      <h2 id="d-title">Coût total selon la part {"vendue" if d["kind"] == "vendre" else "retirée"}</h2>
+      {body}
     </section>"""
 
 

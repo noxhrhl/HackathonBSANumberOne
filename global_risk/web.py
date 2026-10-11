@@ -15,7 +15,8 @@ CSS = """
 .global-tabs a:hover{border-color:var(--cyan-soft)}
 .global-current-graph{min-width:0}.global-current-mode{margin:0 0 10px;color:var(--cyan-soft);font-size:13px;font-weight:600}
 .global-hero{padding:20px}.global-hero h1{font-size:25px;margin:0 0 8px}.global-hero p{color:var(--muted);margin:0 0 14px}
-.global-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.global-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,200px));gap:10px}
+.global-all{display:none}
 .global-kpi{background:#0c1d38;border:1px solid var(--soft-line);padding:12px;border-radius:4px}
 .global-kpi span{display:block;color:var(--muted);font-size:12px}.global-kpi strong{display:block;font-size:18px;margin-top:4px}
 .global-note{padding:12px;background:#142139;border-left:3px solid var(--partial);color:var(--ink);line-height:1.55}
@@ -131,14 +132,11 @@ def _risk_body(row):
             '<dl>'
             f'<dt>Chemin vers la position</dt><dd>{path}</dd>'
             f'<dt>Transmission</dt><dd>{transmission}</dd>'
-            f'<dt>Exposition isolée</dt><dd>{_pct(row["conditional_loss_fraction"])} '
-            f'de la position ({_money(row["conditional_loss_usd"])}) si ce composant défaille ; '
-            f'impact du chemin {_pct(row["impact_factor"])}, sévérité supposée {_pct(row["severity_if_failure"])}</dd>'
-            f'<dt>Probabilité sur l’horizon</dt><dd>{probability}</dd>'
-            f'<dt>Espérance de perte</dt><dd>{_expected(row)}</dd>'
-            f'<dt>Source du lien</dt><dd>{_sources_html(row["sources"])}</dd>'
-            f'<dt>Statut du chemin</dt><dd>{_s(status_line or "indisponible")}</dd>'
-            f'<dt>Limite principale</dt><dd>{_s(row["main_limit"])}</dd>'
+            f'<dt>Perte si ça casse</dt><dd>{_pct(row["conditional_loss_fraction"])} de la position '
+            f'({_money(row["conditional_loss_usd"])})</dd>'
+            f'<dt>Probabilité</dt><dd>{_pct(row["probability"], 2) + " sur l’horizon (moyenne de la catégorie)" if row["probability"] is not None else "non estimable"}</dd>'
+            f'<dt>Probabilité × perte</dt><dd>{_money(row["expected_loss_usd"]) if row["expected_loss_fraction"] is not None else "non calculable"}</dd>'
+            f'<dt>Source</dt><dd>{_sources_html(row["sources"])}</dd>'
             '</dl>')
 
 
@@ -179,11 +177,10 @@ def render_global(analysis, graph, report, context, positions):
         f'aria-pressed="false"><span>Risque {index:02d} · {_s(row["group"])}</span>'
         f'<b>{_s(row["name"])}</b>'
         + (f'<strong>{_money(row["expected_loss_usd"])}</strong>'
-           f'<small>d’espérance de perte = probabilité {_pct(row["probability"], 2)} × '
-           f'perte si défaillance {_money(row["conditional_loss_usd"])}</small></button>'
+           f'<small>probabilité {_pct(row["probability"], 2)} × perte si ça casse {_money(row["conditional_loss_usd"])}</small></button>'
            if row["expected_loss_fraction"] is not None else
            f'<strong>{_pct(row["conditional_loss_fraction"])}</strong>'
-           f'<small>de perte si défaillance ; probabilité non estimable</small></button>')
+           f'<small>de la position perdue si ça casse ; probabilité non estimable</small></button>')
         for index, row in enumerate(top_three, 1))
     initial_risk = top_three[0] if top_three else None
     initial_anchor = _anchor(initial_risk["id"]) if initial_risk else ""
@@ -205,22 +202,16 @@ def render_global(analysis, graph, report, context, positions):
 <form class="controls" action="/global" method="get"><label>Choisir une position<select name="pos">{options}</select></label>
 <label>Montant à analyser <span>$</span><input type="number" name="amount" min="10000" max="10000000000" step="any" value="{round(amount)}"></label>
 <button type="submit">Analyser</button></form>
-<p class="side-note">Aucune défaillance à sélectionner. Cette page parcourt toutes les dépendances découvertes pour cette position.</p></aside>
+</aside>
 <main class="main">{tabs(pid, amount=amount)}
 <section class="panel global-hero" id="summary"><h1>Analyse globale des risques</h1>
-<p>Profil des risques modélisés dans le graphe de cette position. Cette vue ne change pas la recommandation « rester ou vendre ».</p>
-<div class="global-kpis"><div class="global-kpi"><span>Dépendances couvertes</span><strong>{len(analysis["rows"])} nœuds</strong></div>
-<div class="global-kpi"><span>Horizon</span><strong>{analysis["horizon_days"]:.0f} jours</strong></div>
-<div class="global-kpi"><span>Montant choisi, illustratif</span><strong>{_money(amount)}</strong></div>
-<div class="global-kpi"><span>Confiance</span><strong>{_s(analysis["confidence"])}</strong></div></div>
-<p class="global-muted" style="margin-top:12px">Relevé : {_s(fetched)} · Taille de référence des cotations : {_money(analysis["reference_size_usd"])} · Groupes présents : {_s(", ".join(groups) or "aucun")}</p>
-<div class="global-note"><strong>Pas de score total fiable.</strong> {_s(analysis["summary"]["reason"])}<br>
-Plus forte espérance de perte d’un seul composant = {expected_text}.
-Repère de stress : plus forte perte conditionnelle d’un seul composant = {summary_text}. Ce n’est ni une prévision, ni une somme, ni la perte maximale de toutes les causes réunies.</div></section>
+<p>Les blocs dont dépend la position, classés selon probabilité × perte si ça casse.</p>
+<div class="global-kpis"><div class="global-kpi"><span>Blocs analysés</span><strong>{len(analysis["rows"])}</strong></div>
+<div class="global-kpi"><span>Horizon</span><strong>{analysis["horizon_days"]:.0f} jours</strong></div></div></section>
 <section class="panel global-panel"><h2>Les 3 risques les plus importants</h2>
-<p class="global-muted">Classement selon l’<strong>espérance de perte</strong> : probabilité que le composant défaille sur l’horizon × perte sur la position s’il défaille (scénario central). Les probabilités sont des repères historiques par catégorie de composant, pas des prévisions propres à chacun. Plusieurs lignes peuvent partager une même cause ; leurs pertes ne s'additionnent pas.</p>
+<p class="global-muted">Probabilité × perte si ça casse. Les probabilités sont des moyennes par catégorie : les montants sont des ordres de grandeur. Plusieurs blocs ont la même cause : leurs pertes ne s'additionnent pas.</p>
 <div class="global-priorities">{priorities or '<p>Données indisponibles : aucun risque couvert.</p>'}</div></section>
-<section class="panel global-panel"><h2>Graphe et détail du risque</h2><p class="global-muted">Cliquez sur un nœud pour lire son risque dans la fiche. Une flèche A → B signifie qu'une défaillance de A peut toucher B.</p>
+<section class="panel global-panel"><h2>Le graphe</h2><p class="global-muted">Cliquez sur un bloc pour voir sa fiche. Une flèche A → B veut dire « si A casse, B est touché ».</p>
 <div class="global-explore"><div class="graph-wrap global-graph">{drawing}</div>
 <aside class="global-detail" id="global-risk-detail" tabindex="-1" aria-live="polite"><p class="global-detail-label">Risque sélectionné</p>
 <div class="global-risk" id="global-risk-detail-content">{initial_body}</div></aside></div>
