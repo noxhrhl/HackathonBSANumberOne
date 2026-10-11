@@ -1,8 +1,10 @@
 """Profil de tous les risques du graphe, sans addition de causes corrélées.
 
-Les valeurs calculées ici décrivent la perte *conditionnelle et isolée* d'un
-composant. Un même événement peut traverser plusieurs nœuds : les additionner
-donnerait alors une perte ou une probabilité globale trompeuse.
+Pour chaque composant : la perte *conditionnelle et isolée* (s'il défaille), sa
+probabilité de défaillance sur l'horizon (repère de catégorie), et leur produit,
+l'*espérance de perte* p × perte, qui sert au classement. Un même événement peut
+traverser plusieurs nœuds : additionner ces espérances donnerait une perte globale
+trompeuse, donc aucun total n'est calculé.
 """
 
 from risk_engine import model, schema
@@ -102,6 +104,7 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
         # p est utilisable comme repère de catégorie, jamais comme probabilité
         # d'incident spécifique. Une règle supposée n'a pas de p publiable.
         p = prm["p"] if sources and not prm["assumption"] else None
+        expected = p * conditional if p is not None else None   # espérance de perte : p × perte si défaillance
         if not sources:
             missing.append(f"{node['name']} : preuve de découverte indisponible")
         if path[-1] != target:
@@ -117,6 +120,8 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
             "impact_factor": impact, "severity_if_failure": prm["sev"],
             "conditional_loss_fraction": conditional,
             "conditional_loss_usd": conditional * size if size is not None else None,
+            "expected_loss_fraction": expected,
+            "expected_loss_usd": expected * size if expected is not None and size is not None else None,
             "probability": p,
             "probability_basis": "Paramètre historique ou heuristique de catégorie, non propre au composant" if p is not None else "Non estimable avec fiabilité",
             "sources": sources, "main_limit": _limit(node, edges, sources, prm),
@@ -124,7 +129,10 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
             "has_evidence": bool(sources), "assumption": prm["assumption"],
             "channel": "oracle" if node["kind"] == "oracle" else "sale" if node["kind"] == "venue" else "other",
         })
-    rows.sort(key=lambda r: (-r["conditional_loss_fraction"], r["name"], r["id"]))
+    # Classement par espérance de perte ; sans probabilité publiable, le composant passe après,
+    # trié par perte conditionnelle (sa probabilité est « non estimable », pas nulle).
+    rows.sort(key=lambda r: (r["expected_loss_fraction"] is None, -(r["expected_loss_fraction"] or 0),
+                             -r["conditional_loss_fraction"], r["name"], r["id"]))
     sensitivity = []
     for label, pm in scenarios.items():
         values = [(n["id"], pm.params[n["id"]]["sev"] * pm.impact.get(n["id"], 0.0))
@@ -149,7 +157,8 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
     if not rows:
         confidence = "données indisponibles"
         missing.append("Aucune dépendance découverte")
-    strongest = rows[0] if rows else None
+    strongest = max(rows, key=lambda r: r["conditional_loss_fraction"]) if rows else None
+    likeliest = rows[0] if rows and rows[0]["expected_loss_fraction"] is not None else None
     core_groups = ("Actifs sous-jacents", "Émetteurs et garanties", "Oracles",
                    "Prêts et liquidations", "Liquidité de sortie", "Chaîne et règlement")
     absent_groups = [group for group in core_groups if not any(r["group"] == group for r in rows)]
@@ -163,7 +172,9 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
         "summary": {"quantified_global_risk": None,
                     "reason": "Causes corrélées et probabilités de catégorie : somme non défendable.",
                     "largest_single_event_fraction": strongest["conditional_loss_fraction"] if strongest else None,
-                    "largest_single_event_node": strongest["name"] if strongest else None},
+                    "largest_single_event_node": strongest["name"] if strongest else None,
+                    "largest_expected_fraction": likeliest["expected_loss_fraction"] if likeliest else None,
+                    "largest_expected_node": likeliest["name"] if likeliest else None},
         "adverse_scenarios": rows[:3], "sensitivity": sensitivity,
         "missing": list(dict.fromkeys(missing)),
         "absent_groups": absent_groups,

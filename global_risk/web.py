@@ -135,10 +135,18 @@ def _risk_body(row):
             f'de la position ({_money(row["conditional_loss_usd"])}) si ce composant défaille ; '
             f'impact du chemin {_pct(row["impact_factor"])}, sévérité supposée {_pct(row["severity_if_failure"])}</dd>'
             f'<dt>Probabilité sur l’horizon</dt><dd>{probability}</dd>'
+            f'<dt>Espérance de perte</dt><dd>{_expected(row)}</dd>'
             f'<dt>Source du lien</dt><dd>{_sources_html(row["sources"])}</dd>'
             f'<dt>Statut du chemin</dt><dd>{_s(status_line or "indisponible")}</dd>'
             f'<dt>Limite principale</dt><dd>{_s(row["main_limit"])}</dd>'
             '</dl>')
+
+
+def _expected(row):
+    if row["expected_loss_fraction"] is None:
+        return "Non calculable : probabilité non estimable avec fiabilité"
+    return (f'{_pct(row["expected_loss_fraction"], 3)} de la position ({_money(row["expected_loss_usd"])}) '
+            f'= probabilité {_pct(row["probability"], 2)} × perte si défaillance {_pct(row["conditional_loss_fraction"])}')
 
 
 def _risk_html(row):
@@ -169,8 +177,13 @@ def render_global(analysis, graph, report, context, positions):
     priorities = "".join(
         f'<button type="button" class="global-priority" data-risk-id="{_anchor(row["id"])}" '
         f'aria-pressed="false"><span>Risque {index:02d} · {_s(row["group"])}</span>'
-        f'<b>{_s(row["name"])}</b><strong>{_pct(row["conditional_loss_fraction"])}</strong>'
-        f'<small>de perte conditionnelle isolée ({_money(row["conditional_loss_usd"])})</small></button>'
+        f'<b>{_s(row["name"])}</b>'
+        + (f'<strong>{_money(row["expected_loss_usd"])}</strong>'
+           f'<small>d’espérance de perte = probabilité {_pct(row["probability"], 2)} × '
+           f'perte si défaillance {_money(row["conditional_loss_usd"])}</small></button>'
+           if row["expected_loss_fraction"] is not None else
+           f'<strong>{_pct(row["conditional_loss_fraction"])}</strong>'
+           f'<small>de perte si défaillance ; probabilité non estimable</small></button>')
         for index, row in enumerate(top_three, 1))
     initial_risk = top_three[0] if top_three else None
     initial_anchor = _anchor(initial_risk["id"]) if initial_risk else ""
@@ -180,6 +193,9 @@ def render_global(analysis, graph, report, context, positions):
     largest = analysis["summary"]["largest_single_event_fraction"]
     summary_text = (f'{_pct(largest)} si « {_s(analysis["summary"]["largest_single_event_node"])} » défaille seul'
                     if largest is not None else "Données indisponibles")
+    likeliest = analysis["summary"].get("largest_expected_fraction")
+    expected_text = (f'{_pct(likeliest, 3)} ({_money(likeliest * amount)}) pour « {_s(analysis["summary"]["largest_expected_node"])} »'
+                     if likeliest is not None else "non calculable")
     return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Belem — Analyse globale des risques</title><link rel="stylesheet" href="/static/style.css">{CSS}</head><body>
 <header class="topbar"><span class="product"><b>Belem Capital</b> Risque de dépendances DeFi</span>
@@ -199,16 +215,17 @@ def render_global(analysis, graph, report, context, positions):
 <div class="global-kpi"><span>Confiance</span><strong>{_s(analysis["confidence"])}</strong></div></div>
 <p class="global-muted" style="margin-top:12px">Relevé : {_s(fetched)} · Taille de référence des cotations : {_money(analysis["reference_size_usd"])} · Groupes présents : {_s(", ".join(groups) or "aucun")}</p>
 <div class="global-note"><strong>Pas de score total fiable.</strong> {_s(analysis["summary"]["reason"])}<br>
+Plus forte espérance de perte d’un seul composant = {expected_text}.
 Repère de stress : plus forte perte conditionnelle d’un seul composant = {summary_text}. Ce n’est ni une prévision, ni une somme, ni la perte maximale de toutes les causes réunies.</div></section>
 <section class="panel global-panel"><h2>Les 3 risques les plus importants</h2>
-<p class="global-muted">Classement selon la perte conditionnelle isolée dans le scénario central : ce n'est pas un classement par probabilité. Plusieurs lignes peuvent partager une même cause ; leurs pertes ne s'additionnent pas.</p>
+<p class="global-muted">Classement selon l’<strong>espérance de perte</strong> : probabilité que le composant défaille sur l’horizon × perte sur la position s’il défaille (scénario central). Les probabilités sont des repères historiques par catégorie de composant, pas des prévisions propres à chacun. Plusieurs lignes peuvent partager une même cause ; leurs pertes ne s'additionnent pas.</p>
 <div class="global-priorities">{priorities or '<p>Données indisponibles : aucun risque couvert.</p>'}</div></section>
 <section class="panel global-panel"><h2>Graphe et détail du risque</h2><p class="global-muted">Cliquez sur un nœud pour lire son risque dans la fiche. Une flèche A → B signifie qu'une défaillance de A peut toucher B.</p>
 <div class="global-explore"><div class="graph-wrap global-graph">{drawing}</div>
 <aside class="global-detail" id="global-risk-detail" tabindex="-1" aria-live="polite"><p class="global-detail-label">Risque sélectionné</p>
 <div class="global-risk" id="global-risk-detail-content">{initial_body}</div></aside></div>
 <details class="global-all"><summary>Voir tous les risques du graphe ({len(analysis["rows"])})</summary><div>
-<p class="global-muted">Risques regroupés par famille et classés selon leur perte conditionnelle isolée. Chaque ligne traite une cause séparément.</p>{risks}</div></details></section>
+<p class="global-muted">Risques regroupés par famille et classés selon leur espérance de perte (probabilité × perte si défaillance). Chaque ligne traite une cause séparément.</p>{risks}</div></details></section>
 </main></div><script>
 (function () {{
   const detail = document.getElementById("global-risk-detail");

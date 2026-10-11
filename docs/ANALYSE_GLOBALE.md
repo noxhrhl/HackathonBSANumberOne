@@ -18,7 +18,7 @@ Ouvrir `http://127.0.0.1:8000`. Si le port est occupé, arrêter le serveur pré
 
 ### Lire la page globale
 
-La synthèse donne l'horizon, le montant illustratif, la date du relevé et le niveau de confiance. Les **trois risques mis en avant** sont ceux dont la perte **conditionnelle isolée** est la plus élevée dans le scénario central. Ce classement n'est pas un classement par probabilité ; deux risques peuvent appartenir à la même chaîne de causes et leurs pertes ne doivent pas être additionnées.
+La synthèse donne l'horizon, le montant illustratif, la date du relevé et le niveau de confiance. Les **trois risques mis en avant** sont ceux dont l'**espérance de perte** est la plus élevée : probabilité de défaillance sur l'horizon × perte conditionnelle isolée, dans le scénario central. Un composant sans probabilité publiable (règle supposée ou preuve absente) n'a pas d'espérance : il est classé après les autres, selon sa perte conditionnelle, et la page indique « probabilité non estimable ». Deux risques peuvent appartenir à la même chaîne de causes : leurs espérances ne doivent pas être additionnées, et la page ne calcule aucun total.
 
 Cliquer une carte ou un nœud du graphe affiche sa fiche à côté du graphe : chemin de propagation, mécanisme, exposition estimée, probabilité si disponible, sources et limite principale. Sur un écran étroit, la fiche apparaît sous le graphe et le clic y fait défiler la page. Le nœud de la position renvoie à la synthèse : il ne représente pas une cause de défaillance. La liste de **tous les risques couverts par le graphe** reste accessible sous le graphe, repliée par famille pour alléger la lecture. Les trois anciennes sections sous le graphe (sensibilité, prix de vente/oracle, sources et limites générales) ne sont plus affichées ; les sources et limites propres à chaque risque restent dans sa fiche.
 
@@ -52,6 +52,8 @@ Pour un composant `n`, le moteur existant donne une sévérité `sev(n)` et un p
 I(n) = max sur les chemins n → position du produit des w(e)
 Perte conditionnelle isolée(n) = sev(n) × I(n)
 Montant illustratif = perte conditionnelle isolée(n) × taille illustrative de la position
+p(n) = 1 − exp(−λ(n) × H / 365)                          (probabilité de catégorie sur l'horizon H)
+Espérance de perte(n) = p(n) × perte conditionnelle isolée(n)   ← sert au classement
 ```
 
 `I(n)` et `sev(n)` ne sont **pas** des pertes observées : ils sont produits par les règles du modèle. La valeur la plus élevée parmi les pertes conditionnelles isolées sert de **repère de stress d'un seul composant**. Elle n'est pas une borne de perte totale en cas de plusieurs causes, ni une prévision. Les scénarios bas / central / haut remplacent les valeurs de sévérité et de poids par les bornes définies dans `risk_engine/rules.py` ; ces résultats restent dans le profil JSON, mais ne sont plus montrés dans la page simplifiée.
@@ -60,7 +62,7 @@ Le champ `montant` permet de changer la taille illustrative de la position. Sur 
 
 Lorsqu'une règle et une preuve permettent de montrer une probabilité indicative, le moteur utilise `p = 1 − exp(−λ × H / 365)`, où `λ` est un taux annuel de **catégorie** et `H` l'horizon en jours. Certaines catégories viennent des incidents historiques, d'autres d'un jugement documenté. Cette probabilité n'est ni la fréquence observée du contrat exact ni la probabilité d'une alerte en cours. Pour une règle explicitement supposée, ou sans preuve de découverte, la page affiche **non estimable avec fiabilité**.
 
-Exemple de lecture : si la sévérité supposée d'un émetteur est 20 % et que le meilleur chemin jusqu'à la position transmet 50 %, la perte conditionnelle isolée est `20 % × 50 % = 10 %`. Pour une taille illustrative de 2 M$, cela affiche 200 000 $. Ce n'est pas une perte réellement observée et ne doit pas être ajouté à la ligne de l'actif émis par cet émetteur.
+Exemple de lecture : si la sévérité supposée d'un émetteur est 20 % et que le meilleur chemin jusqu'à la position transmet 50 %, la perte conditionnelle isolée est `20 % × 50 % = 10 %`. Pour une taille illustrative de 2 M$, cela affiche 200 000 $. Avec une probabilité de catégorie de 0,2 % sur l'horizon, l'espérance de perte est `0,2 % × 200 000 $ = 400 $`. Ce n'est pas une perte réellement observée et ne doit pas être ajouté à la ligne de l'actif émis par cet émetteur.
 
 ## Prix de vente, oracle et qualité des données
 

@@ -70,6 +70,21 @@ class GlobalRiskTests(unittest.TestCase):
         html = web.render_global(result, graph, REPORT, {}, [{"id": "test", "label": "Position test"}])
         self.assertIn("Données indisponibles", html)
 
+    def test_ranking_uses_expected_loss(self):
+        result = analyze(fixture_graph(), REPORT)
+        rows = result["rows"]
+        for r in rows:
+            if r["probability"] is None:
+                self.assertIsNone(r["expected_loss_fraction"])
+            else:
+                self.assertAlmostEqual(r["expected_loss_fraction"], r["probability"] * r["conditional_loss_fraction"])
+        known = [r["expected_loss_fraction"] for r in rows if r["expected_loss_fraction"] is not None]
+        self.assertEqual(known, sorted(known, reverse=True))
+        first_unknown = next((i for i, r in enumerate(rows) if r["expected_loss_fraction"] is None), len(rows))
+        self.assertTrue(all(r["expected_loss_fraction"] is None for r in rows[first_unknown:]))  # sans probabilité : après
+        self.assertEqual(result["summary"]["largest_expected_node"], rows[0]["name"])
+        self.assertIsNone(result["summary"]["quantified_global_risk"])                              # toujours pas de total
+
     def test_reproducible_with_fixed_horizon(self):
         graph = fixture_graph()
         self.assertEqual(analyze(graph, REPORT, horizon=45), analyze(graph, REPORT, horizon=45))
