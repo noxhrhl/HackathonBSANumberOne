@@ -116,11 +116,6 @@ def _risk_body(row):
     """Décrit un risque isolé, partagé par la liste et la fiche du graphe."""
     path = " → ".join(_s(x) for x in row["path_names"])
     transmission = " ".join(_s(x) for x in dict.fromkeys(row["transmission"])) or "Mécanisme non documenté."
-    probability = (_pct(row["probability"], 2) + " — " + _s(row["probability_basis"])
-                   if row["probability"] is not None else "Non estimable avec fiabilité")
-    statuses = {"verified_onchain": "lu sur chaîne", "api": "API", "documented": "documentation",
-                "assumed": "hypothèse"}
-    status_line = ", ".join(dict.fromkeys(statuses.get(s, s or "inconnu") for s in row["edge_statuses"]))
     if row["channel"] == "oracle":
         channel = '<span class="tag">Prix de l’oracle</span>'
     elif row["channel"] == "sale":
@@ -138,13 +133,6 @@ def _risk_body(row):
             f'<dt>Probabilité × perte</dt><dd>{_money(row["expected_loss_usd"]) if row["expected_loss_fraction"] is not None else "non calculable"}</dd>'
             f'<dt>Source</dt><dd>{_sources_html(row["sources"])}</dd>'
             '</dl>')
-
-
-def _expected(row):
-    if row["expected_loss_fraction"] is None:
-        return "Non calculable : probabilité non estimable avec fiabilité"
-    return (f'{_pct(row["expected_loss_fraction"], 3)} de la position ({_money(row["expected_loss_usd"])}) '
-            f'= probabilité {_pct(row["probability"], 2)} × perte si défaillance {_pct(row["conditional_loss_fraction"])}')
 
 
 def _risk_html(row):
@@ -187,12 +175,6 @@ def render_global(analysis, graph, report, context, positions):
     initial_body = _risk_body(initial_risk) if initial_risk else '<p>Données indisponibles : aucun risque couvert.</p>'
     drawing = svg.render(graph, node_href=lambda nid: "#summary" if nid == graph["position"]["id"] else "#" + _anchor(nid))
     fetched = analysis["fetched_at"] or "Données indisponibles"
-    largest = analysis["summary"]["largest_single_event_fraction"]
-    summary_text = (f'{_pct(largest)} si « {_s(analysis["summary"]["largest_single_event_node"])} » défaille seul'
-                    if largest is not None else "Données indisponibles")
-    likeliest = analysis["summary"].get("largest_expected_fraction")
-    expected_text = (f'{_pct(likeliest, 3)} ({_money(likeliest * amount)}) pour « {_s(analysis["summary"]["largest_expected_node"])} »'
-                     if likeliest is not None else "non calculable")
     return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Belem — Analyse globale des risques</title><link rel="stylesheet" href="/static/style.css">{CSS}</head><body>
 <header class="topbar"><span class="product"><b>Belem Capital</b> Risque de dépendances DeFi</span>

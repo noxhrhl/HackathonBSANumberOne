@@ -942,7 +942,8 @@ The classic controls are removed from the main page, because they only fed the p
 | Propagation (strongest path / sum) | **removed** | no impact factor I |
 | Failed component (drop-down list) | **removed** | the failed block is chosen **by clicking it in the graph** |
 | Position (5 choices), amount | kept | |
-| Scenario, severity, duration | kept (simulator) | |
+| Scenario, severity | kept (simulator); the scenario is shown, not chosen, when only one applies | |
+| Incident duration | **removed** | fixed at 24 h (persistent failure) |
 
 Removing these controls also removes what depended on them on the main page:
 - "La réponse à 3 h du matin" (Monte Carlo);
@@ -955,5 +956,5 @@ Removing these controls also removes what depended on them on the main page:
 
 The block preselected when a position opens is a simulable one: the lending market's oracle for a PT, otherwise the asset held, lent or posted as collateral.
 
-The new stay / exit recommendation (section 14) replaces the removed sections once implemented. The classic modules stay in the code for the `/global` page.
+The stay / exit recommendation (section 14, `risk_engine/exit_rule.py`) replaces the removed sections: verdict at the top of the page, cost curve at the bottom. The classic modules stay in the code for the `/global` page.
 

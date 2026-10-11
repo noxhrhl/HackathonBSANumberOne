@@ -499,56 +499,13 @@ def sim_dashboard(res):
                    "alert" if not ex1["full_exit"] else "")]
     kpis = "".join(f'<div class="kpi{" " + k if k else ""}"><span>{a}</span><strong>{b}</strong><small>{c}</small></div>'
                    for a, b, c, k in tiles)
-    rows = ""
-    extra = []
-    if blocked:
-        extra = [{"key": "forced", "label": "Impact si sortie forcée maintenant (part bloquée comptée comme perdue)",
-                  "initial": T["initial"], "after": T["after_if_forced_exit"], "change_usd": -T["loss_if_forced_exit_usd"],
-                  "status": "borne haute : la part bloquée n'est perdue que si l'on doit sortir avant le retour de la liquidité",
-                  "method": "Impact financier total + valeur non exécutable maintenant"}]
-    for m in R["metrics"] + [dict(T, key="total", status="calculé")] + extra:
-        if m.get("initial") is None:
-            rows += (f'<tr><td>{escape(m["label"])}</td><td colspan="4" class="muted">{escape(m["status"])}</td>'
-                     f'<td>{escape(m.get("method") or "")}</td></tr>')
-            continue
-        delta = m.get("change_usd", m["after"] - m["initial"])
-        if m["key"] == "blocked":
-            delta = -m["after"]  # valeur qu'on ne peut plus encaisser maintenant
-        cls = {"total": ' class="total"', "forced": ' class="forced"'}.get(m["key"], ' class="excluded"' if m.get("excluded_from_total") else "")
-        rows += (f'<tr{cls}><td>{escape(m["label"])}<br><small>{escape(m["status"])}</small></td><td>{usd_exact(m["initial"])}</td>'
-                 f'<td>{usd_exact(m["after"])}</td><td>{"+" if delta > 0.5 else ""}{usd_exact(delta)}</td>'
-                 f'<td>{pct(delta / T["initial"], 2) if T["initial"] else "—"}</td>'
-                 f'<td>{escape(m.get("method") or "")}{"<br><small>" + escape(m["note"]) + "</small>" if m.get("note") else ""}</td></tr>')
     names = {n["id"]: n["name"] for n in graph_for_id(res)["nodes"]}
     path = ""
     if res["path"]:
         path = escape(svg._clip(res["node_name"], 40)) + "".join(
             f' <span class="arrow">—{escape(svg.MECH_SHORT.get(p["mechanism"], p["mechanism"]))}→</span> {escape(svg._clip(names.get(p["to"], p["to"]), 40))}'
             for p in res["path"])
-    steps = ""
-    for st in res["steps"]:
-        hyp = "; ".join(st.get("assumptions", []) + st.get("assumptions_extra", []))
-        steps += (f'<tr class="st-{st["status"]}"><td><strong>{escape(svg._clip(st["name"], 44))}</strong><br><small>{escape(STATUS_FR.get(st["status"], st["status"]))}</small></td>'
-                  f'<td>{escape(st["variable"])}</td><td>{fmt_state(st["variable"], st["before"])}</td><td>{fmt_state(st["variable"], st["after"])}</td>'
-                  f'<td>{escape(st["mechanism"])}<br><small>{escape(st.get("dependency") or "")} · {escape(st.get("formula") or "")}</small></td>'
-                  f'<td><small>{escape(hyp) or "—"}</small></td></tr>')
-    unknown = R.get("unknown") or []
-    unk = ("<ul class='plain'>" + "".join(f"<li class='flag'>{escape(u)}</li>" for u in unknown) + "</ul>") if unknown else \
-        "<p class='fine-print'>Aucune transmission non chiffrée n'atteint la position.</p>"
-    sec = "".join(f"<li>{escape(names.get(e['from'], e['from']))} → {escape(names.get(e['to'], e['to']))} : {escape(e.get('text', ''))} "
-                  f"<em>(estimation avec un emprunteur moyen, non incluse dans le total)</em></li>" for e in res["secondary_effects"])
     forced = forced_html(res.get("forced_liquidations") or [])
-    edges = "".join(f"<tr><td>{escape(svg._clip(names.get(e['from'], e['from']), 32))} → {escape(svg._clip(names.get(e['to'], e['to']), 32))}</td>"
-                    f"<td>{escape(e['dependency'])}</td><td>{escape(e['transmission'])}</td><td>{escape(e['formula'])}</td>"
-                    f"<td>{escape(', '.join(e['params']) or '—')}</td><td>{escape(e['source'])}</td>"
-                    f"<td>{escape('; '.join(e['assumptions']) or '—')}</td><td>{'oui' if e['quantified'] else 'INCONNU'}</td></tr>"
-                    for e in res["edges"])
-    data = res["data"]
-    ev = "".join(f"<li>{escape(x['label'])} — <em>{escape({'verified_onchain': 'lu on-chain', 'api': 'API'}.get(x['status'], x['status']))}, "
-                 f"relevé {escape(x['fetched_at'])}</em></li>" for x in data["evidence"])
-    assumed = (f"<li class='flag'>HYPOTHÈSE : prix de {escape(', '.join(data['assumed_prices']))} = 1 $ (aucun prix relevé)</li>"
-               if data.get("assumed_prices") else "")
-    missing = "".join(f"<li class='flag'>Donnée manquante : {escape(m)}</li>" for m in data.get("missing", []))
     return f"""
       <div class="kpis">{kpis}</div>
       <p class="sim-path"><strong>Chemin de propagation :</strong> {path or "la défaillance n'atteint pas la position par un chemin modifiant sa valeur."}</p>

@@ -17,6 +17,7 @@ HackathonBSANumberOne/
 │   ├── model.py              Facteurs d'impact et paramètres par composant (analyse globale)
 │   ├── simulate.py           Simulateur de défaillance : propagation d'état, sévérité financière
 │   ├── amm.py                Courbe de l'AMM Pendle V2 (MarketMathCore)
+│   ├── exit_rule.py          Règle rester / vendre x % / tout vendre (SIMULATION_MODEL.md § 14)
 │   ├── cascade.py            Liquidations Morpho avec les vrais emprunteurs (outil, ventes forcées)
 │   └── svg.py                Dessin SVG des graphes
 ├── templates/index.html      Structure HTML du site
@@ -44,7 +45,7 @@ positions.json + documented.json + API/RPC relevés en ligne
                          ↓
               graphe en mémoire
                          ↓
-   simulate.py + amm.py (page actuelle) · rules.py + model.py (analyse globale)
+   simulate.py + amm.py + exit_rule.py (page actuelle) · rules.py + model.py (analyse globale)
                          ↓
               rapport et données du simulateur en mémoire
                          ↓
