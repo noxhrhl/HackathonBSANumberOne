@@ -161,7 +161,7 @@ class UnifiedCurrentPageTests(unittest.TestCase):
     def setUpClass(cls):
         import app
         cls.pid = "pt-susde-26nov2026"
-        cls.other_pid = "wsteth-hold"
+        cls.other_pid = "pt-wsteth-30dec2027"  # une autre des 5 positions du site
         cls.guard = patch("app.ensure_live_data")
         cls.guard.start()
         for pid in (cls.pid, cls.other_pid):
@@ -177,7 +177,6 @@ class UnifiedCurrentPageTests(unittest.TestCase):
             app._graphs.pop(pid, None)
             app._reports.pop(pid, None)
             app._sims.pop(pid, None)
-        app._models.clear()
 
     def test_compatible_failure_shows_one_advanced_graph_and_parameters(self):
         import app
@@ -187,27 +186,30 @@ class UnifiedCurrentPageTests(unittest.TestCase):
         self.assertEqual(page.count('class="dep-graph"'), 1)
         self.assertNotIn('class="tabbar"', page)
         self.assertIn('class="sim-form"', page)
-        self.assertIn('name="incident" onchange="this.form.submit()"', page)
-        self.assertIn("LA RÉPONSE À 3 H DU MATIN", page)
+        self.assertNotIn('<select name="incident"', page)  # le bloc se choisit en cliquant dans le graphe
+        self.assertIn('type="hidden" name="incident"', page)
+        self.assertIn("DÉFAILLANCE SUPPOSÉE", page)
         self.assertIn("Analyse globale des risques", page)
 
     def test_noncompatible_failure_shows_one_simple_graph(self):
         import app
         from global_risk.current import render_current
-        issuer = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "issuer")
-        page = render_current("pos=" + self.pid + "&incident=" + issuer, self.pid, app)
+        # Ethereum n'a pas de scénario (un arrêt de chaîne ne change aucun prix) : graphe simple
+        chain = next(n["id"] for n in app.graph_for(self.pid)["nodes"] if n["kind"] == "chain")
+        page = render_current("pos=" + self.pid + "&incident=" + chain, self.pid, app)
         self.assertEqual(page.count('class="dep-graph"'), 1)
         self.assertNotIn('class="sim-form"', page)
         self.assertNotIn('class="tabbar"', page)
         self.assertIn("Dépendances de la défaillance choisie", page)
 
-    def test_other_position_keeps_one_simple_graph(self):
+    def test_other_position_also_gets_the_simulator(self):
+        # Le simulateur est ouvert aux 11 positions : un actif d'une autre position donne aussi le graphe approfondi.
         import app
         from global_risk.current import render_current
         asset = next(n["id"] for n in app.graph_for(self.other_pid)["nodes"] if n["kind"] == "asset")
         page = render_current("pos=" + self.other_pid + "&incident=" + asset, self.other_pid, app)
         self.assertEqual(page.count('class="dep-graph"'), 1)
-        self.assertNotIn('class="sim-form"', page)
+        self.assertIn('class="sim-form"', page)
 
     def test_clicking_advanced_graph_node_changes_selected_failure(self):
         import app

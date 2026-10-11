@@ -17,7 +17,6 @@ class LiveCollectionTests(unittest.TestCase):
         app._graphs.clear()
         app._reports.clear()
         app._sims.clear()
-        app._models.clear()
 
     def tearDown(self):
         app._last_refresh.clear()

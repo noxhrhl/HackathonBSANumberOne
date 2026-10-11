@@ -1,6 +1,7 @@
 """Simulateur de défaillance : AMM Pendle, trois scénarios, moteur générique, données manquantes, page."""
 import copy
 import json
+import math
 import unittest
 from pathlib import Path
 
@@ -234,16 +235,23 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(any("Aave" in u for u in res["result"]["unknown"]))
 
     def test_reflexive_loop_handled(self):
-        res = run("wsteth-hold", "price_shock", STETH, 0.20)
+        # le graphe PT-wstETH contient la boucle wstETH → oracle Morpho → ventes forcées → wstETH
+        res = run("pt-wsteth-30dec2027", "price_shock", STETH, 0.20)
         self.assertAlmostEqual(metric(res, "market")["loss_usd"], 400_000, places=3)
-        self.assertEqual(metric(res, "execution")["status"], "information insuffisante")
+        self.assertFalse(any("boucle détectée" in u for u in res["result"]["unknown"]))
 
     def test_incompatible_scenario_rejected(self):
         g, ctx = load("pt-susde-26nov2026")
         with self.assertRaises(ValueError):
             SIM.simulate(g, ctx, "liquidity_crisis", USDE, 0.5)
         self.assertEqual(SIM.compatible_scenarios(g, USDE), ["price_shock"])
-        self.assertEqual(SIM.compatible_scenarios(g, VENUE), ["liquidity_crisis"])
+        self.assertEqual(SIM.compatible_scenarios(g, VENUE), ["liquidity_crisis", "implied_rate_shock"])
+        self.assertEqual(SIM.compatible_scenarios(g, "chain:ethereum"), [])
+        self.assertEqual(SIM.compatible_scenarios(g, "issuer:ethena"), ["collateral_loss"])
+        aave = "lending:aave:1:0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2"
+        self.assertEqual(SIM.compatible_scenarios(g, aave), [])                      # Aave : INCONNU, pas de scénario
+        with self.assertRaises(ValueError):
+            SIM.simulate(g, ctx, "protocol_exploit", aave, 0.1)
 
     def test_missing_data_gives_unknown_not_crash(self):
         g, ctx = load("morpho-ptsusde-borrow")
@@ -291,7 +299,6 @@ class SimulatorPageTests(unittest.TestCase):
         app._graphs.clear()
         app._reports.clear()
         app._sims.clear()
-        app._models.clear()
     def test_page_runs_each_scenario(self):
         import app
         for node, sc, sev in ((USDE, "price_shock", 5), (LINEAR_FEED, "oracle_failure", 10), (VENUE, "liquidity_crisis", 80)):
@@ -327,6 +334,186 @@ class SimulatorPageTests(unittest.TestCase):
         self.assertEqual(res["scenario"], "price_shock")
         self.assertIn("error", app.api_simulate("pos=inconnu&node=x"))
         self.assertIn("error", app.api_simulate(f"pos=pt-susde-26nov2026&node={USDE}&type=liquidity_crisis"))
+
+
+LENDING = "lending:morpho:1:0x5613b170ded221c588b6e9637b910f49e5508680ceede207f44aa72e5c46cb05"
+
+
+def with_real_borrowers(pid):
+    """Contexte de test + positions réelles des emprunteurs (instantané data/cascade, API Morpho)."""
+    g, ctx = load(pid)
+    snap = json.loads((ROOT / "data" / "cascade" / "morpho-ptsusde-usdc.json").read_text(encoding="utf-8"))
+    book = [[int(x["collateral_raw"]) / 1e18, int(x["debt_raw"]) / 1e6] for x in snap["borrowers"] if int(x["debt_raw"]) > 0]
+    ctx = copy.deepcopy(ctx)
+    ctx["lending"][LENDING].update(borrowers=book, loan_decimals=6, collateral_decimals=18, loan_price_usd=1.0)
+    return g, ctx
+
+
+@unittest.skipUnless((ROOT / "data" / "cascade" / "morpho-ptsusde-usdc.json").exists(), "instantané des emprunteurs absent")
+class OtherBorrowersLiquidationTests(unittest.TestCase):
+    def test_no_liquidation_before_meta_oracle_switch(self):
+        g, ctx = with_real_borrowers("pt-susde-26nov2026")
+        res = SIM.simulate(g, ctx, "price_shock", USDE, 0.05, hours=1, with_threshold=False)
+        self.assertEqual(res["forced_liquidations"], [])
+        self.assertTrue(res["result"]["exit_after"]["full_exit"])
+
+    def test_liquidations_fill_the_pool_and_block_the_exit(self):
+        g, ctx = with_real_borrowers("pt-susde-26nov2026")
+        res = SIM.simulate(g, ctx, "price_shock", USDE, 0.05, hours=24, with_threshold=False)
+        f = res["forced_liquidations"][0]
+        self.assertGreater(f["liquidations"], 0)
+        self.assertTrue(f["quantified"])
+        self.assertLess(f["capacity_after"], 0.01 * f["capacity_before"])      # le pool est plein
+        self.assertLess(f["spot_change"], 0)
+        R = res["result"]
+        self.assertFalse(R["exit_after"]["full_exit"])                         # ta sortie est bloquée
+        self.assertGreater(R["total"]["blocked_usd"], 0)
+        base = run("pt-susde-26nov2026", "price_shock", USDE, 0.05, with_threshold=False)  # sans positions réelles
+        self.assertGreater(R["total"]["loss_usd"], base["result"]["total"]["loss_usd"])   # la baisse du PT s'ajoute
+        self.assertFalse(any("ventes forcées" in u and LENDING.split(":")[-1][:6] in u for u in R["unknown"]))
+
+    def test_liquidators_only_act_when_profitable(self):
+        g, ctx = with_real_borrowers("pt-susde-26nov2026")
+        f = SIM.simulate(g, ctx, "oracle_failure", LINEAR_FEED, 0.10, with_threshold=False)["forced_liquidations"][0]
+        self.assertGreaterEqual(f["proceeds_usd"], f["debt_repaid_usd"] + SIM.LIQUIDATION_GAS_USD * f["liquidations"] - 1e-6)
+        self.assertGreater(f["stuck_count"], 0)                                 # certains ne peuvent plus être liquidés
+
+    def test_lender_bad_debt_from_real_positions(self):
+        g, ctx = with_real_borrowers("morpho-ptsusde-usdc")
+        R = SIM.simulate(g, ctx, "price_shock", USDE, 0.20, with_threshold=False)["result"]
+        liq = next(m for m in R["metrics"] if m["key"] == "liquidation")
+        self.assertEqual(liq["label"], "Créance douteuse")
+        self.assertGreater(liq["loss_usd"], 0)
+        self.assertIn("Positions réelles", liq["note"])
+
+    def test_borrower_collateral_value_includes_forced_sales(self):
+        g, ctx = with_real_borrowers("morpho-ptsusde-borrow")
+        L = SIM.simulate(g, ctx, "price_shock", USDE, 0.05, with_threshold=False)["result"]["lending"]
+        self.assertLess(L["market_price1"] / L["market_price0"], 0.95)        # dépeg + ventes forcées sur le pool
+
+    def test_without_real_positions_falls_back_to_estimate(self):
+        res = run("pt-susde-26nov2026", "price_shock", USDE, 0.05, with_threshold=False)
+        self.assertEqual(res["forced_liquidations"], [])
+        self.assertTrue(res["secondary_effects"])                              # emprunteur moyen, hors total
+
+
+SY = "protocol:pendle-sy:1:0xbf98480425a29197e5d99d003017f63a1e595d02"
+USDC = "asset:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+WSTETH_VENUE_ID = "venue:pendle:1:0x34280882267ffa6383b363e278b027be083bbe3b"
+ETHENA_TODAY = {"token": USDE, "supply": 4_764_672_822, "collateral": 4_783_760_578, "reserve": 62_079_307,
+                "unit": "USD", "assumptions": []}   # API Ethena et totalSupply(), relevés du 2026-10-10 (SIMULATION_MODEL.md § 10)
+
+
+def with_issuers(pid, **issuers):
+    g, ctx = load(pid)
+    ctx = copy.deepcopy(ctx)
+    ctx["issuers"] = issuers
+    return g, ctx
+
+
+def token_change(res, token):
+    return [s for s in res["steps"] if s["node"] == token and s.get("change_pct") is not None][-1]["change_pct"]
+
+
+class CollateralLossTests(unittest.TestCase):
+    def test_binance_formula_matches_documentation(self):
+        g, ctx = with_issuers("pt-susde-26nov2026", **{"issuer:ethena": ETHENA_TODAY})
+        res = SIM.simulate(g, ctx, "collateral_loss", "perp:binance", 0.5, with_threshold=False)
+        share = next(e["details"]["share_of_backing"] for e in g["edges"] if e["from"] == "perp:binance")
+        C, R, S_ = ETHENA_TODAY["collateral"], ETHENA_TODAY["reserve"], ETHENA_TODAY["supply"]
+        b1 = (C + R - share * C * 0.5) / S_
+        self.assertAlmostEqual(token_change(res, USDE), min(1, b1) - 1, places=9)   # b0 > 1 : min(1, b0) = 1
+        self.assertAlmostEqual(b1, 0.950, delta=0.002)                               # tableau 11.4
+
+    def test_bybit_2025_absorbed_by_reserve_fund(self):
+        # Bybit, 21 février 2025 : ~30 M$ d'exposition, fonds de réserve 60,55 M$ (API Ethena) → pas de dépeg
+        g, _ = load("pt-susde-26nov2026")
+        share = next(e["details"]["share_of_backing"] for e in g["edges"] if e["from"] == "perp:bybit")
+        C = 30e6 / share
+        g, ctx = with_issuers("pt-susde-26nov2026", **{"issuer:ethena": dict(ETHENA_TODAY, collateral=C, supply=C, reserve=60.55e6)})
+        res = SIM.simulate(g, ctx, "collateral_loss", "perp:bybit", 1.0, with_threshold=False)
+        self.assertAlmostEqual(res["result"]["total"]["loss_usd"], 0.0, places=3)
+
+    def test_svb_2023_gives_redemption_anchor(self):
+        # Circle, mars 2023 : 3,3 Md$ bloqués sur ~40 Md$ → b = 0,9175 (l'USDC est tombé à 0,88 pendant le week-end)
+        circle = {"token": USDC, "supply": 40e9, "collateral": 40e9, "reserve": 0.0, "unit": "USD", "assumptions": []}
+        g, ctx = with_issuers("morpho-ptsusde-usdc", **{"issuer:circle": circle})
+        res = SIM.simulate(g, ctx, "collateral_loss", "issuer:circle", 3.3 / 40, with_threshold=False)
+        self.assertAlmostEqual(token_change(res, USDC), -0.0825, places=6)
+
+    def test_unpublished_custodian_share_is_unknown(self):
+        circle = {"token": USDC, "supply": 40e9, "collateral": 40e9, "reserve": 0.0, "unit": "USD", "assumptions": []}
+        g, ctx = with_issuers("morpho-ptsusde-usdc", **{"issuer:circle": circle})
+        res = SIM.simulate(g, ctx, "collateral_loss", "custodian:circle-banks", 0.5, with_threshold=False)
+        self.assertAlmostEqual(res["result"]["total"]["loss_usd"], 0.0, places=6)
+        self.assertTrue(any("non chiffrable" in u for u in res["affected"]["custodian:circle-banks"]["unknown"]))
+
+    def test_missing_issuer_data_is_unknown(self):
+        g, ctx = with_issuers("pt-susde-26nov2026")
+        res = SIM.simulate(g, ctx, "collateral_loss", "issuer:ethena", 0.5, with_threshold=False)
+        self.assertAlmostEqual(res["result"]["total"]["loss_usd"], 0.0, places=6)
+        self.assertTrue(res["result"]["unknown"])
+
+
+class ProtocolExploitTests(unittest.TestCase):
+    def test_sy_drain_hits_pt_but_not_the_oracle(self):
+        res = run("morpho-ptsusde-borrow", "protocol_exploit", SY, 0.10, with_threshold=False)
+        L = res["result"]["lending"]
+        self.assertAlmostEqual(L["hf1"], L["hf0"], places=12)          # l'oracle (décote linéaire) ne voit pas le vol
+        self.assertAlmostEqual(L["market_price1"] / L["market_price0"], 0.90, places=9)
+        self.assertGreater(res["result"]["total"]["loss_usd"] / res["result"]["total"]["initial"], 0.6)  # effet de levier
+
+    def test_morpho_bad_debt_is_shared_pro_rata(self):
+        res = run("morpho-ptsusde-usdc", "protocol_exploit", LENDING, 0.10, with_threshold=False)
+        liq = next(m for m in res["result"]["metrics"] if m["key"] == "liquidation")
+        self.assertAlmostEqual(liq["loss_usd"], 0.10 * 2_000_000, places=3)
+        self.assertIn("totalSupplyAssets", liq["note"])
+
+
+class ImpliedRateShockTests(unittest.TestCase):
+    def test_pt_price_follows_pendle_formula(self):
+        g, ctx = load("pt-wsteth-30dec2027")
+        st = ctx["pendle"][WSTETH_VENUE_ID]
+        t = (st["expiry_ts"] - st["snapshot_ts"]) / (365 * 86400)
+        r0 = st["last_ln_implied_rate"]
+        expected = math.exp(-(math.log(math.exp(r0) + 0.02) - r0) * t)
+        res = SIM.simulate(g, ctx, "implied_rate_shock", WSTETH_VENUE_ID, 0.02, with_threshold=False)
+        m = metric(res, "market")
+        self.assertAlmostEqual(m["after"] / m["initial"], expected, places=9)
+        self.assertGreater(m["loss_usd"], 0)
+
+    def test_near_maturity_pt_barely_moves(self):
+        res = run("pt-susde-26nov2026", "implied_rate_shock", VENUE, 0.02, with_threshold=False)
+        self.assertLess(metric(res, "market")["loss_usd"] / 2_000_000, 0.003)
+
+    def test_borrower_health_unchanged_but_exit_costlier(self):
+        res = run("morpho-ptsusde-borrow", "implied_rate_shock", VENUE, 0.10, with_threshold=False)
+        L, R = res["result"]["lending"], res["result"]
+        self.assertAlmostEqual(L["hf1"], L["hf0"], places=12)          # l'oracle ne lit pas le taux du pool
+        self.assertLess(R["exit_after"]["proceeds_usd"], R["exit_before"]["proceeds_usd"])
+
+
+class MorphoBorrowersSourceTests(unittest.TestCase):
+    def _fake(self, market_debt):
+        from risk_engine import sources as S
+        market = {"data": {"marketById": {"marketId": "0xabc", "loanAsset": {"symbol": "USDC", "decimals": 6},
+                                          "collateralAsset": {"symbol": "PT", "decimals": 18},
+                                          "state": {"borrowAssets": str(market_debt), "collateralAssets": str(3 * 10**18)}}}}
+        rows = {"data": {"marketPositions": {"items": [
+            {"state": {"borrowAssets": str(2 * 10**6), "collateral": str(3 * 10**18)}},
+            {"state": {"borrowAssets": "0", "collateral": "0"}}]}}}
+        S.reset_sources()
+        return [market, rows]
+
+    def test_reads_and_checks_borrower_positions(self):
+        from unittest.mock import patch
+        from risk_engine import sources as S
+        with patch.object(S, "_post_json", side_effect=self._fake(2 * 10**6)):
+            out = S.morpho_market_borrowers(1, "0xABC")
+        self.assertEqual(out["borrowers"], [[3.0, 2.0]])                      # positions sans dette ignorées
+        with patch.object(S, "_post_json", side_effect=self._fake(9 * 10**6)):
+            with self.assertRaises(ValueError):                                # somme ≠ état du marché : rejeté
+                S.morpho_market_borrowers(1, "0xABC")
 
 
 if __name__ == "__main__":

@@ -33,6 +33,9 @@ from . import sources as S
 
 MORPHO_MAX_LIF = 1.15        # Morpho Blue, ConstantsLib.MAX_LIQUIDATION_INCENTIVE_FACTOR
 MORPHO_LIQ_CURSOR = 0.3      # Morpho Blue, ConstantsLib.LIQUIDATION_CURSOR
+LIQUIDATION_GAS_USD = 100.0  # HYPOTHÈSE : coût d'exécution d'une liquidation (même valeur que risk_engine/cascade.py)
+LIQUIDATION_MAX_ROUNDS = 12  # même plafond que risk_engine/cascade.py
+_FRACTIONS = [i / 64 for i in range(64, 0, -1)] + [1 / 2 ** i for i in range(7, 21)]
 USD_STABLE_ASSUMED = {"USDC", "USDT", "PYUSD", "DAI", "USDS"}
 DEFAULT_HOURS = 24
 
@@ -43,7 +46,24 @@ SCENARIOS = {
                        "variable": "prix rapporté", "help": "L'oracle rapporte un prix trop bas ; le prix de marché ne bouge pas."},
     "liquidity_crisis": {"label": "Crise de liquidité", "kinds": ("venue",), "default": 0.80, "max": 0.99,
                          "variable": "liquidité du pool", "help": "Les LP retirent une part de la liquidité du pool (retrait proportionnel)."},
+    "implied_rate_shock": {"label": "Choc de taux implicite", "kinds": ("venue",), "default": 0.02, "max": 0.50,
+                           "variable": "taux implicite (points)", "sign": "+", "unit": "pts",
+                           "help": "Le taux implicite du pool Pendle monte : le PT perd de la valeur avant l'échéance "
+                                   "(pire hausse observée : +2 points en un jour)."},
+    "collateral_loss": {"label": "Perte de collatéral de l'émetteur", "kinds": ("issuer", "perp_exchange", "custodian"),
+                        "default": 0.50, "max": 1.0, "variable": "part du collatéral exposé non récupérée",
+                        "help": "Une bourse, un dépositaire ou l'émetteur perd une partie du collatéral qui garantit le jeton. "
+                                "Bourses d'Ethena : collatéral gardé hors bourse, la perte réaliste est surtout le PnL non réglé."},
+    "protocol_exploit": {"label": "Exploit du protocole", "kinds": ("protocol", "lending"), "default": 0.10, "max": 1.0,
+                         "variable": "part volée / créance douteuse", "help": "Contrat SY Pendle vidé d'une part de son sous-jacent, "
+                                                                              "ou créance douteuse dans un marché Morpho isolé (en % des dépôts)."},
 }
+
+# Parts du collatéral d'Ethena chez ses dépositaires : non publiées en continu. HYPOTHÈSE datée, modifiable :
+# dernier partage public trouvé (rapports d'Ethena, 22 janvier 2025) : Copper 2,573 Md$, Ceffu 3,045 Md$ pour 5,739 Md$.
+CUSTODIAN_SHARE_ASSUMED = {"custodian:copper": (0.448, "Copper ≈ 44,8 % du collatéral (janvier 2025, HYPOTHÈSE)"),
+                           "custodian:ceffu": (0.531, "Ceffu ≈ 53,1 % du collatéral (janvier 2025, HYPOTHÈSE)"),
+                           "custodian:lido-node-operators": (1.0, "les opérateurs de nœuds valident tout l'ETH déposé chez Lido")}
 
 # ---------------------------------------------------------------------------
 # Modèles de transmission (un par type d'arête)
@@ -123,10 +143,14 @@ MODELS = {
         "assumptions": ["Liquidation simulée totale (Morpho n'a pas de facteur de clôture) : cas défavorable",
                         "Éligible ≠ liquidé : un liquidateur doit agir"], "quantified": True},
     "forced_sales": {
-        "dependency": "Ventes forcées par les liquidations d'un marché", "transmission": "pression vendeuse",
-        "formula": "Effet secondaire : collatéral saisi revendu sur le marché (estimation, NON incluse dans le total)",
-        "params": ["collatéral et dette du marché (API)"], "source": "API Morpho",
-        "assumptions": ["Répartition des emprunteurs inconnue : estimation par un emprunteur représentatif"], "quantified": False},
+        "dependency": "Ventes forcées par les liquidations d'un marché", "transmission": "pression vendeuse, capacité du pool",
+        "formula": "Pour chaque emprunteur réel sous HF 1 : saisie = remboursé × LIF / P_oracle, plus grande fraction rentable "
+                   "(produit de vente ≥ remboursé + frais), revendue sur le pool Pendle (état du pool mis à jour après chaque vente)",
+        "params": ["positions réelles des emprunteurs (Morpho GraphQL marketPositions)", "LLTV, LIF, price()", "readState du pool"],
+        "source": "API Morpho + courbe Pendle on-chain",
+        "assumptions": ["Liquidateurs rationnels : ils liquident seulement si la revente couvre la dette remboursée et les frais (100 $, HYPOTHÈSE)",
+                        "Les ventes forcées passent avant ta sortie une fois le seuil franchi ; acheteurs et ordres limites ignorés (borne pessimiste)",
+                        "Sans positions réelles ou sans pool de revente : estimation séparée, non incluse"], "quantified": False},
     "amm_exit": {
         "dependency": "Pool AMM où l'on vend la position", "transmission": "prix de sortie exécutable",
         "formula": "Courbe Pendle V2 (MarketMathCore) ; un retrait proportionnel laisse le prix spot inchangé et réduit la profondeur",
@@ -134,9 +158,15 @@ MODELS = {
         "source": "readState() on-chain, vérifié contre RouterStatic.swapExactPtForSyStatic",
         "assumptions": ["AMM seul : les ordres limites Pendle (non garantis en crise) sont ignorés → borne prudente"], "quantified": True},
     "issuer_backing": {
-        "dependency": "Émetteur qui garantit l'actif", "transmission": "solvabilité",
-        "formula": "INCONNU : la perte de l'émetteur ne se traduit pas mécaniquement en prix", "params": [],
-        "source": "documentation", "assumptions": [], "quantified": False},
+        "dependency": "Émetteur qui garantit l'actif", "transmission": "valeur de rachat",
+        "formula": "Si le collatéral perdu est connu : P_jeton / P_référence = min(1, b), b = (C + R − L) / S ; sinon INCONNU",
+        "params": ["collatéral C, fonds de réserve R, offre S"], "source": "API de l'émetteur + totalSupply() on-chain",
+        "assumptions": ["Rachat au prorata à la valeur de couverture b (un émetteur peut aussi suspendre les rachats)"],
+        "quantified": False},
+    "collateral_exposure": {
+        "dependency": "Collatéral de l'émetteur confié à ce bloc", "transmission": "perte de collatéral",
+        "formula": "L = part du collatéral chez ce bloc × C × sévérité", "params": ["part du collatéral (API Ethena ou HYPOTHÈSE datée)"],
+        "source": "API Ethena (bourses), rapports publics (dépositaires)", "assumptions": [], "quantified": True},
     "issuer_deployment": {
         "dependency": "Collatéral de l'émetteur placé dans un protocole", "transmission": "solvabilité",
         "formula": "INCONNU : la perte du protocole sur ce placement n'est pas modélisée", "params": ["part du collatéral (API Ethena)"],
@@ -174,6 +204,8 @@ def classify(edge, nodes, graph):
             return "position_holds" if ptype == "hold" else "position_loan_asset"
         if sk == "issuer":
             return "issuer_backing"
+        if dk == "issuer" and sk in ("perp_exchange", "custodian"):
+            return "collateral_exposure"
         if sk == "lending" and dk == "position":
             return "lender_claim"
         if sk == "lending" and dk == "issuer":
@@ -189,6 +221,8 @@ def classify(edge, nodes, graph):
         return "liquidation_rule" if dk == "position" else "forced_sales"
     if mech == "bad_debt":
         return "collateral_value" if (d.get("share_of_collateral") or 0) >= 0.999 else "pool_bad_debt"
+    if mech in ("hedging", "custody") and dk == "issuer":
+        return "collateral_exposure"
     return "not_modeled"
 
 
@@ -280,6 +314,53 @@ def build_context(graph):
         ctx["lending"][n["id"]] = {"protocol": "morpho-blue", "lltv": lltv, "oracle": oracle,
                                    "lif": morpho_lif(lltv) if lltv else None, "collateral_usd": mt.get("collateral_usd"),
                                    "borrow_usd": mt.get("borrow_usd"), "supply_usd": mt.get("supply_usd")}
+        mid = (n.get("details") or {}).get("market_id")
+        book = safe(f"positions des emprunteurs {mid}", S.morpho_market_borrowers, 1, mid) if mid else None
+        if book and book["borrowers"]:
+            lc = ctx["lending"][n["id"]]
+            debt_units = sum(d for _, d in book["borrowers"])
+            coll_units = sum(c for c, _ in book["borrowers"])
+            lc.update(borrowers=book["borrowers"], loan_decimals=book["loan_decimals"],
+                      collateral_decimals=book["collateral_decimals"],
+                      # prix implicites de l'état du marché (API) : valeur en USD / quantité
+                      loan_price_usd=(mt.get("borrow_usd") or 0) / debt_units if debt_units else None,
+                      collateral_price_usd=(mt.get("collateral_usd") or 0) / coll_units if coll_units else None)
+            ctx["evidence"].append(_ev("morpho", f"borrowers_1_{mid.lower()}",
+                                       f"Positions des {len(book['borrowers'])} emprunteurs de {n['name'][:40]}", "api"))
+
+    for n in graph["nodes"]:
+        if n["kind"] != "issuer":
+            continue
+        token = next((e["to"] for e in graph["edges"] if e["from"] == n["id"] and e["mechanism"] == "backing"
+                      and nodes[e["to"]]["kind"] == "asset"), None)
+        addr = (nodes.get(token) or {}).get("address")
+        if not addr:
+            continue
+        supply = safe(f"offre de {nodes[token]['name']}", S.erc20_total_supply, addr)
+        if not supply:
+            continue
+        iss = {"token": token, "supply": supply, "assumptions": []}
+        ev = [_ev("rpc", f"call_{addr}_0x18160ddd", f"totalSupply() de {nodes[token]['name']}", "verified_onchain")]
+        if n["id"] == "issuer:ethena":
+            br = safe("collatéral d'Ethena", S.ethena_collateral_breakdown)
+            rf = safe("fonds de réserve d'Ethena", S.ethena_reserve_fund)
+            if br and rf:
+                iss.update(collateral=sum(b["usdAmount"] for b in br), reserve=rf["value"], unit="USD")
+                ev += [_ev("ethena", "collateral_breakdown", "Collatéral d'Ethena (API)", "api"),
+                       _ev("ethena", "reserve_fund", "Fonds de réserve d'Ethena (API)", "api")]
+        elif n["id"] == "issuer:circle":
+            iss.update(collateral=supply, reserve=0.0, unit="USD")
+            iss["assumptions"] += ["Réserves de Circle = offre d'USDC (attestations mensuelles, non lues en direct)",
+                                   "Pas de fonds de réserve propre"]
+        elif n["id"] == "issuer:lido":
+            pooled = safe("ETH déposé chez Lido", S.lido_total_pooled_ether, addr)
+            if pooled:
+                iss.update(collateral=pooled, reserve=0.0, unit="ETH")
+                iss["assumptions"] += ["Aucun fonds de couverture des pertes (slashing) chez Lido"]
+                ev += [_ev("rpc", f"call_{addr}_0x37cfdaca", "getTotalPooledEther() de Lido", "verified_onchain")]
+        if "collateral" in iss:
+            ctx.setdefault("issuers", {})[n["id"]] = iss
+            ctx["evidence"] += ev
 
     size = pos["size_usd"]
     ptype = pos.get("type")
@@ -396,7 +477,14 @@ def compatible_scenarios(graph, node_id):
     n = next((x for x in graph["nodes"] if x["id"] == node_id), None)
     if not n:
         return []
-    return [k for k, v in SCENARIOS.items() if n["kind"] in v["kinds"]]
+    out = [k for k, v in SCENARIOS.items() if n["kind"] in v["kinds"]]
+    if n["kind"] == "venue" and not n["id"].startswith("venue:pendle:"):
+        out = [k for k in out if k != "implied_rate_shock"]
+    if n["kind"] == "protocol" and not n["id"].startswith("protocol:pendle-sy"):
+        out = []
+    if n["kind"] == "lending" and (n.get("details") or {}).get("protocol") != "morpho-blue":
+        out = []  # Aave : pool multi-collatéral, créance douteuse non modélisable (INCONNU)
+    return out
 
 
 class Engine:
@@ -409,11 +497,14 @@ class Engine:
         self.nodes = {n["id"]: n for n in graph["nodes"]}
         if node_id not in self.nodes:
             raise ValueError(f"nœud inconnu : {node_id}")
-        if self.nodes[node_id]["kind"] not in SCENARIOS[scenario]["kinds"]:
-            raise ValueError(f"scénario {scenario} incompatible avec un nœud de type {self.nodes[node_id]['kind']}")
+        if scenario not in compatible_scenarios(graph, node_id):
+            raise ValueError(f"scénario {scenario} incompatible avec le nœud {self.nodes[node_id]['name']} "
+                             f"(type {self.nodes[node_id]['kind']})")
         self.edges = list(graph["edges"]) + derived_edges(graph)
         self.state = {nid: {"m": 1.0, "om": 1.0, "lm": 1.0, "status": "unchanged", "unknown": []} for nid in self.nodes}
         self.steps, self.secondary_effects, self.edge_reports = [], [], []
+        self.pool_after, self.spot_mult, self.forced = {}, {}, {}
+        self.issuer_m = {}  # émetteur → effet de la perte de collatéral sur son jeton
 
     # -- utilitaires -------------------------------------------------------
     def model_of(self, e):
@@ -487,17 +578,33 @@ class Engine:
         o, st = self.origin, self.state[self.origin]
         s = self.severity
         var = SCENARIOS[self.scenario]["variable"]
+        kind = self.nodes[o]["kind"]
         if self.scenario == "price_shock":
             st["m"] = 1 - s
         elif self.scenario == "oracle_failure":
             st["om"] = 1 - s
-        else:
+        elif self.scenario == "liquidity_crisis":
             st["lm"] = 1 - s
+        elif self.scenario == "implied_rate_shock":
+            self.apply_rate_shock(o, s)
+        elif self.scenario == "protocol_exploit":
+            if kind == "protocol":
+                st["m"] = 1 - s          # chaque SY n'est plus adossé qu'à (1 − f) sous-jacent
+            else:
+                st["bad_debt_frac"] = s  # créance douteuse du marché, en part des dépôts
         st["status"] = "origin"
-        self.steps.append({"node": o, "name": self.name(o), "kind": self.nodes[o]["kind"], "variable": var,
-                           "before": 1.0, "after": 1 - s, "change_pct": -s, "status": "origin", "model": None,
-                           "mechanism": f"Défaillance appliquée : {var} × (1 − {s:.0%})", "via": [], "unknown": [],
-                           "assumptions": [], "dependency": "Point de départ", "formula": f"{var} × {1 - s:.4f}"})
+        if self.scenario == "implied_rate_shock":
+            mech, before, after, chg = f"Défaillance appliquée : taux implicite + {s * 100:.1f} points", 0.0, s, None
+        elif self.scenario == "collateral_loss":
+            mech, before, after, chg = f"Défaillance appliquée : {s:.0%} du collatéral exposé non récupéré", 1.0, 1 - s, -s
+        else:
+            mech, before, after, chg = f"Défaillance appliquée : {var} × (1 − {s:.0%})", 1.0, 1 - s, -s
+        self.steps.append({"node": o, "name": self.name(o), "kind": kind, "variable": var,
+                           "before": before, "after": after, "change_pct": chg, "status": "origin", "model": None,
+                           "mechanism": mech, "via": [], "unknown": [],
+                           "assumptions": [], "dependency": "Point de départ", "formula": mech})
+        if self.scenario == "collateral_loss":
+            self.apply_collateral_loss(o, s)
         order, cyclic = self.downstream_order()
         for nid in cyclic:
             self.flag_unknown(nid, "boucle détectée dans les dépendances : non modélisée")
@@ -513,12 +620,100 @@ class Engine:
                 self.report_edge(e)
             kind = self.nodes[nid]["kind"]
             {"asset": self.eval_asset, "protocol": self.eval_asset, "oracle": self.eval_oracle,
-             "lending": self.eval_lending, "venue": self.eval_venue}.get(kind, self.eval_other)(nid, inputs)
+             "lending": self.eval_lending, "venue": self.eval_venue,
+             "issuer": self.eval_issuer}.get(kind, self.eval_other)(nid, inputs)
+        if self.secondary:
+            self.liquidation_pass()
         self.feedback_pass()
         for e in self.edges:
             if e["to"] == pos_id and self.affected(e["from"]):
                 self.report_edge(e)
         return self.eval_position()
+
+    def apply_rate_shock(self, venue, delta):
+        """Choc de taux implicite Pendle : r' = ln(1 + APY + Δ) ; prix du PT × exp(−(r' − r) × t / an)."""
+        pm = self.ctx["pendle"].get(venue)
+        st = self.state[venue]
+        if not pm:
+            self.flag_unknown(venue, "état du pool Pendle indisponible : choc de taux non calculable")
+            return
+        mk = self.market_for(venue)
+        r0 = mk.last_ln_implied_rate
+        r1 = math.log(math.exp(r0) + delta)
+        shifted = amm.PendleMarket(mk.total_pt, mk.total_sy, mk.sy_rate, mk.scalar_root, mk.ln_fee_rate_root, r1,
+                                   mk.expiry_ts, mk.now_ts)
+        st["pt_m"] = shifted.spot_pt_to_asset() / mk.spot_pt_to_asset()
+        st["rate"] = {"apy0": math.exp(r0) - 1, "apy1": math.exp(r1) - 1, "days": mk.t / 86400}
+        self.pool_after[venue] = shifted
+
+    def apply_collateral_loss(self, origin, sev):
+        """Perte de collatéral : L = part × C × sévérité ; b = (C + R − L) / S ; jeton × min(1, b) / min(1, b0)."""
+        kind = self.nodes[origin]["kind"]
+        if kind == "issuer":
+            issuer, share, share_txt = origin, 1.0, "tout le collatéral de l'émetteur"
+        else:
+            e = next((e for e in self.edges if e["from"] == origin and self.nodes[e["to"]]["kind"] == "issuer"), None)
+            issuer = e["to"] if e else None
+            measured = ((e or {}).get("details") or {}).get("share_of_backing")
+            if measured is not None:
+                share, share_txt = measured, f"{measured:.1%} du collatéral (mesuré, API Ethena)"
+            elif origin in CUSTODIAN_SHARE_ASSUMED:
+                share, share_txt = CUSTODIAN_SHARE_ASSUMED[origin]
+            else:
+                share, share_txt = None, None
+        prm = (self.ctx.get("issuers") or {}).get(issuer) if issuer else None
+        if share is None or not prm:
+            why = ("part du collatéral confiée à ce bloc non publiée" if share is None else
+                   "collatéral, fonds de réserve ou offre de l'émetteur indisponibles")
+            self.flag_unknown(origin, f"perte de collatéral non chiffrable : {why}")
+            self.state[origin]["status"] = "origin"
+            return
+        C, R, S_ = prm["collateral"], prm["reserve"], prm["supply"]
+        L = share * C * sev
+        b0, b1 = (C + R) / S_, (C + R - L) / S_
+        m = min(1.0, b1) / min(1.0, b0)
+        self.issuer_m[issuer] = {"m": m, "token": prm["token"], "L": L, "b0": b0, "b1": b1, "share": share,
+                                 "unit": prm["unit"], "buffer": C + R - S_}
+        unit = "$" if prm["unit"] == "USD" else " ETH"
+        self.steps.append({"node": issuer, "name": self.name(issuer), "kind": "issuer", "variable": "ratio de couverture b",
+                           "before": b0, "after": b1, "change_pct": b1 / b0 - 1, "status": "changed", "model": "issuer_backing",
+                           "mechanism": (f"perte L = {share_txt} × C {C:,.0f}{unit} × {sev:.0%} = {L:,.0f}{unit} ; "
+                                         f"b = (C + R − L) / S = ({C:,.0f} + {R:,.0f} − {L:,.0f}) / {S_:,.0f} = {b1:.4f}"
+                                         + (" → jeton sous sa valeur de rachat" if b1 < 1 else " → absorbé par la marge (pas de dépeg)")),
+                           "dependency": MODELS["issuer_backing"]["dependency"], "formula": MODELS["issuer_backing"]["formula"],
+                           "params": MODELS["issuer_backing"]["params"], "source": MODELS["issuer_backing"]["source"],
+                           "assumptions": list(MODELS["issuer_backing"]["assumptions"]) + prm["assumptions"]
+                           + ([share_txt] if "HYPOTHÈSE" in (share_txt or "") else []),
+                           "via": [origin] if origin != issuer else [], "unknown": []})
+        st = self.state[issuer]
+        st["m"], st["status"] = m, ("origin" if issuer == origin else "changed")
+
+    def eval_issuer(self, nid, inputs):
+        if nid in self.issuer_m:
+            return  # déjà calculé par apply_collateral_loss (étape enregistrée)
+        self.eval_other(nid, inputs)
+
+    def real_book(self, lid):
+        """Positions réelles et prix d'oracle disponibles pour ce marché ?"""
+        lc = self.ctx["lending"].get(lid) or {}
+        return lc if lc.get("borrowers") and oracle_price_loan_units(self.ctx, lc.get("oracle"), lid) else None
+
+    def resale_venue(self, lid):
+        """Pool Pendle où les liquidateurs revendent le collatéral : cible des ventes forcées, sinon le pool du PT
+        mis en garantie (graphe d'un prêteur, où le marché n'a pas d'arête vers le pool)."""
+        for e in self.edges:
+            if e["from"] == lid and self.model_of(e) == "forced_sales" and e["to"] in self.ctx["pendle"]:
+                return e["to"]
+        coll = next((e["from"] for e in self.edges if e["to"] == lid and self.model_of(e) == "collateral_value"), None)
+        return next((v for v, pm in self.ctx["pendle"].items() if coll and pm.get("pt_node") == coll), None)
+
+    def forced_quantified(self, lid, target):
+        """Les ventes forcées de ce marché sont-elles chiffrées (positions réelles + pool de revente modélisé) ?"""
+        return bool(self.real_book(lid)) and self.resale_venue(lid) is not None and self.secondary
+
+    def liquidatable(self, lid):
+        """Le marché a-t-il des emprunteurs que le choc rend liquidables ? (positions réelles, sinon agrégat)"""
+        return bool(self.state[lid].get("agg_liquidatable"))
 
     def feedback_pass(self):
         """Ventes forcées par un marché devenu liquidable : effet non chiffré, signalé sur tout l'aval."""
@@ -529,6 +724,8 @@ class Engine:
             if self.model_of(e) != "forced_sales":
                 continue
             src = self.state[e["from"]]
+            if self.forced_quantified(e["from"], e["to"]):
+                continue  # chiffrées par liquidation_pass() et incluses dans la position
             if src.get("agg_liquidatable"):
                 text = f"ventes forcées par {self.name(e['from'])} sur {self.name(e['to'])} (rétroaction non chiffrée)"
             elif src["status"] == "unknown" and abs(src["om"] - 1) < 1e-12:
@@ -561,7 +758,9 @@ class Engine:
         value, blocked = [], []
         for e in inputs:
             m = self.model_of(e)
-            if m in ("wrapper_rate", "sy_wrap", "pt_backing"):
+            if m in ("wrapper_rate", "sy_wrap", "pt_backing") or (m == "issuer_backing" and e["from"] in self.issuer_m):
+                value.append(e)
+            elif m == "amm_exit" and "pt_m" in self.state[e["from"]]:
                 value.append(e)
             elif m == "amm_exit":
                 if self.state[e["from"]]["unknown"]:
@@ -569,7 +768,7 @@ class Engine:
                 else:
                     blocked.append((e, "retrait proportionnel : prix spot (référence) inchangé, seule la profondeur baisse"))
             elif m == "forced_sales":
-                if self.state[e["from"]].get("agg_liquidatable"):
+                if self.liquidatable(e["from"]) and not self.forced_quantified(e["from"], nid):
                     self.flag_unknown(nid, f"ventes forcées possibles par {self.name(e['from'])} (non chiffrées)")
                 else:
                     blocked.append((e, "marché toujours sain : pas de ventes forcées"))
@@ -577,11 +776,16 @@ class Engine:
                 self.flag_unknown(nid, f"{MODELS[m]['dependency']} ({self.name(e['from'])}) : {MODELS[m]['formula']}")
         self.inherit_unknown(nid, value)
         st = self.state[nid]
+        rate = [e for e in value if self.model_of(e) == "amm_exit"]   # choc de taux : multiplie la valeur
+        value = [e for e in value if e not in rate]
         ms = {round(self.state[e["from"]]["m"], 12) for e in value}
         if len(ms) > 1:
             self.flag_unknown(nid, "plusieurs sources de valeur touchées : combinaison non modélisée")
         elif ms:
             st["m"] = ms.pop()
+        for e in rate:
+            st["m"] *= self.state[e["from"]]["pt_m"]
+        value = value + rate
         price0 = self.ctx["prices_usd"].get(nid)
         changed = abs(st["m"] - 1) > 1e-12
         st["status"] = "unknown" if st["unknown"] and not changed else ("changed" if changed else
@@ -589,6 +793,8 @@ class Engine:
         if st["status"] == "no_effect" and not blocked:
             blocked = [(inputs[0], "aucune transmission")]
         model = self.model_of(value[0]) if value else self.model_of(inputs[0])
+        if model == "amm_exit":
+            model = "pt_backing"
         mech = ("; ".join(why for _, why in blocked) if st["status"] == "no_effect" else
                 f"prix de marché × {st['m']:.4f} via {', '.join(self.name(e['from']) for e in value)}" if value else
                 "effet non chiffré")
@@ -695,15 +901,21 @@ class Engine:
             else:
                 self.flag_unknown(nid, f"{MODELS[m]['dependency']} : non modélisé")
         extra = {}
-        if lc and lc.get("borrow_usd") and lc.get("collateral_usd") and lc.get("lltv"):
+        book = self.real_book(nid)
+        if book:
+            po0 = oracle_price_loan_units(self.ctx, book["oracle"], nid)
+            hfs = [(q * po0 * book["lltv"] / d, q * po0 * st["om"] * book["lltv"] / d) for q, d in book["borrowers"]]
+            newly = [h1 for h0, h1 in hfs if h1 < 1 <= h0]
+            st["agg_liquidatable"] = bool(newly)
+            extra["borrowers"] = {"count": len(hfs), "newly_liquidatable": len(newly),
+                                  "min_hf0": min(h0 for h0, _ in hfs), "min_hf1": min(h1 for _, h1 in hfs)}
+        elif lc and lc.get("borrow_usd") and lc.get("collateral_usd") and lc.get("lltv"):
             ltv0 = lc["borrow_usd"] / lc["collateral_usd"]
             hf0 = lc["lltv"] / ltv0
             hf1 = hf0 * st["om"]
             st["agg_liquidatable"] = hf1 < 1 <= hf0
             extra["aggregate"] = {"ltv0": ltv0, "hf0": hf0, "hf1": hf1, "liquidatable": st["agg_liquidatable"],
                                   "note": "emprunteur représentatif (agrégat du marché) : ESTIMATION"}
-            if st["agg_liquidatable"] and self.secondary:
-                self.forced_sale_estimate(nid, lc, st)
         changed = abs(st["om"] - 1) > 1e-12 or abs(st["m"] - 1) > 1e-12
         st["status"] = "changed" if changed else ("unknown" if st["unknown"] else "no_effect")
         mech = (f"collatéral vu par l'oracle × {st['om']:.4f}, valeur de marché × {st['m']:.4f}" if lc else
@@ -711,8 +923,94 @@ class Engine:
         agg = extra.get("aggregate")
         if agg:
             mech += f" ; santé agrégée du marché {agg['hf0']:.3f} → {agg['hf1']:.3f}" + (" (liquidable)" if agg["liquidatable"] else "")
+        bk = extra.get("borrowers")
+        if bk:
+            mech += (f" ; {bk['newly_liquidatable']} emprunteur(s) réel(s) sur {bk['count']} deviennent liquidables "
+                     f"(santé minimale {bk['min_hf0']:.3f} → {bk['min_hf1']:.3f})")
         self.step(nid, "collatéral vu par le protocole (relatif)", 1.0, st["om"], st["status"],
                   "oracle_to_lending" if lc else "pool_bad_debt", mech, inputs, extra)
+
+    def liquidation_pass(self):
+        """Liquidations des autres emprunteurs : positions réelles, règles Morpho, revente sur le pool Pendle."""
+        for lid in sorted(self.ctx["lending"]):
+            st = self.state.get(lid)
+            if not st or st["status"] in ("unchanged",) or not st.get("agg_liquidatable"):
+                continue
+            book = self.real_book(lid)
+            if book:
+                self.liquidate_real(lid, book)
+            else:
+                self.forced_sale_estimate(lid, self.ctx["lending"][lid], st)
+
+    def liquidate_real(self, lid, lc):
+        st = self.state[lid]
+        targets = [e["to"] for e in self.edges if e["from"] == lid and self.model_of(e) == "forced_sales"]
+        venue = self.resale_venue(lid)
+        po0 = oracle_price_loan_units(self.ctx, lc["oracle"], lid)
+        po1, lltv, lif = po0 * st["om"], lc["lltv"], lc["lif"]
+        p_loan = lc.get("loan_price_usd") or 1.0
+        if venue:
+            pm = self.ctx["pendle"][venue]
+            coll_node, sy_node = pm["pt_node"], pm["sy_node"]
+            p_sy = (self.ctx["prices_usd"].get(sy_node) or 0) * self.m_of(sy_node)
+            mk = self.pool_after.get(venue) or self.market_for(venue)
+            mk_before = mk
+        else:
+            coll_node = next((t for t in targets), None)
+            mk = mk_before = None
+        p_coll = (self.ctx["prices_usd"].get(coll_node) or lc.get("collateral_price_usd") or 0) * self.m_of(coll_node)
+        if venue and self.nodes.get(coll_node, {}).get("kind") == "position":
+            p_coll *= self.state[venue].get("pt_m", 1.0)  # le PT est la position : le choc de taux n'est porté que par le pool
+        books = [[q, d] for q, d in lc["borrowers"]]
+        done, sold, repaid_total, proceeds_total = [], 0.0, 0.0, 0.0
+        for _ in range(LIQUIDATION_MAX_ROUNDS):
+            acted = False
+            for b in sorted(books, key=lambda x: x[0] * po1 * lltv / x[1] if x[1] > 1e-9 else 1e9):
+                q, d = b
+                if d <= 1e-9 or q * po1 * lltv / d >= 1:
+                    continue
+                max_repay = min(d, q * po1 / lif)
+                for f in _FRACTIONS:
+                    repaid = max_repay * f
+                    seized = min(q, repaid * lif / po1)
+                    if mk is not None:
+                        r = mk.sell_pt(seized)
+                        if not r["ok"]:
+                            continue
+                        proceeds = r["sy_out"] * p_sy
+                    else:  # pas de pool modélisé : revente supposée au prix de marché, sans impact (non chiffré sur le prix)
+                        r, proceeds = None, seized * p_coll
+                    if proceeds >= repaid * p_loan + LIQUIDATION_GAS_USD:
+                        if r is not None:
+                            mk = mk.after_sale(seized, r["asset_out"])
+                        b[0], b[1] = q - seized, d - repaid
+                        sold, repaid_total, proceeds_total = sold + seized, repaid_total + repaid * p_loan, proceeds_total + proceeds
+                        done.append(seized)
+                        acted = True
+                        break
+            if not acted:
+                break
+        spot_mult = mk.spot_pt_to_asset() / mk_before.spot_pt_to_asset() if mk is not None else 1.0
+        stuck = [(q, d) for q, d in books if d > 1e-9 and q * po1 * lltv / d < 1]
+        p_coll_after = p_coll * spot_mult
+        bad_debt = sum(max(0.0, d * p_loan - q * p_coll_after) for q, d in stuck)
+        res = {"market": lid, "market_name": self.name(lid), "venue": venue, "borrowers": len(books),
+               "liquidations": len(done), "collateral_sold": sold, "debt_repaid_usd": repaid_total,
+               "proceeds_usd": proceeds_total, "stuck_count": len(stuck), "stuck_debt_usd": sum(d for _, d in stuck) * p_loan,
+               "bad_debt_usd": bad_debt, "spot_change": spot_mult - 1, "quantified": mk is not None,
+               "capacity_before": mk_before.max_pt_sellable() if mk_before else None,
+               "capacity_after": mk.max_pt_sellable() if mk else None, "oracle_drop": 1 - st["om"]}
+        self.forced[lid] = res
+        if venue:
+            self.pool_after[venue] = mk
+            self.spot_mult[venue] = self.spot_mult.get(venue, 1.0) * spot_mult
+            self.state[venue]["status"] = "changed"
+            self.step(venue, "capacité du pool (PT vendables)", res["capacity_before"], res["capacity_after"], "changed",
+                      "forced_sales",
+                      f"{len(done)} liquidation(s) sur {self.name(lid)} : {sold:,.0f} PT revendus, prix spot du PT "
+                      f"{spot_mult - 1:+.2%}, capacité {res['capacity_before']:,.0f} → {res['capacity_after']:,.0f} PT ; "
+                      f"{len(stuck)} emprunteur(s) liquidable(s) non liquidé(s) (pool plein ou liquidation non rentable)",
+                      [{"from": lid}], {"forced": res})
 
     def forced_sale_estimate(self, nid, lc, st):
         """Effet secondaire : si tout le marché était liquidé, combien de collatéral serait revendu ?"""
@@ -746,7 +1044,7 @@ class Engine:
         st = self.state[nid]
         self.inherit_unknown(nid, inputs)
         for e in inputs:
-            if self.model_of(e) == "forced_sales" and self.state[e["from"]].get("agg_liquidatable"):
+            if self.model_of(e) == "forced_sales" and self.liquidatable(e["from"]) and not self.forced_quantified(e["from"], nid):
                 self.flag_unknown(nid, f"ventes forcées par {self.name(e['from'])} (voir effets secondaires, non incluses)")
         st["status"] = "unknown" if st["unknown"] else "no_effect"
         self.step(nid, "liquidité du pool (relative)", 1.0, st["lm"], st["status"], "forced_sales",
@@ -769,6 +1067,8 @@ class Engine:
         pm = self.ctx["pendle"].get(venue) if venue else None
         if not pm:
             return None
+        if not baseline and venue in self.pool_after:
+            return self.pool_after[venue]  # pool après les liquidations des autres
         return amm.PendleMarket.from_state(pm).scaled(1.0 if baseline else self.state[venue]["lm"])
 
     def exit_value(self, venue, units, sy_price_usd, baseline=False):
@@ -797,7 +1097,7 @@ class Engine:
             m = self.model_of(e)
             if not MODELS[m]["quantified"] and m != "forced_sales":
                 self.flag_unknown(pid, f"{MODELS[m]['dependency']} ({self.name(e['from'])}) : non modélisé")
-            if m == "forced_sales" and self.state[e["from"]].get("agg_liquidatable"):
+            if m == "forced_sales" and self.liquidatable(e["from"]) and not self.forced_quantified(e["from"], e["to"]):
                 self.flag_unknown(pid, f"ventes forcées par {self.name(e['from'])} (non chiffrées)")
         fn = {"pendle_pt": self.pos_pendle, "morpho_borrow": self.pos_borrow, "hold": self.pos_hold,
               "aave_supply": self.pos_supply, "morpho_supply": self.pos_supply}.get(typ)
@@ -813,9 +1113,14 @@ class Engine:
         pc, pid = self.ctx["position"], self.g["position"]["id"]
         sy_edge = next((e for e in incoming if self.model_of(e) == "pt_backing"), None)
         m = self.m_of(sy_edge["from"]) if sy_edge else 1.0
-        if sy_edge and self.affected(sy_edge["from"]):
-            self.step(pid, "prix de marché du PT (USD)", self.ctx["prices_usd"].get(pid), (self.ctx["prices_usd"].get(pid) or 0) * m,
-                      "changed" if abs(m - 1) > 1e-12 else "no_effect", "pt_backing", f"P_PT × {m:.4f} (taux implicite constant)", [sy_edge])
+        sm = self.spot_mult.get(pc.get("venue"), 1.0)  # baisse du prix du PT causée par les ventes forcées
+        sm *= self.state.get(pc.get("venue") or "", {}).get("pt_m", 1.0)  # choc de taux implicite
+        if sy_edge and self.affected(sy_edge["from"]) or abs(sm - 1) > 1e-12:
+            self.step(pid, "prix de marché du PT (USD)", self.ctx["prices_usd"].get(pid),
+                      (self.ctx["prices_usd"].get(pid) or 0) * m * sm, "changed" if abs(m * sm - 1) > 1e-12 else "no_effect",
+                      "pt_backing", f"P_PT × {m:.4f} (sous-jacent)" + (f" × {sm:.4f} (ventes forcées sur le pool)" if abs(sm - 1) > 1e-12 else ""),
+                      [sy_edge] if sy_edge else [])
+        m = m * sm
         size = pc["size_usd"]
         sy_p, sy_node = self._sy_price(pc.get("venue"))
         ex0 = self.exit_value(pc.get("venue"), pc.get("units"), sy_p, baseline=True)
@@ -845,7 +1150,20 @@ class Engine:
         lc = self.ctx["lending"].get(lid)
         bad0 = bad1 = 0.0
         note = None
-        if lc and lc.get("supply_usd"):
+        forced = self.forced.get(lid)
+        exploit = self.state.get(lid, {}).get("bad_debt_frac") if lid else None
+        if lc and lc.get("supply_usd") and exploit is not None:
+            share = size / lc["supply_usd"]
+            bad1 = share * exploit * lc["supply_usd"]
+            note = (f"Morpho Blue retire la créance douteuse D = {exploit:.0%} des dépôts ({exploit * lc['supply_usd']:,.0f} $) "
+                    f"de totalSupplyAssets : chaque part de prêteur perd {exploit:.0%} (part du dépôt {share:.1%})")
+        elif lc and lc.get("supply_usd") and forced:
+            share = size / lc["supply_usd"]
+            bad1 = share * forced["bad_debt_usd"]
+            note = (f"Positions réelles des {forced['borrowers']} emprunteurs : {forced['liquidations']} liquidation(s), "
+                    f"{forced['stuck_count']} emprunteur(s) liquidable(s) non liquidé(s) ({forced['stuck_debt_usd']:,.0f} $ de dette) ; "
+                    f"créance douteuse si leur collatéral vaut moins que leur dette : {forced['bad_debt_usd']:,.0f} $ × part {share:.1%}")
+        elif lc and lc.get("supply_usd"):
             share = size / lc["supply_usd"]
             m_coll = self.state[lid]["m"]
             bad0 = share * max(0.0, lc["borrow_usd"] - lc["collateral_usd"])
@@ -861,7 +1179,7 @@ class Engine:
                      f"({min(1, avail / size):.0%} de la position) ; le reste est différé, pas perdu" if avail is not None else None)
         return self.finish(ref0=ref0, ref1=ref1, liq1=liq1, ex0=None, ex1=None, lending=None,
                            exposure={"Valeur du dépôt": (size, ref1)}, exec_note=exec_note, liq_note=note,
-                           liq_label="Créance douteuse (estimation)")
+                           liq_label="Créance douteuse" + ("" if forced else " (estimation)"))
 
     def pos_borrow(self, incoming):
         pc, pid = self.ctx["position"], self.g["position"]["id"]
@@ -875,6 +1193,7 @@ class Engine:
             self.flag_unknown(pid, "données de prêt incomplètes (prix, oracle ou LLTV) : santé non calculable")
             return {"error": "données insuffisantes", "unknown": self.state[pid]["unknown"]}
         m_c, m_d = self.m_of(pc["collateral_node"]), self.m_of(pc["debt_node"])
+        m_c *= self.spot_mult.get(pc.get("venue"), 1.0)  # ventes forcées des autres sur le pool du collatéral
         om = self.state[lid]["om"]
         po1 = po0 * om
         lltv, lif = lc["lltv"], lc["lif"]
@@ -1016,7 +1335,8 @@ def simulate(graph, ctx, scenario, node_id, severity, hours=DEFAULT_HOURS, with_
            "position": {"id": graph["position"]["id"], "label": graph["position"]["label"],
                         "type": graph["position"].get("type")},
            "result": res, "steps": eng.steps, "affected": affected, "edges": eng.edge_reports,
-           "secondary_effects": eng.secondary_effects, "path": main_path(graph, eng),
+           "secondary_effects": eng.secondary_effects, "forced_liquidations": list(eng.forced.values()),
+           "path": main_path(graph, eng),
            "data": {"evidence": ctx.get("evidence", []), "missing": ctx.get("missing", []),
                     "assumed_prices": ctx.get("assumed_prices", [])}}
     if with_threshold and res.get("lending"):
