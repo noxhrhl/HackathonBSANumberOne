@@ -1,24 +1,15 @@
 """Simulation d'impact : SI ce composant défaille, que devient la position ? (aucune probabilité).
 
-Un seul moteur, générique, pour toutes les défaillances :
+  1. le scénario modifie une variable d'état du nœud choisi : prix de marché (m), prix
+     d'oracle (om) ou liquidité d'un pool (lm), multipliée par 1 − sévérité ;
+  2. le graphe est parcouru en aval, dans l'ordre topologique ; chaque nœud recalcule son
+     état à partir de tous ses parents (un nœud atteint par deux chemins compte une fois) ;
+  3. chaque arête traversée suit un modèle de transmission (MODELS) ;
+  4. la position applique les règles de son protocole : oracle, facteur de santé,
+     liquidation Morpho, sortie sur l'AMM Pendle ;
+  5. les pertes sont ventilées : marché, liquidation, exécution, total.
 
-  1. le scénario modifie UNE variable d'état du nœud choisi
-       price_shock      → prix de marché d'un actif        (m  = 1 − sévérité)
-       oracle_failure   → prix rapporté par un oracle      (om = 1 − sévérité), marché inchangé
-       liquidity_crisis → réserves d'un pool AMM           (lm = 1 − sévérité)
-  2. on parcourt le graphe en aval, dans l'ordre topologique ;
-  3. chaque nœud RECALCULE son état à partir de l'état de TOUS ses parents (pas d'addition de
-     pertes : un nœud atteint par deux chemins n'est compté qu'une fois) ;
-  4. chaque arête traversée est rattachée à un modèle de transmission (MODELS) : type de
-     dépendance, mécanisme, formule, paramètres, source, hypothèses ;
-  5. la position applique les règles de son protocole (valeur de marché, oracle, LTV, facteur
-     de santé, liquidation Morpho, sortie sur l'AMM Pendle) ;
-  6. on calcule les métriques de sévérité (marché, liquidation, exécution, total).
-
-Variables d'état séparées : prix de marché (m), prix d'oracle (om), liquidité de pool (lm),
-prix de sortie exécutable, valeur du collatéral, valeur de la dette, statut de liquidation,
-fonds propres. Un mécanisme non modélisable est marqué INCONNU et propagé comme tel :
-les chiffres affichés n'incluent jamais une transmission inventée.
+Un mécanisme non modélisable est marqué INCONNU et n'entre pas dans les chiffres.
 
 Ajouter une défaillance : une entrée dans SCENARIOS. Ajouter un protocole : un modèle dans
 MODELS, une règle dans classify(), un évaluateur de nœud ou de position.

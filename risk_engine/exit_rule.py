@@ -1,18 +1,13 @@
 """Règle « rester ou sortir » sans probabilité (docs/SIMULATION_MODEL.md, section 14).
 
-La défaillance est supposée (scénario du simulateur). La décision se prend AU MOMENT DE L'ALERTE,
-avant que les effets n'atteignent la position :
+La défaillance est supposée ; on décide à l'alerte, avant que le choc n'atteigne la position.
 
-  rester      : perte_rester = perte de marché + perte de liquidation (simulées)
-  vendre x    : coût(x) = coût d'exécution(x) + perte_rester(position restante)
-                coût d'exécution(x) = valeur de référence des unités vendues − produit sur l'AMM Pendle
-                (courbe on-chain, pool actuel, avant le choc)
-  x*          = argmin sur x ∈ {0, 5 %, …, 100 %} ∩ [0, capacité de l'AMM]
+  rester   : perte de marché + perte de liquidation (simulées)
+  vendre x : coût de vente de x sur l'AMM Pendle (pool actuel) + perte simulée sur le reste
+  x*       : le moins cher sur x = 0 %, 5 %, …, 100 %, dans la limite de ce que l'AMM accepte
 
-La position restante est RE-SIMULÉE pour chaque x (pertes non linéaires : un emprunteur qui vend
-une partie de sa garantie et rembourse sa dette a un nouveau facteur de santé).
-Prêteur (Aave, Morpho) : sortir = retirer, sans glissement, dans la limite de la liquidité disponible ;
-le retrait évite la créance douteuse mais pas la baisse de l'actif prêté.
+Le reste est re-simulé pour chaque x : un emprunteur qui vend une partie de sa garantie
+rembourse sa dette. Un prêteur retire sans glissement, dans la limite de la liquidité.
 """
 
 from . import simulate as SIM

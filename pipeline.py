@@ -94,7 +94,7 @@ def build_report(graph):
 
     default_incident : bloc présélectionné (global_risk/current.py, app.parse) ;
     data_fetched_at : heure du relevé (badge, analyse globale) ; horizon_days et exit.quotes :
-    analyse globale. L'ancien Monte Carlo et la décision « combien vendre » ont été retirés."""
+    analyse globale."""
     pid = graph["position_id"]
     return {
         "position_id": pid, "label": graph["position"]["label"], "size_usd": graph["position"]["size_usd"],

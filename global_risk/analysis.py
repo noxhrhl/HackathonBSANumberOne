@@ -75,14 +75,13 @@ def analyze(graph, report, context=None, horizon=None, amount=None):
     fourni par app.ensure_live_data. `amount` est la taille choisie, validée par
     app.parse ; elle change les dollars, jamais les pourcentages. `horizon` fixe
     une date de comparaison en test.
-    Aucun appel à PositionModel.losses(None) ni au simulateur de cascades.
     """
     horizon = report.get("horizon_days") if horizon is None else horizon
     if horizon is None:
         horizon = model.horizon_days(graph)
     reference_size = graph["position"].get("size_usd")
     size = reference_size if amount is None else amount
-    scenarios = {s: model.PositionModel(graph, s, "max", horizon=horizon, n=1)
+    scenarios = {s: model.PositionModel(graph, s, "max", horizon=horizon)
                  for s in ("low", "base", "high")}
     base = scenarios["base"]
     names = {n["id"]: n["name"] for n in graph["nodes"]}

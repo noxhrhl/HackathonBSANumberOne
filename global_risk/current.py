@@ -90,10 +90,10 @@ def _one_graph(page, advanced):
     page = page[:outer[0]] + replacement + page[outer[3]:]
     script_start = page.find('<script>\n    // Onglets du graphe')
     if script_start < 0:
-        raise ValueError("Script des anciens sous-onglets introuvable")
+        raise ValueError("Script des sous-onglets introuvable")
     script_end = page.find("</script>", script_start)
     if script_end < 0:
-        raise ValueError("Fin du script des anciens sous-onglets introuvable")
+        raise ValueError("Fin du script des sous-onglets introuvable")
     page = page[:script_start] + page[script_end + len("</script>"):]
     # Le choix de la défaillance déclenche immédiatement le bon mode de graphe.
     page = page.replace('<select name="incident">',

@@ -10,9 +10,6 @@ Facteur d'impact I(n) : part d'une défaillance du nœud n qui arrive jusqu'à l
     Limite : ignore qu'un dommage peut arriver par plusieurs chemins à la fois.
   - « sum » : somme des produits sur tous les chemins, plafonnée à 1 (peut compter deux fois
     un même dommage).
-
-L'ancienne simulation Monte Carlo et la décision « combien vendre » ont été retirées : la page
-principale utilise le simulateur de défaillance (risk_engine/simulate.py), sans probabilité.
 """
 
 from datetime import datetime, timezone
@@ -72,11 +69,9 @@ def best_path(graph, route, start):
 
 
 class PositionModel:
-    """Poids des arêtes, facteurs d'impact et paramètres (p, sev) d'une position, en BAS / BASE / HAUT.
+    """Poids des arêtes, facteurs d'impact et paramètres (p, sev) d'une position, en BAS / BASE / HAUT."""
 
-    `n` n'est plus utilisé (ancienne taille du Monte Carlo) : conservé pour les appels existants."""
-
-    def __init__(self, graph, scenario="base", propagation="max", horizon=None, n=None):
+    def __init__(self, graph, scenario="base", propagation="max", horizon=None):
         self.graph = graph
         self.scenario = scenario
         self.propagation = propagation
